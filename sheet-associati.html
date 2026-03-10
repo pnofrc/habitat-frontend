@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Full Members Sheet - Habitat</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: courier, monospace; margin: 0; background: #f4f4f4; color: #000; font-size: 11px; }
+        .toolbar { background: #000; color: #fff; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; height: 40px; }
+        .toolbar input { background: #222; border: 1px solid #444; color: #fff; padding: 4px; font-family: inherit; font-size: 10px; width: 200px; }
+        .sheet-container { overflow: auto; height: calc(100vh - 40px); background: #fff; }
+        table { border-collapse: collapse; min-width: 100%; table-layout: fixed; }
+        th { background: #eee; border: 1px solid #ccc; padding: 8px; position: sticky; top: 0; z-index: 5; text-transform: uppercase; font-size: 9px; width: 140px; }
+        td { border: 1px solid #ccc; padding: 6px; white-space: nowrap; background: #fff; outline: none; overflow: hidden; text-overflow: ellipsis; }
+        tr:hover td { background: #fffdf0; }
+        td:focus { background: #fff !important; box-shadow: inset 0 0 0 2px #000; }
+        .row-num { width: 40px; background: #eee; text-align: center; font-weight: bold; border-right: 2px solid #ccc; position: sticky; left: 0; z-index: 6; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .saving { background: orange; } .saved { background: green; } .error { background: red; }
+        .btn-export { background: #fff; border: none; padding: 4px 8px; cursor: pointer; font-family: inherit; font-size: 9px; font-weight: bold; }
+    </style>
+</head>
+<body x-data="memberSheet" x-init="init()" x-cloak>
+
+    <div class="toolbar">
+        <div>
+            <span class="status-dot" :class="status"></span>
+            <b x-text="statusMsg"></b>
+            <input type="text" x-model="search" placeholder="CERCA COGNOME/NOME..." style="margin-left:15px">
+        </div>
+        <div>
+            <button class="btn-export" @click="exportCSV()">EXPORT CSV</button>
+            <button class="btn-export" onclick="window.close()" style="margin-left:5px">CLOSE</button>
+        </div>
+    </div>
+
+    <div class="sheet-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="row-num">#</th>
+                    <th>Cognome</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Data Nascita (DD/MM/YYYY)</th>
+                    <th>Luogo Nascita</th>
+                    <th>Prov Nascita</th>
+                    <th>Paese Nascita</th>
+                    <th>Codice Fiscale</th>
+                    <th>Indirizzo</th>
+                    <th>CAP</th>
+                    <th>Città Residenza</th>
+                    <th>Prov Residenza</th>
+                    <th>Paese Residenza</th>
+                    <th>Telefono</th>
+                    <th style="width:250px">Interessi</th>
+                    <th>Metodo Pagamento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(m, index) in filteredItems" :key="m._id">
+                    <tr>
+                        <td class="row-num" x-text="index + 1"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'cognome', $event.target.innerText)" x-text="m.cognome"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'nome', $event.target.innerText)" x-text="m.nome"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'email', $event.target.innerText)" x-text="m.email"></td>
+                        <td contenteditable="true" @blur="saveDate(m._id, 'dataNascita', $event.target.innerText)" x-text="formatDate(m.dataNascita)"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'luogoNascita', $event.target.innerText)" x-text="m.luogoNascita"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'provNascita', $event.target.innerText)" x-text="m.provNascita"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'paeseNascita', $event.target.innerText)" x-text="m.paeseNascita"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'codiceFiscale', $event.target.innerText)" x-text="m.codiceFiscale" style="text-transform: uppercase"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'indirizzo', $event.target.innerText)" x-text="m.indirizzo"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'cap', $event.target.innerText)" x-text="m.cap"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'cittaResidenza', $event.target.innerText)" x-text="m.cittaResidenza"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'provResidenza', $event.target.innerText)" x-text="m.provResidenza"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'paeseResidenza', $event.target.innerText)" x-text="m.paeseResidenza"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'telefono', $event.target.innerText)" x-text="m.telefono"></td>
+                        <td contenteditable="true" @blur="saveInteressi(m._id, $event.target.innerText)" x-text="m.interessi?.join(', ')"></td>
+                        <td contenteditable="true" @blur="save(m._id, 'metodoPagamento', $event.target.innerText)" x-text="m.metodoPagamento"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('memberSheet', () => ({
+                BASE_URL: 'http://localhost:3000',
+                token: localStorage.getItem('token'),
+                items: [],
+                search: '',
+                status: 'idle',
+                statusMsg: 'READY',
+
+                async init() {
+                    if (!this.token) return window.close();
+                    await this.fetchData();
+                },
+
+                async fetchData() {
+                    const res = await fetch(`${this.BASE_URL}/memberships/`, {
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    this.items = await res.json();
+                },
+
+                get filteredItems() {
+                    return this.items.filter(i => 
+                        (i.cognome + ' ' + i.nome).toLowerCase().includes(this.search.toLowerCase())
+                    );
+                },
+
+                formatDate(d) {
+                    if (!d) return '';
+                    const date = new Date(d);
+                    if (isNaN(date.getTime())) return d;
+                    return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+                },
+
+                async saveDate(id, field, ddmm) {
+                    const p = ddmm.split('/');
+                    if (p.length !== 3) return;
+                    await this.save(id, field, `${p[2]}-${p[1]}-${p[0]}`);
+                },
+
+                async saveInteressi(id, text) {
+                    const arr = text.split(',').map(s => s.trim()).filter(s => s !== '');
+                    await this.save(id, 'interessi', arr);
+                },
+
+                async save(id, field, value) {
+                    this.status = 'saving'; this.statusMsg = 'SAVING...';
+                    try {
+                        const res = await fetch(`${this.BASE_URL}/memberships/${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                            body: JSON.stringify({ [field]: value })
+                        });
+                        if (!res.ok) throw new Error();
+                        this.status = 'saved'; this.statusMsg = 'SAVED';
+                    } catch (e) {
+                        this.status = 'error'; this.statusMsg = 'ERROR!';
+                    }
+                },
+
+                exportCSV() {
+                    const headers = "Cognome,Nome,Email,DataNascita,CF,Citta,Telefono,Pagamento\n";
+                    const rows = this.filteredItems.map(m => 
+                        `${m.cognome},${m.nome},${m.email},${this.formatDate(m.dataNascita)},${m.codiceFiscale},${m.cittaResidenza},${m.telefono},${m.metodoPagamento}`
+                    ).join("\n");
+                    const blob = new Blob([headers + rows], { type: 'text/csv' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'database_soci.csv';
+                    a.click();
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

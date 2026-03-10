@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Flow Sheet</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: courier, monospace; margin: 0; background: #f4f4f4; color: #000; font-size: 11px; }
+        .toolbar { background: #000; color: #fff; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; height: 40px; }
+        .sheet-container { overflow: auto; height: calc(100vh - 40px); background: #fff; }
+        table { border-collapse: collapse; min-width: 100%; table-layout: fixed; }
+        th { background: #eee; border: 1px solid #ccc; padding: 8px; position: sticky; top: 0; z-index: 5; text-transform: uppercase; font-size: 9px; width: 150px; }
+        td { border: 1px solid #ccc; padding: 6px; white-space: nowrap; background: #fff; outline: none; overflow: hidden; text-overflow: ellipsis; }
+        tr:hover td { background: #fffdf0; }
+        td:focus { background: #fff !important; box-shadow: inset 0 0 0 2px #000; }
+        .row-num { width: 40px; background: #eee; text-align: center; font-weight: bold; border-right: 2px solid #ccc; position: sticky; left: 0; z-index: 6; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .saving { background: orange; } .saved { background: green; } .error { background: red; }
+        .btn-export { background: #fff; border: none; padding: 4px 8px; cursor: pointer; font-family: inherit; font-size: 9px; font-weight: bold; }
+        /* Colori dinamici */
+        .txt-red { color: #ff0000 !important; font-weight: bold; }
+        .txt-green { color: #008000 !important; font-weight: bold; }
+    </style>
+</head>
+<body x-data="fullSheet" x-init="initSheet()" x-cloak>
+
+    <div class="toolbar">
+        <div>
+            <span class="status-dot" :class="status"></span>
+            <b x-text="statusMsg"></b>
+            <span style="margin-left: 15px; font-size: 9px; color: #ccc;" x-text="`FILTRO: ${filter} | PAYER: ${habitante}`"></span>
+        </div>
+        <div>
+            <button class="btn-export" @click="exportCSV()">EXPORT CSV</button>
+            <button class="btn-export" onclick="window.close()" style="margin-left:5px">CLOSE</button>
+        </div>
+    </div>
+
+    <div class="sheet-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="row-num">#</th>
+                    <th>Data</th>
+                    <th style="width:250px">Titolo</th>
+                    <th>Importo (€)</th>
+                    <th>isExit (true/false)</th>
+                    <th>Payer Type</th>
+                    <th>Specific Habitante</th>
+                    <th>Payment Method</th>
+                    <th>Receipt Type</th>
+                    <!-- <th>Paid Activity</th> -->
+                    <th style="width:300px">Description</th>
+                    <!-- <th>isRepeatable</th> -->
+                    <!-- <th>Repeat Interval</th> -->
+                    <!-- <th>Repeat Until (DD/MM/YYYY)</th> -->
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in filteredItems" :key="item._id">
+                    <tr>
+                        <td class="row-num" x-text="index + 1"></td>
+                        <td contenteditable="true" @blur="saveDate(item._id, 'date', $event.target.innerText)" x-text="formatDate(item.date)"></td>
+                        <td contenteditable="true" @blur="save(item._id, 'title', $event.target.innerText)" x-text="item.title"></td>
+                        <td contenteditable="true" 
+                            @blur="save(item._id, 'amount', $event.target.innerText)" 
+                            x-text="item.amount" 
+                            :class="String(item.isExit) === 'true' ? 'txt-red' : 'txt-green'"></td>
+                        
+                        <td contenteditable="true" @blur="save(item._id, 'isExit', $event.target.innerText)" x-text="item.isExit"></td>
+                        <td contenteditable="true" @blur="save(item._id, 'payerType', $event.target.innerText)" x-text="item.payerType"></td>
+                        <td contenteditable="true" @blur="save(item._id, 'specificHabitante', $event.target.innerText)" x-text="item.specificHabitante"></td>
+                        <td contenteditable="true" @blur="save(item._id, 'paymentMethod', $event.target.innerText)" x-text="item.paymentMethod"></td>
+                        <td contenteditable="true" @blur="save(item._id, 'receiptType', $event.target.innerText)" x-text="item.receiptType"></td>
+                        <!-- <td contenteditable="true" @blur="save(item._id, 'paidActivity', $event.target.innerText)" x-text="item.paidActivity"></td> -->
+                        <td contenteditable="true" @blur="save(item._id, 'description', $event.target.innerText)" x-text="item.description"></td>
+                        <!-- <td contenteditable="true" @blur="save(item._id, 'isRepeatable', $event.target.innerText)" x-text="item.isRepeatable"></td> -->
+                        <!-- <td contenteditable="true" @blur="save(item._id, 'repeatInterval', $event.target.innerText)" x-text="item.repeatInterval"></td> -->
+                        <!-- <td contenteditable="true" @blur="saveDate(item._id, 'repeatUntil', $event.target.innerText)" x-text="formatDate(item.repeatUntil)"></td> -->
+                        <td contenteditable="true" @blur="save(item._id, 'category', $event.target.innerText)" x-text="item.category"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('fullSheet', () => ({
+                BASE_URL: 'http://localhost:3000',
+                token: localStorage.getItem('token'),
+                items: [],
+                filter: 'all',
+                habitante: 'all',
+                status: 'idle',
+                statusMsg: 'READY',
+
+                async initSheet() {
+                    const params = new URLSearchParams(window.location.search);
+                    this.filter = params.get('filter') || 'all';
+                    this.habitante = params.get('habitante') || 'all';
+                    
+                    if (!this.token) return window.close();
+                    await this.fetchData();
+                },
+
+                async fetchData() {
+                    try {
+                        const res = await fetch(`${this.BASE_URL}/expenses/`, {
+                            headers: { 'Authorization': `Bearer ${this.token}` }
+                        });
+                        this.items = await res.json();
+                    } catch (e) { this.status = 'error'; }
+                },
+
+                get filteredItems() {
+                    return this.items.filter(i => {
+                        const isExit = String(i.isExit) === 'true';
+                        let matchType = (this.filter === 'all') || (this.filter === 'out' ? isExit : !isExit);
+                        if (this.filter !== 'out') return matchType;
+                        let matchHabitante = (this.habitante === 'all') || 
+                            (this.habitante === 'habitat' ? i.payerType === 'habitat' : (i.payerType === 'habitante' && i.specificHabitante === this.habitante));
+                        return matchType && matchHabitante;
+                    }).sort((a,b) => new Date(b.date) - new Date(a.date));
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return dateStr;
+                    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                },
+
+                async saveDate(id, field, ddmm) {
+                    const parts = ddmm.split('/');
+                    if (parts.length !== 3) return;
+                    const isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    await this.save(id, field, isoDate);
+                },
+
+                async save(id, field, value) {
+                    this.status = 'saving';
+                    this.statusMsg = 'SAVING...';
+                    let val = value.trim();
+                    if (field === 'amount') val = parseFloat(val.replace(',', '.'));
+                    if (['isExit', 'isRepeatable'].includes(field)) val = (val.toLowerCase() === 'true');
+
+                    try {
+                        const res = await fetch(`${this.BASE_URL}/expenses/${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                            body: JSON.stringify({ [field]: val })
+                        });
+                        if (!res.ok) throw new Error();
+                        
+                        // Aggiorna localmente l'item per riflettere i colori se isExit cambia
+                        const item = this.items.find(i => i._id === id);
+                        if (item) item[field] = val;
+
+                        this.status = 'saved';
+                        this.statusMsg = 'SAVED';
+                    } catch (e) {
+                        this.status = 'error';
+                        this.statusMsg = 'ERROR!';
+                    }
+                },
+
+                exportCSV() {
+                    const headers = "Data,Titolo,Importo,Uscita,Pagatore,Metodo\n";
+                    const rows = this.filteredItems.map(i => `${this.formatDate(i.date)},${i.title},${i.amount},${i.isExit},${i.specificHabitante},${i.paymentMethod}`).join("\n");
+                    const blob = new Blob([headers + rows], { type: 'text/csv' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'expenses_export.csv';
+                    a.click();
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

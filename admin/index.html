@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: courier;
+            margin: 0;
+            background: #fff;
+            color: #000;
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #000;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 10;
+        }
+
+        button {
+            font-family: inherit !important;
+            background: none;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            text-decoration: underline;
+        }
+
+        nav button.active {
+            text-decoration: underline;
+        }
+
+        .card {
+            border: 1px solid #000;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table td {
+            white-space: nowrap;
+        }
+
+        th {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 100%;
+            background: #fff;
+            border-left: 1px solid #000;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 6px;
+            margin: 4px 0 12px;
+            border: 1px solid #000;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        label {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .btn-blk {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-del {
+            color: red;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .in-casa {
+            color: #2c7a7b;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .sub-box {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+
+        .create {
+            margin-bottom: 15px;
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .alert-red {
+            background-color: rgba(255, 0, 0, 0.1) !important;
+        }
+
+        .status-tag {
+            font-size: 9px;
+            padding: 2px 4px;
+            border: 1px solid currentColor;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body x-data="app" x-cloak>
+
+    <template x-if="!token">
+        <div style="display: flex; height: 100vh; align-items: center; justify-content: center;">
+            <div class="card" style="width: 250px;">
+                <label>Username</label><input type="text" x-model="loginData.username">
+                <label>Password</label><input type="password" x-model="loginData.password">
+                <button class="btn-blk" @click="login">ENTRA</button>
+            </div>
+        </div>
+    </template>
+
+    <template x-if="token">
+        <main>
+            <nav>
+                <button :class="view === 'expenses' && 'active'" @click="setView('expenses')">Flow Cassa</button>
+                <button :class="view === 'guests' && 'active'" @click="setView('guests')">Ospitalita'</button>
+                <button :class="view === 'bookings' && 'active'" @click="setView('bookings')">Residenze</button>
+                <button :class="view === 'memberships' && 'active'"
+                    @click="setView('memberships')">Tesseramenti</button>
+                <button @click="logout" style="margin-left: auto; color: red;">LOGOUT</button>
+            </nav>
+
+            <div class="container">
+
+                <div x-show="view === 'memberships'">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin:0">Richieste Iscrizione / Soci</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Socio</th>
+                                    <th>Email</th>
+                                    <th>Città</th>
+                                    <th>Interessi</th>
+                                    <th>Pagamento</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="m in items" :key="m._id">
+                                    <tr>
+                                        <td @click="editingMembership = m" style="cursor:pointer; text-decoration:underline;" x-text="m.cognome + ' ' + m.nome"></td>
+                                        <td x-text="m.email"></td>
+                                        <td x-text="m.cittaResidenza"></td>
+                                        <td>
+                                            <small x-text="m.interessi?.join(', ')"></small>
+                                        </td>
+                                        <td x-text="m.metodoPagamento"></td>
+                                        <td><button @click="deleteItem(m._id)" class="btn-del">X</button></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <div x-show="view === 'expenses'">
+                    <div class="card" style="height: 180px;"><canvas id="expenseChart"></canvas></div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
+                        <div class="card" style="flex:1"><small>IN</small><br><b x-text="stats.totalIn + '€'"
+                                style="color:green"></b></div>
+                        <div class="card" style="flex:1"><small>OUT</small><br><b x-text="stats.totalOut + '€'"
+                                style="color:red"></b></div>
+                        <div class="card" style="flex:1"><small>SALDO</small><br><b x-text="stats.balance + '€'"></b>
+                        </div>
+                        <button @click="window.open(`sheet-flow.html?filter=${filter}&habitante=${habitanteFilter}`, '_blank')" 
+                                class="card">
+                            APRI FOGLIO CALCOLO ↗
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px;">
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <select x-model="filter" style="width: auto; margin:0"
+                                    @change="if(filter !== 'out') habitanteFilter = 'all'">
+                                    <option value="all">Tutti i movimenti</option>
+                                    <option value="in">Entrate</option>
+                                    <option value="out">Uscite</option>
+                                </select>
+
+                                <div x-show="filter === 'out'" x-transition>
+                                    <select x-model="habitanteFilter" style="width: auto; margin:0">
+                                        <option value="all">Tutti i pagatori</option>
+                                        <option value="habitat">Habitat (Cassa)</option>
+                                        <option value="beppe">Beppe</option>
+                                        <option value="chiara">Chiara</option>
+                                        <option value="enri">Enri</option>
+                                        <option value="marco">Marco</option>
+                                        <option value="pongie">Pongie</option>
+                                        <option value="poni">Poni</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button @click="openCreate()"
+                                style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+
+                                NUOVA VOCE</button>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Titolo</th>
+                                    <th>€</th>
+                                    <th>Data</th>
+                                    <template x-if="filter === 'out'">
+                                        <th style="background: #fdf2f2;">Pagato da</th>
+                                    </template>
+                                    <template x-if="filter === 'out'">
+                                        <th style="background: #fdf2f2;">Modalità</th>
+                                    </template>
+                                    <template x-if="filter === 'out'">
+                                        <th style="background: #fdf2f2;">Documento</th>
+                                    </template>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="item in filteredItems" :key="item._id">
+                                    <tr>
+                                        <td @click="openEdit(item)" x-text="item.title"
+                                            style="cursor:pointer; text-decoration:underline;"></td>
+                                        <td x-text="item.amount + '€'"
+                                            :style="item.isExit ? 'color:red' : 'color:green'"></td>
+                                        <td x-text="formatDate(item.date)"></td>
+
+                                        <template x-if="filter === 'out'">
+                                            <td x-text="item.payerType === 'habitat' ? 'Habitat' : item.specificHabitante"
+                                                style="text-transform: capitalize; font-size: 11px;"></td>
+                                        </template>
+                                        <template x-if="filter === 'out'">
+                                            <td x-text="item.paymentMethod" style="font-size: 11px; color: #666;"></td>
+                                        </template>
+                                        <template x-if="filter === 'out'">
+                                            <td x-text="item.receiptType === 'nessuno' ? '-' : item.receiptType"
+                                                style="font-size: 11px;"></td>
+                                        </template>
+
+                                        <td><button @click="deleteItem(item._id)" class="btn-del">X</button></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div x-show="view === 'guests'">
+                    <template x-if="!selectedGuest">
+                        <div class="card">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <button @click="openCreateGuest()" class="create">+ NUOVO OSPITE</button>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ospite</th>
+                                        <th>Stato</th>
+                                        <th>In casa?</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="g in items" :key="g._id">
+                                        <tr :class="!g.isConfirmed && 'alert-red'">
+                                            <td @click="selectGuest(g)" x-text="g.name"
+                                                style="cursor:pointer; text-decoration:underline;"></td>
+                                            <td>
+                                                <span x-show="!g.isConfirmed" class="status-tag"
+                                                    style="color:red; border-color:red;">DA CONFERMARE</span>
+                                                <span x-show="g.isConfirmed" class="status-tag"
+                                                    style="color:green; border-color:green;">OK</span>
+                                            </td>
+                                            <td><span class="in-casa" x-show="isGuestPresent(g._id)">in casa.</span>
+                                            </td>
+                                            <td><button @click="deleteItem(g._id)" class="btn-del">X</button></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+
+                    <template x-if="selectedGuest">
+                        <div>
+                            <button @click="selectedGuest = null" style="margin-bottom:10px; cursor:pointer;">←
+                                LISTA</button>
+                            <div class="card">
+                                <div style="display:flex; justify-content: space-between;">
+                                    <h2 x-text="selectedGuest.name" style="margin:0"></h2>
+                                    <button @click="editingGuest = {...selectedGuest}" style="cursor:pointer;">MODIFICA
+                                        SCHEDA</button>
+                                </div>
+                                <p><small>EMAIL:</small> <span x-text="selectedGuest.email || '-'"></span></p>
+                                <p><small>TEL:</small> <span x-text="selectedGuest.phone || '-'"></span></p>
+                                <p><small>STATO:</small> <b
+                                        x-text="selectedGuest.isConfirmed ? 'CONFERMATO' : 'DA CONFERMARE'"></b></p>
+                                <hr>
+                                <h3>STORICO SOGGIORNI</h3>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Dal</th>
+                                            <th>Al</th>
+                                            <th>Stanza</th>
+                                            <th>Stato</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="b in guestHistory" :key="b._id">
+                                            <tr :class="b.room === 'da assegnare' && 'alert-red'">
+                                                <td x-text="formatDate(b.checkIn)"></td>
+                                                <td x-text="formatDate(b.checkOut)"></td>
+                                                <td x-text="b.room"></td>
+                                                <td x-text="getBookingStatus(b)"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
+
+                <div x-show="view === 'bookings'">
+                    <div class="card">
+                        <button @click="openCreateBooking()" class="create">+ NUOVA RESIDENZA</button>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ospite</th>
+                                    <th>Stanza</th>
+                                    <th>Da</th>
+                                    <th>A</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="b in items" :key="b._id">
+                                    <tr :class="b.room === 'da assegnare' && 'alert-red'">
+                                        <td @click="openEditBooking(b)" x-text="b.guest?.name || b.guest || 'N/A'"
+                                            style="cursor:pointer; text-decoration:underline;"></td>
+                                        <td x-text="b.room"></td>
+                                        <td x-text="formatDate(b.checkIn)"></td>
+                                        <td x-text="formatDate(b.checkOut)"></td>
+                                        <td><button @click="deleteItem(b._id)" class="btn-del">X</button></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <template x-if="editingItem">
+                <div class="sidebar">
+                    <h3 x-text="editingItem._id ? 'Modifica Voce' : 'Nuova Voce'"></h3>
+                    <label>Titolo</label><input type="text" x-model="editingItem.title">
+                    <label>Descrizione</label><textarea x-model="editingItem.description" rows="2"></textarea>
+                    <label>Importo (€)</label><input type="number" x-model.number="editingItem.amount">
+                    <label>Data</label><input type="date" x-model="editingItem.date">
+                    <label>Tipo</label>
+                    <select :value="editingItem.isExit.toString()"
+                        @change="editingItem.isExit = ($event.target.value === 'true')">
+                        <option value="false">Entrata</option>
+                        <option value="true">Uscita</option>
+                    </select>
+                    <template x-if="String(editingItem.isExit) === 'true'">
+                        <div class="sub-box">
+                            <label>Attività pagata</label><input type="text" x-model="editingItem.paidActivity">
+                            <label>Documento</label>
+                            <select x-model="editingItem.receiptType">
+                                <option value="nessuno">Nessuno</option>
+                                <option value="scontrino">Scontrino</option>
+                                <option value="fattura">Fattura</option>
+                            </select>
+                            <label style="margin-top:10px;">Chi ha pagato?</label>
+                            <select x-model="editingItem.payerType">
+                                <option value="habitat">Habitat (Cassa comune)</option>
+                                <option value="habitante">Un Habitante</option>
+                            </select>
+                            <template x-if="editingItem.payerType === 'habitante'">
+                                <div style="margin-top: 10px;">
+                                    <label>Seleziona Habitante</label>
+                                    <select x-model="editingItem.specificHabitante">
+                                        <option value="">Scegli...</option>
+                                        <option value="beppe">Beppe</option>
+                                        <option value="chiara">Chiara</option>
+                                        <option value="enri">Enri</option>
+                                        <option value="marco">Marco</option>
+                                        <option value="pongie">Pongie</option>
+                                        <option value="poni">Poni</option>
+                                    </select>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <br>
+                    <label>Modalità di pagamento</label>
+                    <select x-model="editingItem.paymentMethod">
+                        <option value="cash">Cash</option>
+                        <option value="iban">IBAN</option>
+                        <option value="paypal">PayPal</option>
+                    </select>
+                    <hr>
+                    <label><input type="checkbox" x-model="editingItem.isRepeatable" style="width:auto">
+                        Ripetibile?</label>
+                    <template x-if="editingItem.isRepeatable">
+                        <div class="sub-box">
+                            <label>Frequenza</label>
+                            <select x-model="editingItem.repeatInterval">
+                                <option value="weekly">Settimanale</option>
+                                <option value="monthly">Mensile</option>
+                                <option value="yearly">Annuale</option>
+                            </select>
+                            <label>Fino al</label><input type="date" x-model="editingItem.repeatUntil">
+                        </div>
+                    </template>
+                    <button class="btn-blk" @click="saveData()">SALVA</button>
+                    <button @click="editingItem = null"
+                        style="width:100%; border:none; background:none; cursor:pointer; margin-top:10px;">Annulla</button>
+                </div>
+            </template>
+
+            <template x-if="editingGuest">
+                <div class="sidebar">
+                    <h3 x-text="editingGuest._id ? 'MODIFICA OSPITE' : 'NUOVO OSPITE'"></h3>
+                    <label>Nome</label><input type="text" x-model="editingGuest.name">
+                    <label>Email</label><input type="email" x-model="editingGuest.email">
+                    <label>Telefono</label><input type="text" x-model="editingGuest.phone">
+                    <label style="margin-top:10px;">
+                        <input type="checkbox" x-model="editingGuest.isConfirmed" style="width:auto"> Confermato?
+                    </label>
+                    <button class="btn-blk" @click="saveGuest()">SALVA</button>
+                    <button @click="editingGuest = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Chiudi</button>
+                </div>
+            </template>
+
+            <template x-if="editingBooking">
+                <div class="sidebar">
+                    <h3>RESIDENZA</h3>
+                    <template x-if="!editingBooking._id">
+                        <label><input type="checkbox" x-model="newGuestToggle" style="width:auto"> Nuovo Ospite?</label>
+                    </template>
+                    <template x-if="!newGuestToggle">
+                        <select x-model="editingBooking.guest" style="margin-top:5px">
+                            <option value="">Scegli...</option>
+                            <template x-for="g in guests" :key="g._id">
+                                <option :value="g._id" x-text="g.name" :selected="editingBooking.guest === g._id">
+                                </option>
+                            </template>
+                        </select>
+                    </template>
+                    <template x-if="newGuestToggle">
+                        <input type="text" x-model="newGuestName" placeholder="Nome completo">
+                    </template>
+                    <label>In</label><input type="date" x-model="editingBooking.checkIn">
+                    <label>Out</label><input type="date" x-model="editingBooking.checkOut">
+                    <label>Stanza</label>
+                    <select x-model="editingBooking.room">
+                        <option value="da assegnare">da assegnare</option>
+                        <option value="ex poni">ex poni</option>
+                        <option value="monolocale">monolocale</option>
+                        <option value="camerata">camerata</option>
+                    </select>
+                    <label>Feedback</label>
+                    <textarea x-model="editingBooking.feedback" rows="4" placeholder=""></textarea>
+
+                    <button class="btn-blk" @click="saveBooking()">SALVA</button>
+                    <button @click="editingBooking = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
+
+        </main>
+    </template>
+    <script src="app.js"></script>
+</body>
+
+</html>
