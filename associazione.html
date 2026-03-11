@@ -28,7 +28,7 @@
         <template x-if="!submitted">
             <div>
                 <h1>DOMANDA DI ISCRIZIONE</h1>
-                <p>Quota associativa annuale: <b>€ 10,00</b></p>
+                <p>Quota associativa annuale: <b>&euro; 10,00</b></p>
 
                 <template x-if="errorMessage">
                     <div class="error-banner" x-text="errorMessage"></div>
@@ -72,15 +72,15 @@
                 <label>Metodo di pagamento *</label>
                 <select x-model="form.metodoPagamento">
                     <option value="">Scegli...</option>
-                    <option value="paypal_habitat">HABITAT >> PAYPAL</option>
-                    <option value="iban_habitat">HABITAT >> IBAN</option>
-                    <option value="paypal_distretto">DISTRETTO A >> PAYPAL</option>
-                    <option value="iban_distretto">DISTRETTO A >> IBAN</option>
-                    <option value="cash">CONTANTI / CASH</option>
+                    <option value="HabitatPaypal">HABITAT >> PAYPAL</option>
+                    <option value="HabitatIban">HABITAT >> IBAN</option>
+                    <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
+                    <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
+                    <option value="Cash">CONTANTI / CASH</option>
                 </select>
                 <div class="payment-box" x-show="form.metodoPagamento">
-                    <p x-show="form.metodoPagamento.includes('habitat')">IBAN: IT88Q0623023704000030225469</p>
-                    <p x-show="form.metodoPagamento.includes('distretto')">IBAN: IT80B0303223701010000636901</p>
+                    <p x-show="form.metodoPagamento.includes('Habitat')">IBAN: IT88Q0623023704000030225469</p>
+                    <p x-show="form.metodoPagamento.includes('Distretto')">IBAN: IT80B0303223701010000636901</p>
                     <p>Causale: "Quota associativa [Tuo Nome]"</p>
                 </div>
 
@@ -109,32 +109,69 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('membershipForm', () => ({
             BASE_URL: 'http://localhost:3000',
-            loading: false, 
-            submitted: false, 
+            loading: false,
+            submitted: false,
             errorMessage: '',
-            interessiOpts: ['Habitat / Ca\' dei Monti', 'DAWE / Cena itinerante', 'Quazàr - Coworking', 'Laboratori / Workshop'],
+            interessiOpts: ['Habitat / Ca\' dei Monti', 'DAWE / Cena itinerante', 'Quazar - Coworking', 'Laboratori / Workshop'],
             form: {
                 email: '', cognome: '', nome: '', dataNascita: '', luogoNascita: '', provNascita: '', paeseNascita: '', codiceFiscale: '',
                 indirizzo: '', cap: '', cittaResidenza: '', provResidenza: '', paeseResidenza: '', telefono: '',
                 interessi: [], metodoPagamento: '', privacy: false, adesione: false
             },
             async submit() {
-                if (!this.form.privacy || !this.form.adesione) { 
-                    this.errorMessage = "Accetta le condizioni obbligatorie"; 
-                    return; 
+                const required = ['email','cognome','nome','dataNascita','luogoNascita','provNascita',
+                    'paeseNascita','codiceFiscale','indirizzo','cap','cittaResidenza',
+                    'provResidenza','paeseResidenza','telefono','metodoPagamento'];
+                if (required.some(k => !this.form[k])) {
+                    this.errorMessage = "Compila tutti i campi obbligatori";
+                    return;
                 }
-                
-                this.loading = true;
-                this.errorMessage = ''; // Reset errore precedente
+                if (!this.form.privacy || !this.form.adesione) {
+                    this.errorMessage = "Accetta le condizioni obbligatorie";
+                    return;
+                }
 
-                // Recupera il token salvato precedentemente (es. dopo il login)
-                const token = localStorage.getItem('token'); 
+                this.loading = true;
+                this.errorMessage = '';
+
+                const interestiMap = {
+                    'Habitat / Ca\' dei Monti': 'habitat',
+                    'DAWE / Cena itinerante': 'dawe',
+                    'Quazar - Coworking': 'quazar',
+                    'Laboratori / Workshop': 'workshops'
+                };
+                const interests = {};
+                this.form.interessi.forEach(i => {
+                    const key = interestiMap[i];
+                    if (key) interests[key] = true;
+                });
+
+                const payload = {
+                    email: this.form.email,
+                    surname: this.form.cognome,
+                    name: this.form.nome,
+                    birthDate: this.form.dataNascita,
+                    birthPlace: this.form.luogoNascita,
+                    birthProvince: this.form.provNascita,
+                    birthCountry: this.form.paeseNascita,
+                    vatNumber: this.form.codiceFiscale,
+                    address: this.form.indirizzo,
+                    zipcode: this.form.cap,
+                    city: this.form.cittaResidenza,
+                    province: this.form.provResidenza,
+                    country: this.form.paeseResidenza,
+                    phoneNumber: this.form.telefono,
+                    interests,
+                    paymentMethod: this.form.metodoPagamento,
+                    acceptPrivacy: this.form.privacy,
+                    acceptStatute: this.form.adesione
+                };
 
                 try {
-                   const res = await fetch(`${this.BASE_URL}/membership/public`, {
+                    const res = await fetch(`${this.BASE_URL}/membership/`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.form)
+                        body: JSON.stringify(payload)
                     });
 
                     if (res.status === 401) {
@@ -142,17 +179,13 @@
                         return;
                     }
 
-                    if (res.status === 401) {
-                        throw new Error("Sessione scaduta o non autorizzata. Effettua il login.");
-                    }
-
                     if (!res.ok) throw new Error("Errore durante l'invio dei dati.");
-                    
+
                     this.submitted = true;
-                } catch (e) { 
-                    this.errorMessage = e.message; 
-                } finally { 
-                    this.loading = false; 
+                } catch (e) {
+                    this.errorMessage = e.message;
+                } finally {
+                    this.loading = false;
                 }
             }
         }));

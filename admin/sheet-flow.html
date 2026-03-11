@@ -29,7 +29,7 @@
         <div>
             <span class="status-dot" :class="status"></span>
             <b x-text="statusMsg"></b>
-            <span style="margin-left: 15px; font-size: 9px; color: #ccc;" x-text="`FILTRO: ${filter} | PAYER: ${habitante}`"></span>
+            <span style="margin-left: 15px; font-size: 9px; color: #ccc;" x-text="`FILTRO: ${filter} | PAYER: ${habitante} | TIPO: ${typeFilter}`"></span>
         </div>
         <div>
             <button class="btn-export" @click="exportCSV()">EXPORT CSV</button>
@@ -50,6 +50,7 @@
                     <th>Specific Habitante</th>
                     <th>Payment Method</th>
                     <th>Receipt Type</th>
+                    <th>Type</th>
                     <!-- <th>Paid Activity</th> -->
                     <th style="width:300px">Description</th>
                     <!-- <th>isRepeatable</th> -->
@@ -59,27 +60,28 @@
                 </tr>
             </thead>
             <tbody>
-                <template x-for="(item, index) in filteredItems" :key="item._id">
+                <template x-for="(item, index) in filteredItems" :key="item.id">
                     <tr>
                         <td class="row-num" x-text="index + 1"></td>
-                        <td contenteditable="true" @blur="saveDate(item._id, 'date', $event.target.innerText)" x-text="formatDate(item.date)"></td>
-                        <td contenteditable="true" @blur="save(item._id, 'title', $event.target.innerText)" x-text="item.title"></td>
+                        <td contenteditable="true" @blur="saveDate(item.id, 'date', $event.target.innerText)" x-text="formatDate(item.date)"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'title', $event.target.innerText)" x-text="item.title"></td>
                         <td contenteditable="true" 
-                            @blur="save(item._id, 'amount', $event.target.innerText)" 
+                            @blur="save(item.id, 'amount', $event.target.innerText)" 
                             x-text="item.amount" 
                             :class="String(item.isExit) === 'true' ? 'txt-red' : 'txt-green'"></td>
                         
-                        <td contenteditable="true" @blur="save(item._id, 'isExit', $event.target.innerText)" x-text="item.isExit"></td>
-                        <td contenteditable="true" @blur="save(item._id, 'payerType', $event.target.innerText)" x-text="item.payerType"></td>
-                        <td contenteditable="true" @blur="save(item._id, 'specificHabitante', $event.target.innerText)" x-text="item.specificHabitante"></td>
-                        <td contenteditable="true" @blur="save(item._id, 'paymentMethod', $event.target.innerText)" x-text="item.paymentMethod"></td>
-                        <td contenteditable="true" @blur="save(item._id, 'receiptType', $event.target.innerText)" x-text="item.receiptType"></td>
-                        <!-- <td contenteditable="true" @blur="save(item._id, 'paidActivity', $event.target.innerText)" x-text="item.paidActivity"></td> -->
-                        <td contenteditable="true" @blur="save(item._id, 'description', $event.target.innerText)" x-text="item.description"></td>
-                        <!-- <td contenteditable="true" @blur="save(item._id, 'isRepeatable', $event.target.innerText)" x-text="item.isRepeatable"></td> -->
-                        <!-- <td contenteditable="true" @blur="save(item._id, 'repeatInterval', $event.target.innerText)" x-text="item.repeatInterval"></td> -->
-                        <!-- <td contenteditable="true" @blur="saveDate(item._id, 'repeatUntil', $event.target.innerText)" x-text="formatDate(item.repeatUntil)"></td> -->
-                        <td contenteditable="true" @blur="save(item._id, 'category', $event.target.innerText)" x-text="item.category"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'isExit', $event.target.innerText)" x-text="item.isExit"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'payerType', $event.target.innerText)" x-text="item.payerType"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'specificHabitante', $event.target.innerText)" x-text="item.specificHabitante"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'paymentMethod', $event.target.innerText)" x-text="item.paymentMethod"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'receiptType', $event.target.innerText)" x-text="item.receiptType"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'expenseType', $event.target.innerText)" x-text="item.expenseType"></td>
+                        <!-- <td contenteditable="true" @blur="save(item.id, 'paidActivity', $event.target.innerText)" x-text="item.paidActivity"></td> -->
+                        <td contenteditable="true" @blur="save(item.id, 'description', $event.target.innerText)" x-text="item.description"></td>
+                        <!-- <td contenteditable="true" @blur="save(item.id, 'isRepeatable', $event.target.innerText)" x-text="item.isRepeatable"></td> -->
+                        <!-- <td contenteditable="true" @blur="save(item.id, 'repeatInterval', $event.target.innerText)" x-text="item.repeatInterval"></td> -->
+                        <!-- <td contenteditable="true" @blur="saveDate(item.id, 'repeatUntil', $event.target.innerText)" x-text="formatDate(item.repeatUntil)"></td> -->
+                        <td contenteditable="true" @blur="save(item.id, 'category', $event.target.innerText)" x-text="item.category"></td>
                     </tr>
                 </template>
             </tbody>
@@ -94,6 +96,7 @@
                 items: [],
                 filter: 'all',
                 habitante: 'all',
+                typeFilter: 'all',
                 status: 'idle',
                 statusMsg: 'READY',
 
@@ -101,6 +104,7 @@
                     const params = new URLSearchParams(window.location.search);
                     this.filter = params.get('filter') || 'all';
                     this.habitante = params.get('habitante') || 'all';
+                    this.typeFilter = params.get('type') || 'all';
                     
                     if (!this.token) return window.close();
                     await this.fetchData();
@@ -119,10 +123,11 @@
                     return this.items.filter(i => {
                         const isExit = String(i.isExit) === 'true';
                         let matchType = (this.filter === 'all') || (this.filter === 'out' ? isExit : !isExit);
-                        if (this.filter !== 'out') return matchType;
-                        let matchHabitante = (this.habitante === 'all') || 
+                        let matchExpenseType = this.typeFilter === 'all' || i.expenseType === this.typeFilter;
+                        if (this.filter !== 'out') return matchType && matchExpenseType;
+                        let matchHabitante = (this.habitante === 'all') ||
                             (this.habitante === 'habitat' ? i.payerType === 'habitat' : (i.payerType === 'habitante' && i.specificHabitante === this.habitante));
-                        return matchType && matchHabitante;
+                        return matchType && matchHabitante && matchExpenseType;
                     }).sort((a,b) => new Date(b.date) - new Date(a.date));
                 },
 
@@ -156,7 +161,7 @@
                         if (!res.ok) throw new Error();
                         
                         // Aggiorna localmente l'item per riflettere i colori se isExit cambia
-                        const item = this.items.find(i => i._id === id);
+                        const item = this.items.find(i => i.id === id);
                         if (item) item[field] = val;
 
                         this.status = 'saved';

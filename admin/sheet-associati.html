@@ -59,25 +59,25 @@
                 </tr>
             </thead>
             <tbody>
-                <template x-for="(m, index) in filteredItems" :key="m._id">
+                <template x-for="(m, index) in filteredItems" :key="m.id">
                     <tr>
                         <td class="row-num" x-text="index + 1"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'cognome', $event.target.innerText)" x-text="m.cognome"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'nome', $event.target.innerText)" x-text="m.nome"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'email', $event.target.innerText)" x-text="m.email"></td>
-                        <td contenteditable="true" @blur="saveDate(m._id, 'dataNascita', $event.target.innerText)" x-text="formatDate(m.dataNascita)"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'luogoNascita', $event.target.innerText)" x-text="m.luogoNascita"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'provNascita', $event.target.innerText)" x-text="m.provNascita"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'paeseNascita', $event.target.innerText)" x-text="m.paeseNascita"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'codiceFiscale', $event.target.innerText)" x-text="m.codiceFiscale" style="text-transform: uppercase"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'indirizzo', $event.target.innerText)" x-text="m.indirizzo"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'cap', $event.target.innerText)" x-text="m.cap"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'cittaResidenza', $event.target.innerText)" x-text="m.cittaResidenza"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'provResidenza', $event.target.innerText)" x-text="m.provResidenza"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'paeseResidenza', $event.target.innerText)" x-text="m.paeseResidenza"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'telefono', $event.target.innerText)" x-text="m.telefono"></td>
-                        <td contenteditable="true" @blur="saveInteressi(m._id, $event.target.innerText)" x-text="m.interessi?.join(', ')"></td>
-                        <td contenteditable="true" @blur="save(m._id, 'metodoPagamento', $event.target.innerText)" x-text="m.metodoPagamento"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'surname', $event.target.innerText)" x-text="m.surname"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'name', $event.target.innerText)" x-text="m.name"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'email', $event.target.innerText)" x-text="m.email"></td>
+                        <td contenteditable="true" @blur="saveDate(m.id, 'birthDate', $event.target.innerText)" x-text="formatDate(m.birthDate)"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'birthPlace', $event.target.innerText)" x-text="m.birthPlace"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'birthProvince', $event.target.innerText)" x-text="m.birthProvince"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'birthCountry', $event.target.innerText)" x-text="m.birthCountry"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'vatNumber', $event.target.innerText)" x-text="m.vatNumber" style="text-transform: uppercase"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'address', $event.target.innerText)" x-text="m.address"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'zipcode', $event.target.innerText)" x-text="m.zipcode"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'city', $event.target.innerText)" x-text="m.city"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'province', $event.target.innerText)" x-text="m.province"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'country', $event.target.innerText)" x-text="m.country"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'phoneNumber', $event.target.innerText)" x-text="m.phoneNumber"></td>
+                        <td x-text="[m.interestHabitat && 'Habitat', m.interestDawe && 'DAWE', m.interestQuazar && 'Quazar', m.interestWorkshops && 'Workshops'].filter(Boolean).join(', ')"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'paymentMethod', $event.target.innerText)" x-text="m.paymentMethod"></td>
                     </tr>
                 </template>
             </tbody>
@@ -100,15 +100,15 @@
                 },
 
                 async fetchData() {
-                    const res = await fetch(`${this.BASE_URL}/memberships/`, {
+                    const res = await fetch(`${this.BASE_URL}/membership/`, {
                         headers: { 'Authorization': `Bearer ${this.token}` }
                     });
                     this.items = await res.json();
                 },
 
                 get filteredItems() {
-                    return this.items.filter(i => 
-                        (i.cognome + ' ' + i.nome).toLowerCase().includes(this.search.toLowerCase())
+                    return this.items.filter(i =>
+                        (i.surname + ' ' + i.name).toLowerCase().includes(this.search.toLowerCase())
                     );
                 },
 
@@ -125,15 +125,10 @@
                     await this.save(id, field, `${p[2]}-${p[1]}-${p[0]}`);
                 },
 
-                async saveInteressi(id, text) {
-                    const arr = text.split(',').map(s => s.trim()).filter(s => s !== '');
-                    await this.save(id, 'interessi', arr);
-                },
-
                 async save(id, field, value) {
                     this.status = 'saving'; this.statusMsg = 'SAVING...';
                     try {
-                        const res = await fetch(`${this.BASE_URL}/memberships/${id}`, {
+                        const res = await fetch(`${this.BASE_URL}/membership/${id}`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
                             body: JSON.stringify({ [field]: value })
@@ -147,8 +142,8 @@
 
                 exportCSV() {
                     const headers = "Cognome,Nome,Email,DataNascita,CF,Citta,Telefono,Pagamento\n";
-                    const rows = this.filteredItems.map(m => 
-                        `${m.cognome},${m.nome},${m.email},${this.formatDate(m.dataNascita)},${m.codiceFiscale},${m.cittaResidenza},${m.telefono},${m.metodoPagamento}`
+                    const rows = this.filteredItems.map(m =>
+                        `${m.surname},${m.name},${m.email},${this.formatDate(m.birthDate)},${m.vatNumber},${m.city},${m.phoneNumber},${m.paymentMethod}`
                     ).join("\n");
                     const blob = new Blob([headers + rows], { type: 'text/csv' });
                     const a = document.createElement('a');

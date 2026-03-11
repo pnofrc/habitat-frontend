@@ -12,16 +12,26 @@ document.addEventListener('alpine:init', () => {
         guestHistory: [],
         editingItem: null,
         editingBooking: null,
+        editingResidency: null,
+        confirmModal: null,
         editingGuest: null,
         newGuestToggle: false,
         newGuestName: '',
+        membershipTab: 'requests',
         filter: 'all',
         habitanteFilter: 'all',
+        typeFilter: 'all',
         stats: { totalIn: 0, totalOut: 0, balance: 0 },
         loginData: { username: '', password: '' },
 
         async init() {
             if (this.token) await this.fetchData();
+        },
+
+        showConfirm(message) {
+            return new Promise(resolve => {
+                this.confirmModal = { message, resolve };
+            });
         },
 
         formatDate(dateStr) {
@@ -35,7 +45,9 @@ document.addEventListener('alpine:init', () => {
             this.selectedGuest = null;
             this.editingItem = null;
             this.editingBooking = null;
+            this.editingResidency = null;
             this.editingGuest = null;
+            this.confirmModal = null;
             await this.fetchData();
         },
 
@@ -61,17 +73,24 @@ document.addEventListener('alpine:init', () => {
             } catch (e) { console.error(e); }
         },
 
+        get filteredMemberships() {
+            if (this.view !== 'membership') return [];
+            return this.items.filter(m =>
+                this.membershipTab === 'confirmed' ? m.confirmed : !m.confirmed
+            );
+        },
+
         get filteredItems() {
             if (this.view !== 'expenses') return this.items;
 
             return this.items.filter(i => {
                 const isExit = String(i.isExit) === 'true';
-                
+
                 let matchType = true;
                 if (this.filter === 'in') matchType = !isExit;
                 if (this.filter === 'out') matchType = isExit;
 
-                if (this.filter !== 'out') return matchType;
+                if (this.filter !== 'out') return matchType && (this.typeFilter === 'all' || i.expenseType === this.typeFilter);
 
                 let matchHabitante = true;
                 if (this.habitanteFilter !== 'all') {
@@ -82,7 +101,9 @@ document.addEventListener('alpine:init', () => {
                     }
                 }
 
-                return matchType && matchHabitante;
+                let matchExpenseType = this.typeFilter === 'all' || i.expenseType === this.typeFilter;
+
+                return matchType && matchHabitante && matchExpenseType;
             });
         },
 
@@ -111,16 +132,19 @@ document.addEventListener('alpine:init', () => {
         },
 
         async selectGuest(guest) {
-            this.selectedGuest = guest;
-            const res = await fetch(`${this.BASE_URL}/bookings/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
-            const allB = await res.json();
-            this.guestHistory = allB.filter(b => (b.guest?._id || b.guest) === guest._id);
+            try {
+                this.selectedGuest = guest;
+                const res = await fetch(`${this.BASE_URL}/bookings/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
+                if (!res.ok) throw new Error("Errore caricamento prenotazioni");
+                const allB = await res.json();
+                this.guestHistory = allB.filter(b => (b.guest?.id || b.guest) === guest.id);
+            } catch (e) { alert(e.message); }
         },
 
         isGuestPresent(guestId) {
             const today = new Date().setHours(0,0,0,0);
             return this.allBookings.some(b => {
-                const gId = b.guest?._id || b.guest;
+                const gId = b.guest?.id || b.guest;
                 return gId === guestId && today >= new Date(b.checkIn).setHours(0,0,0,0) && today <= new Date(b.checkOut).setHours(0,0,0,0);
             });
         },
@@ -140,8 +164,8 @@ document.addEventListener('alpine:init', () => {
 
         async saveGuest() {
             try {
-                const isUpdate = !!this.editingGuest._id;
-                const url = isUpdate ? `${this.BASE_URL}/guests/${this.editingGuest._id}` : `${this.BASE_URL}/guests/`;
+                const isUpdate = !!this.editingGuest.id;
+                const url = isUpdate ? `${this.BASE_URL}/guests/${this.editingGuest.id}` : `${this.BASE_URL}/guests/`;
                 const res = await fetch(url, {
                     method: isUpdate ? 'PATCH' : 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
@@ -156,57 +180,66 @@ document.addEventListener('alpine:init', () => {
         },
 
         async saveData() {
-            const isUpdate = !!this.editingItem._id;
-            const payload = { 
-                ...this.editingItem, 
-                amount: Number(this.editingItem.amount),
-                isExit: String(this.editingItem.isExit) === 'true', 
-                category: String(this.editingItem.isExit) === 'true' ? 'uscita' : 'entrata' 
-            };
-            await fetch(isUpdate ? `${this.BASE_URL}/expenses/${this.editingItem._id}` : `${this.BASE_URL}/expenses/`, {
-                method: isUpdate ? 'PATCH' : 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                body: JSON.stringify(payload)
-            });
-            this.editingItem = null;
-            await this.fetchData();
+            try {
+                const isUpdate = !!this.editingItem.id;
+                const payload = {
+                    ...this.editingItem,
+                    amount: Number(this.editingItem.amount),
+                    isExit: String(this.editingItem.isExit) === 'true',
+                    category: String(this.editingItem.isExit) === 'true' ? 'uscita' : 'entrata'
+                };
+                const res = await fetch(isUpdate ? `${this.BASE_URL}/expenses/${this.editingItem.id}` : `${this.BASE_URL}/expenses/`, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio spesa");
+                this.editingItem = null;
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
         },
 
         async saveBooking() {
-            let guestId = this.editingBooking.guest;
-            if (this.newGuestToggle && this.newGuestName) {
-                const resG = await fetch(`${this.BASE_URL}/guests/`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` }, 
-                    body: JSON.stringify({ name: this.newGuestName, isConfirmed: false }) 
+            try {
+                let guestId = this.editingBooking.guest;
+                if (this.newGuestToggle && this.newGuestName) {
+                    const resG = await fetch(`${this.BASE_URL}/guests/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                        body: JSON.stringify({ name: this.newGuestName, isConfirmed: false })
+                    });
+                    if (!resG.ok) throw new Error("Errore creazione ospite");
+                    const newG = await resG.json();
+                    guestId = newG.id;
+                }
+                const isUpdate = !!this.editingBooking.id;
+                const res = await fetch(isUpdate ? `${this.BASE_URL}/bookings/${this.editingBooking.id}` : `${this.BASE_URL}/bookings/`, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ ...this.editingBooking, guest: guestId })
                 });
-                const newG = await resG.json();
-                guestId = newG._id;
-            }
-            const isUpdate = !!this.editingBooking._id;
-            await fetch(isUpdate ? `${this.BASE_URL}/bookings/${this.editingBooking._id}` : `${this.BASE_URL}/bookings/`, {
-                method: isUpdate ? 'PATCH' : 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                body: JSON.stringify({ ...this.editingBooking, guest: guestId })
-            });
-            this.editingBooking = null;
-            await this.fetchData();
+                if (!res.ok) throw new Error("Errore salvataggio prenotazione");
+                this.editingBooking = null;
+                this.newGuestName = '';
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
         },
 
         async login() {
             const res = await fetch(`${this.BASE_URL}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.loginData) });
             const d = await res.json();
             if (d.token) { this.token = d.token; localStorage.setItem('token', d.token); await this.fetchData(); }
+            else { alert("Login fallito: credenziali non valide"); }
         },
 
         logout() { this.token = ''; localStorage.removeItem('token'); },
         
-        openCreate() { 
-            this.editingItem = { 
-                title: '', description: '', amount: 0, date: new Date().toISOString().split('T')[0], 
-                isExit: true, receiptType: 'nessuno', payerType: 'habitat', paymentMethod: 'cash', 
-                isRepeatable: false, repeatInterval: 'monthly' 
-            }; 
+        openCreate() {
+            this.editingItem = {
+                title: '', description: '', amount: 0, date: new Date().toISOString().split('T')[0],
+                isExit: true, receiptType: 'nessuno', payerType: 'habitat', paymentMethod: 'cash',
+                isRepeatable: false, repeatInterval: 'monthly', expenseType: ''
+            };
         },
         
         openEdit(item) { 
@@ -232,7 +265,7 @@ document.addEventListener('alpine:init', () => {
             
             this.newGuestToggle = false;
             
-            const guestId = b.guest?._id || b.guest;
+            const guestId = b.guest?.id || b.guest;
             
             this.editingBooking = { 
                 ...b, 
@@ -243,6 +276,84 @@ document.addEventListener('alpine:init', () => {
             };
         },
         
-        async deleteItem(id) { if (confirm("Eliminare?")) { await fetch(`${this.BASE_URL}/${this.view}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${this.token}` } }); await this.fetchData(); } }
+        async confirmResidency(r) {
+            if (!await this.showConfirm("Confermare questa residenza?")) return;
+            try {
+                const resG = await fetch(`${this.BASE_URL}/guests/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ name: r.name, email: r.email, isConfirmed: true })
+                });
+                if (!resG.ok) throw new Error("Errore creazione ospite");
+                const guest = await resG.json();
+                const resB = await fetch(`${this.BASE_URL}/bookings/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ guest: guest.id, checkIn: r.fromDate, checkOut: r.toDate, room: 'da assegnare' })
+                });
+                if (!resB.ok) throw new Error("Errore creazione prenotazione");
+                await fetch(`${this.BASE_URL}/residency/${r.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        openCreateResidency() {
+            this.editingResidency = { name: '', email: '', fromDate: '', toDate: '', proposal: '' };
+        },
+
+        async saveResidency() {
+            try {
+                const isUpdate = !!this.editingResidency.id;
+                const url = isUpdate ? `${this.BASE_URL}/residency/${this.editingResidency.id}` : `${this.BASE_URL}/residency/`;
+                await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(this.editingResidency)
+                });
+                this.editingResidency = null;
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async confirmMembership(m) {
+            if (!await this.showConfirm("Confermare tesseramento?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/membership/${m.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ confirmed: true })
+                });
+                if (!res.ok) throw new Error("Errore conferma tesseramento");
+                const paymentMap = { HabitatPaypal: 'paypal', HabitatIban: 'iban', DistrettoPaypal: 'paypal', DistrettoIban: 'iban', Cash: 'cash' };
+                const resE = await fetch(`${this.BASE_URL}/expenses/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({
+                        title: `Tessera ${m.surname} ${m.name}`,
+                        amount: 10,
+                        date: new Date().toISOString().split('T')[0],
+                        isExit: false,
+                        category: 'entrata',
+                        paymentMethod: paymentMap[m.paymentMethod] || 'cash',
+                        expenseType: 'tessera'
+                    })
+                });
+                if (!resE.ok) throw new Error("Errore creazione spesa tessera");
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteItem(id) {
+            if (await this.showConfirm("Eliminare?")) {
+                try {
+                    const res = await fetch(`${this.BASE_URL}/${this.view}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${this.token}` } });
+                    if (!res.ok) throw new Error("Errore eliminazione");
+                    await this.fetchData();
+                } catch (e) { alert(e.message); }
+            }
+        }
     }));
 });

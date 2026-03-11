@@ -102,10 +102,17 @@
                     this.errorMessage = '';
 
                     try {
-                        const res = await fetch(`${this.BASE_URL}/bookings/public`, {
+                        const payload = {
+                            name: this.form.guestName,
+                            email: this.form.email,
+                            fromDate: this.form.checkIn,
+                            toDate: this.form.checkOut,
+                            proposal: this.form.presentation
+                        };
+                        const res = await fetch(`${this.BASE_URL}/residency/`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.form)
+                            body: JSON.stringify(payload)
                         });
 
                         const data = await res.json();
