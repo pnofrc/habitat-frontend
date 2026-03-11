@@ -1,6 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('app', () => ({
-        BASE_URL: 'https://habitattt.it/formulario',
+        BASE_URL: 'http://habitattt.it:3001',
         token: localStorage.getItem('token') || '',
         view: 'expenses',
         editingMembership: null,
@@ -142,17 +142,17 @@ document.addEventListener('alpine:init', () => {
         },
 
         isGuestPresent(guestId) {
-            const today = new Date().setHours(0,0,0,0);
+            const today = new Date().setHours(0, 0, 0, 0);
             return this.allBookings.some(b => {
                 const gId = b.guest?.id || b.guest;
-                return gId === guestId && today >= new Date(b.checkIn).setHours(0,0,0,0) && today <= new Date(b.checkOut).setHours(0,0,0,0);
+                return gId === guestId && today >= new Date(b.checkIn).setHours(0, 0, 0, 0) && today <= new Date(b.checkOut).setHours(0, 0, 0, 0);
             });
         },
 
         getBookingStatus(b) {
-            const today = new Date().setHours(0,0,0,0);
-            const start = new Date(b.checkIn).setHours(0,0,0,0);
-            const end = new Date(b.checkOut).setHours(0,0,0,0);
+            const today = new Date().setHours(0, 0, 0, 0);
+            const start = new Date(b.checkIn).setHours(0, 0, 0, 0);
+            const end = new Date(b.checkOut).setHours(0, 0, 0, 0);
             if (today < start) return '🔜 Futuro';
             if (today > end) return '✅ Concluso';
             return '🏠 In corso';
@@ -233,7 +233,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         logout() { this.token = ''; localStorage.removeItem('token'); },
-        
+
         openCreate() {
             this.editingItem = {
                 title: '', description: '', amount: 0, date: new Date().toISOString().split('T')[0],
@@ -241,41 +241,41 @@ document.addEventListener('alpine:init', () => {
                 isRepeatable: false, repeatInterval: 'monthly', expenseType: ''
             };
         },
-        
-        openEdit(item) { 
-            this.editingItem = { ...item, isExit: String(item.isExit) === 'true', date: item.date.split('T')[0] }; 
-        },        
 
-       async openCreateBooking() { 
-            const res = await fetch(`${this.BASE_URL}/guests/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
-            this.guests = await res.json();
-            this.newGuestToggle = false;
-            this.editingBooking = { 
-                guest: '', 
-                checkIn: new Date().toISOString().split('T')[0], 
-                checkOut: new Date().toISOString().split('T')[0], 
-                feedback: '', 
-                room: 'da assegnare' 
-            }; 
+        openEdit(item) {
+            this.editingItem = { ...item, isExit: String(item.isExit) === 'true', date: item.date.split('T')[0] };
         },
-        
-        async openEditBooking(b) { 
+
+        async openCreateBooking() {
             const res = await fetch(`${this.BASE_URL}/guests/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
             this.guests = await res.json();
-            
             this.newGuestToggle = false;
-            
-            const guestId = b.guest?.id || b.guest;
-            
-            this.editingBooking = { 
-                ...b, 
-                checkIn: b.checkIn.split('T')[0], 
-                checkOut: b.checkOut.split('T')[0], 
-                guest: guestId, 
-                feedback: b.feedback || '' 
+            this.editingBooking = {
+                guest: '',
+                checkIn: new Date().toISOString().split('T')[0],
+                checkOut: new Date().toISOString().split('T')[0],
+                feedback: '',
+                room: 'da assegnare'
             };
         },
-        
+
+        async openEditBooking(b) {
+            const res = await fetch(`${this.BASE_URL}/guests/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
+            this.guests = await res.json();
+
+            this.newGuestToggle = false;
+
+            const guestId = b.guest?.id || b.guest;
+
+            this.editingBooking = {
+                ...b,
+                checkIn: b.checkIn.split('T')[0],
+                checkOut: b.checkOut.split('T')[0],
+                guest: guestId,
+                feedback: b.feedback || ''
+            };
+        },
+
         async confirmResidency(r) {
             if (!await this.showConfirm("Confermare questa residenza?")) return;
             try {

@@ -1,26 +1,132 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <title>Full Members Sheet - Habitat</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: courier, monospace; margin: 0; background: #f4f4f4; color: #000; font-size: 11px; }
-        .toolbar { background: #000; color: #fff; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; height: 40px; }
-        .toolbar input { background: #222; border: 1px solid #444; color: #fff; padding: 4px; font-family: inherit; font-size: 10px; width: 200px; }
-        .sheet-container { overflow: auto; height: calc(100vh - 40px); background: #fff; }
-        table { border-collapse: collapse; min-width: 100%; table-layout: fixed; }
-        th { background: #eee; border: 1px solid #ccc; padding: 8px; position: sticky; top: 0; z-index: 5; text-transform: uppercase; font-size: 9px; width: 140px; }
-        td { border: 1px solid #ccc; padding: 6px; white-space: nowrap; background: #fff; outline: none; overflow: hidden; text-overflow: ellipsis; }
-        tr:hover td { background: #fffdf0; }
-        td:focus { background: #fff !important; box-shadow: inset 0 0 0 2px #000; }
-        .row-num { width: 40px; background: #eee; text-align: center; font-weight: bold; border-right: 2px solid #ccc; position: sticky; left: 0; z-index: 6; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .saving { background: orange; } .saved { background: green; } .error { background: red; }
-        .btn-export { background: #fff; border: none; padding: 4px 8px; cursor: pointer; font-family: inherit; font-size: 9px; font-weight: bold; }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: courier, monospace;
+            margin: 0;
+            background: #f4f4f4;
+            color: #000;
+            font-size: 11px;
+        }
+
+        .toolbar {
+            background: #000;
+            color: #fff;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            height: 40px;
+        }
+
+        .toolbar input {
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 4px;
+            font-family: inherit;
+            font-size: 10px;
+            width: 200px;
+        }
+
+        .sheet-container {
+            overflow: auto;
+            height: calc(100vh - 40px);
+            background: #fff;
+        }
+
+        table {
+            border-collapse: collapse;
+            min-width: 100%;
+            table-layout: fixed;
+        }
+
+        th {
+            background: #eee;
+            border: 1px solid #ccc;
+            padding: 8px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            text-transform: uppercase;
+            font-size: 9px;
+            width: 140px;
+        }
+
+        td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            white-space: nowrap;
+            background: #fff;
+            outline: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tr:hover td {
+            background: #fffdf0;
+        }
+
+        td:focus {
+            background: #fff !important;
+            box-shadow: inset 0 0 0 2px #000;
+        }
+
+        .row-num {
+            width: 40px;
+            background: #eee;
+            text-align: center;
+            font-weight: bold;
+            border-right: 2px solid #ccc;
+            position: sticky;
+            left: 0;
+            z-index: 6;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .saving {
+            background: orange;
+        }
+
+        .saved {
+            background: green;
+        }
+
+        .error {
+            background: red;
+        }
+
+        .btn-export {
+            background: #fff;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 9px;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body x-data="memberSheet" x-init="init()" x-cloak>
 
     <div class="toolbar">
@@ -62,22 +168,39 @@
                 <template x-for="(m, index) in filteredItems" :key="m.id">
                     <tr>
                         <td class="row-num" x-text="index + 1"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'surname', $event.target.innerText)" x-text="m.surname"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'name', $event.target.innerText)" x-text="m.name"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'email', $event.target.innerText)" x-text="m.email"></td>
-                        <td contenteditable="true" @blur="saveDate(m.id, 'birthDate', $event.target.innerText)" x-text="formatDate(m.birthDate)"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'birthPlace', $event.target.innerText)" x-text="m.birthPlace"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'birthProvince', $event.target.innerText)" x-text="m.birthProvince"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'birthCountry', $event.target.innerText)" x-text="m.birthCountry"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'vatNumber', $event.target.innerText)" x-text="m.vatNumber" style="text-transform: uppercase"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'address', $event.target.innerText)" x-text="m.address"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'zipcode', $event.target.innerText)" x-text="m.zipcode"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'city', $event.target.innerText)" x-text="m.city"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'province', $event.target.innerText)" x-text="m.province"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'country', $event.target.innerText)" x-text="m.country"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'phoneNumber', $event.target.innerText)" x-text="m.phoneNumber"></td>
-                        <td x-text="[m.interestHabitat && 'Habitat', m.interestDawe && 'DAWE', m.interestQuazar && 'Quazar', m.interestWorkshops && 'Workshops'].filter(Boolean).join(', ')"></td>
-                        <td contenteditable="true" @blur="save(m.id, 'paymentMethod', $event.target.innerText)" x-text="m.paymentMethod"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'surname', $event.target.innerText)"
+                            x-text="m.surname"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'name', $event.target.innerText)" x-text="m.name">
+                        </td>
+                        <td contenteditable="true" @blur="save(m.id, 'email', $event.target.innerText)"
+                            x-text="m.email"></td>
+                        <td contenteditable="true" @blur="saveDate(m.id, 'birthDate', $event.target.innerText)"
+                            x-text="formatDate(m.birthDate)"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'birthPlace', $event.target.innerText)"
+                            x-text="m.birthPlace"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'birthProvince', $event.target.innerText)"
+                            x-text="m.birthProvince"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'birthCountry', $event.target.innerText)"
+                            x-text="m.birthCountry"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'vatNumber', $event.target.innerText)"
+                            x-text="m.vatNumber" style="text-transform: uppercase"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'address', $event.target.innerText)"
+                            x-text="m.address"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'zipcode', $event.target.innerText)"
+                            x-text="m.zipcode"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'city', $event.target.innerText)" x-text="m.city">
+                        </td>
+                        <td contenteditable="true" @blur="save(m.id, 'province', $event.target.innerText)"
+                            x-text="m.province"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'country', $event.target.innerText)"
+                            x-text="m.country"></td>
+                        <td contenteditable="true" @blur="save(m.id, 'phoneNumber', $event.target.innerText)"
+                            x-text="m.phoneNumber"></td>
+                        <td
+                            x-text="[m.interestHabitat && 'Habitat', m.interestDawe && 'DAWE', m.interestQuazar && 'Quazar', m.interestWorkshops && 'Workshops'].filter(Boolean).join(', ')">
+                        </td>
+                        <td contenteditable="true" @blur="save(m.id, 'paymentMethod', $event.target.innerText)"
+                            x-text="m.paymentMethod"></td>
                     </tr>
                 </template>
             </tbody>
@@ -87,7 +210,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('memberSheet', () => ({
-                BASE_URL: 'https://habitattt.it/formulario',
+                BASE_URL: 'http://habitattt.it:3001',
                 token: localStorage.getItem('token'),
                 items: [],
                 search: '',
@@ -116,7 +239,7 @@
                     if (!d) return '';
                     const date = new Date(d);
                     if (isNaN(date.getTime())) return d;
-                    return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+                    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
                 },
 
                 async saveDate(id, field, ddmm) {
@@ -155,4 +278,5 @@
         });
     </script>
 </body>
+
 </html>
