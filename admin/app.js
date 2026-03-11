@@ -1,6 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('app', () => ({
-        BASE_URL: 'http://localhost:3000',
+        BASE_URL: 'https://habitattt.it/formulario',
         token: localStorage.getItem('token') || '',
         view: 'expenses',
         editingMembership: null,
