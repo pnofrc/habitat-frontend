@@ -29,7 +29,7 @@
             box-shadow: 10px 10px 0px #000;
             max-width: 750px;
             width: 100%;
-            margin: 40px 0;
+            margin: 0px 0;
         }
 
         .card-header {
@@ -169,7 +169,8 @@
         <template x-if="!submitted">
             <div>
                 <div class="card-header">
-                    <img src="https://habitattt.it/images/h.logo.png" alt="Habitat" style="height:10vh;flex-shrink:0;padding-left: 2%;">
+                    <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
+                        style="height:10vh;flex-shrink:0;padding-left: 2%;">
                     <h1 x-text="lang === 'it' ? 'DOMANDA DI ISCRIZIONE' : 'MEMBERSHIP APPLICATION'"></h1>
                     <div class="lang-toggle">
                         <button @click="lang = 'it'" :class="lang === 'it' && 'active'">IT</button>
@@ -272,15 +273,16 @@
                 <h2 x-text="lang === 'it' ? 'CONDIZIONI' : 'CONDITIONS'"></h2>
                 <label class="checkbox-group">
                     <input type="checkbox" x-model="form.privacy">
-                    <span x-text="lang === 'it' ? 'Acconsento al trattamento dati (obbligatorio)' : 'I consent to data processing (required)'"></span>
+                    <span
+                        x-text="lang === 'it' ? 'Acconsento al trattamento dati (obbligatorio)' : 'I consent to data processing (required)'"></span>
                 </label>
                 <label class="checkbox-group">
                     <input type="checkbox" x-model="form.adesione">
-                    <span x-text="lang === 'it' ? 'Aderisco all\'Associazione (obbligatorio)' : 'I join the Association (required)'"></span>
+                    <span
+                        x-text="lang === 'it' ? 'Aderisco all\'Associazione (obbligatorio)' : 'I join the Association (required)'"></span>
                 </label>
 
-                <button class="btn-send" @click="submit()" :disabled="loading"
-                    x-text="loading
+                <button class="btn-send" @click="submit()" :disabled="loading" x-text="loading
                         ? (lang === 'it' ? 'INVIO...' : 'SUBMITTING...')
                         : (lang === 'it' ? 'INVIA DOMANDA' : 'SUBMIT APPLICATION')"></button>
             </div>
