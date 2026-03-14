@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Richiesta Prenotazione - Habitat</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #f4f4f4;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border: 2px solid #000;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h2 {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 2px solid #000;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            background: #fffdf0;
+        }
+
+        .btn-send {
+            background: black;
+            color: white;
+            padding: 15px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 30px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: transform 0.1s;
+        }
+
+        .btn-send:active {
+            transform: translate(2px, 2px);
+        }
+
+        .btn-send:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .success-msg {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-banner {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 10px;
+            border: 2px solid #b91c1c;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body x-data="publicBooking" x-cloak>
+
+    <div class="card">
+        <template x-if="!submitted">
+            <div>
+                <h2>Habitat Residencies Form</h2>
+
+                <template x-if="errorMessage">
+                    <div class="error-banner" x-text="errorMessage"></div>
+                </template>
+
+                <label>Hello</label>
+                <input type="text" x-model="form.guestName" placeholder="Come ti chiami? What's your name?">
+
+                <label>Email</label>
+                <input type="email" x-model="form.email" placeholder="La tua email / Your email address">
+
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <label>Da - From</label>
+                        <input type="date" x-model="form.checkIn" :min="today">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>A - To</label>
+                        <input type="date" x-model="form.checkOut" :min="form.checkIn">
+                    </div>
+                </div>
+
+                <label>Proposta - Proposal</label>
+                <textarea x-model="form.presentation" rows="4"
+                    placeholder="Dicci tutto... Tell us everything..."></textarea>
+
+                <button class="btn-send" @click="sendRequest()" :disabled="loading"
+                    x-text="loading ? 'SENDING...' : 'SEND REQUEST'">
+                </button>
+            </div>
+        </template>
+
+        <template x-if="submitted">
+            <div class="success-msg">
+                <h1 style="font-size: 3em;">:)</h1>
+                <p><strong>Grazie!</strong> La richiesta è stata inviata.</p>
+                <p style="font-size: 0.9em; color: #444;">Ti risponderemo al più presto via email.</p>
+                <button class="btn-send" @click="resetForm()">Invia un'altra / Send another</button>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('publicBooking', () => ({
+                BASE_URL: 'http://localhost:3000',
+                loading: false,
+                submitted: false,
+                errorMessage: '',
+                today: new Date().toISOString().split('T')[0],
+
+                form: {
+                    guestName: '',
+                    email: '',
+                    checkIn: new Date().toISOString().split('T')[0],
+                    checkOut: '',
+                    presentation: ''
+                },
+
+                async sendRequest() {
+                    if (!this.form.guestName || !this.form.email || !this.form.checkIn || !this.form.checkOut) {
+                        this.errorMessage = "Missing fields / Campi mancanti";
+                        return;
+                    }
+
+                    // Validazione email base
+                    if (!this.form.email.includes('@')) {
+                        this.errorMessage = "Email non valida / Invalid email";
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.errorMessage = '';
+
+                    try {
+                        const payload = {
+                            name: this.form.guestName,
+                            email: this.form.email,
+                            fromDate: this.form.checkIn,
+                            toDate: this.form.checkOut,
+                            proposal: this.form.presentation
+                        };
+                        const res = await fetch(`${this.BASE_URL}/residency/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const data = await res.json();
+
+                        if (!res.ok) {
+                            throw new Error(data.message || "Server Error");
+                        }
+
+                        this.submitted = true;
+                    } catch (e) {
+                        this.errorMessage = "Error: " + e.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                resetForm() {
+                    this.submitted = false;
+                    this.errorMessage = '';
+                    this.form = {
+                        guestName: '',
+                        email: '',
+                        checkIn: this.today,
+                        checkOut: '',
+                        presentation: ''
+                    };
+                }
+            }));
+        });
+    </script>
+</body>
+
+</html>

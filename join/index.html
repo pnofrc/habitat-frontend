@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesseramento - Habitat / Distretto A</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #f4f4f4;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border: 2px solid #000;
+            box-shadow: 10px 10px 0px #000;
+            max-width: 750px;
+            width: 100%;
+            margin: 40px 0;
+        }
+
+        h1 {
+            border-bottom: 4px solid #000;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-transform: uppercase;
+            font-size: 2em;
+        }
+
+        h2 {
+            font-size: 1em;
+            text-transform: uppercase;
+            background: #000;
+            color: #fff;
+            display: inline-block;
+            padding: 5px 10px;
+            margin-top: 30px;
+            margin-bottom: 5px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 0.85em;
+            text-transform: uppercase;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 2px solid #000;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 1rem;
+            border-radius: 0;
+        }
+
+        .help-text {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin: 0;
+            transform: scale(1.2);
+        }
+
+        .payment-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px dashed #000;
+            margin-top: 10px;
+            font-size: 0.85em;
+        }
+
+        .btn-send {
+            background: black;
+            color: white;
+            padding: 20px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 40px;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-transform: uppercase;
+        }
+
+        .error-banner {
+            background: #ff0000;
+            color: #fff;
+            padding: 15px;
+            border: 2px solid #000;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body x-data="membershipForm" x-cloak>
+
+    <div class="card">
+        <template x-if="!submitted">
+            <div>
+                <h1>DOMANDA DI ISCRIZIONE</h1>
+                <p>Quota associativa annuale: <b>&euro; 10,00</b></p>
+
+                <template x-if="errorMessage">
+                    <div class="error-banner" x-text="errorMessage"></div>
+                </template>
+
+                <h2>1. ANAGRAFICA</h2>
+                <label>Email *</label><input type="email" x-model="form.email">
+                <div class="grid">
+                    <div><label>Cognome *</label><input type="text" x-model="form.cognome"></div>
+                    <div><label>Nome *</label><input type="text" x-model="form.nome"></div>
+                </div>
+                <label>Data di nascita *</label><input type="date" x-model="form.dataNascita">
+                <div class="grid">
+                    <div><label>Città di nascita *</label><input type="text" x-model="form.luogoNascita"></div>
+                    <div><label>Prov. *</label><input type="text" x-model="form.provNascita" maxlength="2"></div>
+                </div>
+                <label>Paese di nascita *</label><input type="text" x-model="form.paeseNascita">
+                <label>Cod. Fiscale / VAT Number *</label><input type="text" x-model="form.codiceFiscale"
+                    style="text-transform:uppercase">
+
+                <h2>2. RESIDENZA & RECAPITI</h2>
+                <label>Indirizzo *</label><input type="text" x-model="form.indirizzo">
+                <div class="grid">
+                    <div><label>CAP *</label><input type="text" x-model="form.cap"></div>
+                    <div><label>Città *</label><input type="text" x-model="form.cittaResidenza"></div>
+                </div>
+                <div class="grid">
+                    <div><label>Prov. *</label><input type="text" x-model="form.provResidenza" maxlength="2"></div>
+                    <div><label>Paese *</label><input type="text" x-model="form.paeseResidenza"></div>
+                </div>
+                <label>Cellulare / Tel. *</label><input type="text" x-model="form.telefono">
+
+                <h2>3. INTERESSI</h2>
+                <label>Sono interessato/a a... *</label>
+                <template x-for="opt in interessiOpts">
+                    <label class="checkbox-group">
+                        <input type="checkbox" :value="opt" x-model="form.interessi"> <span x-text="opt"></span>
+                    </label>
+                </template>
+
+                <h2>4. PAGAMENTO</h2>
+                <label>Metodo di pagamento *</label>
+                <select x-model="form.metodoPagamento">
+                    <option value="">Scegli...</option>
+                    <option value="HabitatPaypal">HABITAT >> PAYPAL</option>
+                    <option value="HabitatIban">HABITAT >> IBAN</option>
+                    <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
+                    <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
+                    <option value="Cash">CONTANTI / CASH</option>
+                </select>
+                <div class="payment-box" x-show="form.metodoPagamento">
+                    <p x-show="form.metodoPagamento.includes('Habitat')">IBAN: IT88Q0623023704000030225469</p>
+                    <p x-show="form.metodoPagamento.includes('Distretto')">IBAN: IT80B0303223701010000636901</p>
+                    <p>Causale: "Quota associativa [Tuo Nome]"</p>
+                </div>
+
+                <h2>CONDIZIONI</h2>
+                <label class="checkbox-group">
+                    <input type="checkbox" x-model="form.privacy"> <span>Acconsento al trattamento dati
+                        (obbligatorio)</span>
+                </label>
+                <label class="checkbox-group">
+                    <input type="checkbox" x-model="form.adesione"> <span>Aderisco all'Associazione
+                        (obbligatorio)</span>
+                </label>
+
+                <button class="btn-send" @click="submit()" :disabled="loading"
+                    x-text="loading ? 'INVIO...' : 'INVIA DOMANDA'"></button>
+            </div>
+        </template>
+
+        <template x-if="submitted">
+            <div style="text-align: center; padding: 40px;">
+                <h1>DOMANDA RICEVUTA</h1>
+                <p>Grazie per esserti unito a noi.</p>
+                <button class="btn-send" style="width:auto; padding:10px 30px" @click="location.reload()">Invia
+                    un'altra</button>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('membershipForm', () => ({
+                BASE_URL: 'http://localhost:3000',
+                loading: false,
+                submitted: false,
+                errorMessage: '',
+                interessiOpts: ['Habitat / Ca\' dei Monti', 'DAWE / Cena itinerante', 'Quazar - Coworking', 'Laboratori / Workshop'],
+                form: {
+                    email: '', cognome: '', nome: '', dataNascita: '', luogoNascita: '', provNascita: '', paeseNascita: '', codiceFiscale: '',
+                    indirizzo: '', cap: '', cittaResidenza: '', provResidenza: '', paeseResidenza: '', telefono: '',
+                    interessi: [], metodoPagamento: '', privacy: false, adesione: false
+                },
+                async submit() {
+                    const required = ['email', 'cognome', 'nome', 'dataNascita', 'luogoNascita', 'provNascita',
+                        'paeseNascita', 'codiceFiscale', 'indirizzo', 'cap', 'cittaResidenza',
+                        'provResidenza', 'paeseResidenza', 'telefono', 'metodoPagamento'];
+                    if (required.some(k => !this.form[k])) {
+                        this.errorMessage = "Compila tutti i campi obbligatori";
+                        return;
+                    }
+                    if (!this.form.privacy || !this.form.adesione) {
+                        this.errorMessage = "Accetta le condizioni obbligatorie";
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.errorMessage = '';
+
+                    const interestiMap = {
+                        'Habitat / Ca\' dei Monti': 'habitat',
+                        'DAWE / Cena itinerante': 'dawe',
+                        'Quazar - Coworking': 'quazar',
+                        'Laboratori / Workshop': 'workshops'
+                    };
+                    const interests = {};
+                    this.form.interessi.forEach(i => {
+                        const key = interestiMap[i];
+                        if (key) interests[key] = true;
+                    });
+
+                    const payload = {
+                        email: this.form.email,
+                        surname: this.form.cognome,
+                        name: this.form.nome,
+                        birthDate: this.form.dataNascita,
+                        birthPlace: this.form.luogoNascita,
+                        birthProvince: this.form.provNascita,
+                        birthCountry: this.form.paeseNascita,
+                        vatNumber: this.form.codiceFiscale,
+                        address: this.form.indirizzo,
+                        zipcode: this.form.cap,
+                        city: this.form.cittaResidenza,
+                        province: this.form.provResidenza,
+                        country: this.form.paeseResidenza,
+                        phoneNumber: this.form.telefono,
+                        interests,
+                        paymentMethod: this.form.metodoPagamento,
+                        acceptPrivacy: this.form.privacy,
+                        acceptStatute: this.form.adesione
+                    };
+
+                    try {
+                        const res = await fetch(`${this.BASE_URL}/membership/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (res.status === 401) {
+                            this.errorMessage = "Errore di configurazione server: accesso negato a risorsa pubblica.";
+                            return;
+                        }
+
+                        if (!res.ok) throw new Error("Errore durante l'invio dei dati.");
+
+                        this.submitted = true;
+                    } catch (e) {
+                        this.errorMessage = e.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }));
+        });
+    </script>
+</body>
+
+</html>
