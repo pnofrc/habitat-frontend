@@ -31,6 +31,37 @@
             width: 100%;
         }
 
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .lang-toggle {
+            display: flex;
+            border: 2px solid #000;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75em;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .lang-toggle button {
+            padding: 4px 8px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: inherit;
+        }
+
+        .lang-toggle button.active {
+            background: #000;
+            color: #fff;
+        }
+
         h2 {
             border-bottom: 2px solid #000;
             padding-bottom: 10px;
@@ -108,35 +139,43 @@
     <div class="card">
         <template x-if="!submitted">
             <div>
-                <h2>Habitat Residencies Form</h2>
+                <div class="card-header">
+                    <h2 x-text="lang === 'it' ? 'Modulo Residenze Habitat' : 'Habitat Residencies Form'"></h2>
+                    <div class="lang-toggle">
+                        <button @click="lang = 'it'" :class="lang === 'it' && 'active'">IT</button>
+                        <button @click="lang = 'en'" :class="lang === 'en' && 'active'">EN</button>
+                    </div>
+                </div>
 
                 <template x-if="errorMessage">
                     <div class="error-banner" x-text="errorMessage"></div>
                 </template>
 
-                <label>Hello</label>
-                <input type="text" x-model="form.guestName" placeholder="Come ti chiami? What's your name?">
+                <label x-text="lang === 'it' ? 'Ciao' : 'Hello'"></label>
+                <input type="text" x-model="form.guestName"
+                    :placeholder="lang === 'it' ? 'Come ti chiami?' : 'What\'s your name?'">
 
                 <label>Email</label>
-                <input type="email" x-model="form.email" placeholder="La tua email / Your email address">
+                <input type="email" x-model="form.email"
+                    :placeholder="lang === 'it' ? 'La tua email' : 'Your email address'">
 
                 <div style="display: flex; gap: 15px;">
                     <div style="flex: 1;">
-                        <label>Da - From</label>
+                        <label x-text="lang === 'it' ? 'Da' : 'From'"></label>
                         <input type="date" x-model="form.checkIn" :min="today">
                     </div>
                     <div style="flex: 1;">
-                        <label>A - To</label>
+                        <label x-text="lang === 'it' ? 'A' : 'To'"></label>
                         <input type="date" x-model="form.checkOut" :min="form.checkIn">
                     </div>
                 </div>
 
-                <label>Proposta - Proposal</label>
+                <label x-text="lang === 'it' ? 'Proposta' : 'Proposal'"></label>
                 <textarea x-model="form.presentation" rows="4"
-                    placeholder="Dicci tutto... Tell us everything..."></textarea>
+                    :placeholder="lang === 'it' ? 'Dicci tutto...' : 'Tell us everything...'"></textarea>
 
                 <button class="btn-send" @click="sendRequest()" :disabled="loading"
-                    x-text="loading ? 'SENDING...' : 'SEND REQUEST'">
+                    x-text="loading ? (lang === 'it' ? 'INVIO...' : 'SENDING...') : (lang === 'it' ? 'INVIA RICHIESTA' : 'SEND REQUEST')">
                 </button>
             </div>
         </template>
@@ -144,9 +183,15 @@
         <template x-if="submitted">
             <div class="success-msg">
                 <h1 style="font-size: 3em;">:)</h1>
-                <p><strong>Grazie!</strong> La richiesta è stata inviata.</p>
-                <p style="font-size: 0.9em; color: #444;">Ti risponderemo al più presto via email.</p>
-                <button class="btn-send" @click="resetForm()">Invia un'altra / Send another</button>
+                <p>
+                    <strong x-text="lang === 'it' ? 'Grazie!' : 'Thanks!'"></strong>
+                    <span x-text="lang === 'it' ? 'La richiesta è stata inviata.' : 'Your request has been sent.'"></span>
+                </p>
+                <p style="font-size: 0.9em; color: #444;"
+                    x-text="lang === 'it' ? 'Ti risponderemo al più presto via email.' : 'We\'ll get back to you by email shortly.'">
+                </p>
+                <button class="btn-send" @click="resetForm()"
+                    x-text="lang === 'it' ? 'Invia un\'altra' : 'Send another'"></button>
             </div>
         </template>
     </div>
@@ -158,6 +203,7 @@
                 loading: false,
                 submitted: false,
                 errorMessage: '',
+                lang: 'it',
                 today: new Date().toISOString().split('T')[0],
 
                 form: {
@@ -170,13 +216,12 @@
 
                 async sendRequest() {
                     if (!this.form.guestName || !this.form.email || !this.form.checkIn || !this.form.checkOut) {
-                        this.errorMessage = "Missing fields / Campi mancanti";
+                        this.errorMessage = this.lang === 'it' ? "Campi mancanti" : "Missing fields";
                         return;
                     }
 
-                    // Validazione email base
                     if (!this.form.email.includes('@')) {
-                        this.errorMessage = "Email non valida / Invalid email";
+                        this.errorMessage = this.lang === 'it' ? "Email non valida" : "Invalid email";
                         return;
                     }
 

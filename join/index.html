@@ -32,6 +32,37 @@
             margin: 40px 0;
         }
 
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .lang-toggle {
+            display: flex;
+            border: 2px solid #000;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75em;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .lang-toggle button {
+            padding: 4px 8px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: inherit;
+        }
+
+        .lang-toggle button.active {
+            background: #000;
+            color: #fff;
+        }
+
         h1 {
             border-bottom: 4px solid #000;
             padding-bottom: 10px;
@@ -137,52 +168,92 @@
     <div class="card">
         <template x-if="!submitted">
             <div>
-                <h1>DOMANDA DI ISCRIZIONE</h1>
-                <p>Quota associativa annuale: <b>&euro; 10,00</b></p>
+                <div class="card-header">
+                    <h1 x-text="lang === 'it' ? 'DOMANDA DI ISCRIZIONE' : 'MEMBERSHIP APPLICATION'"></h1>
+                    <div class="lang-toggle">
+                        <button @click="lang = 'it'" :class="lang === 'it' && 'active'">IT</button>
+                        <button @click="lang = 'en'" :class="lang === 'en' && 'active'">EN</button>
+                    </div>
+                </div>
+                <p>
+                    <span x-text="lang === 'it' ? 'Quota associativa annuale:' : 'Annual membership fee:'"></span>
+                    <b>&euro; 10,00</b>
+                </p>
 
                 <template x-if="errorMessage">
                     <div class="error-banner" x-text="errorMessage"></div>
                 </template>
 
-                <h2>1. ANAGRAFICA</h2>
+                <h2 x-text="lang === 'it' ? '1. ANAGRAFICA' : '1. PERSONAL INFO'"></h2>
                 <label>Email *</label><input type="email" x-model="form.email">
                 <div class="grid">
-                    <div><label>Cognome *</label><input type="text" x-model="form.cognome"></div>
-                    <div><label>Nome *</label><input type="text" x-model="form.nome"></div>
+                    <div>
+                        <label x-text="lang === 'it' ? 'Cognome *' : 'Surname *'"></label>
+                        <input type="text" x-model="form.cognome">
+                    </div>
+                    <div>
+                        <label x-text="lang === 'it' ? 'Nome *' : 'Name *'"></label>
+                        <input type="text" x-model="form.nome">
+                    </div>
                 </div>
-                <label>Data di nascita *</label><input type="date" x-model="form.dataNascita">
+                <label x-text="lang === 'it' ? 'Data di nascita *' : 'Date of birth *'"></label>
+                <input type="date" x-model="form.dataNascita">
                 <div class="grid">
-                    <div><label>Città di nascita *</label><input type="text" x-model="form.luogoNascita"></div>
-                    <div><label>Prov. *</label><input type="text" x-model="form.provNascita" maxlength="2"></div>
+                    <div>
+                        <label x-text="lang === 'it' ? 'Città di nascita *' : 'City of birth *'"></label>
+                        <input type="text" x-model="form.luogoNascita">
+                    </div>
+                    <div>
+                        <label x-text="lang === 'it' ? 'Prov. *' : 'Province *'"></label>
+                        <input type="text" x-model="form.provNascita" maxlength="2">
+                    </div>
                 </div>
-                <label>Paese di nascita *</label><input type="text" x-model="form.paeseNascita">
-                <label>Cod. Fiscale / VAT Number *</label><input type="text" x-model="form.codiceFiscale"
-                    style="text-transform:uppercase">
+                <label x-text="lang === 'it' ? 'Paese di nascita *' : 'Country of birth *'"></label>
+                <input type="text" x-model="form.paeseNascita">
 
-                <h2>2. RESIDENZA & RECAPITI</h2>
-                <label>Indirizzo *</label><input type="text" x-model="form.indirizzo">
-                <div class="grid">
-                    <div><label>CAP *</label><input type="text" x-model="form.cap"></div>
-                    <div><label>Città *</label><input type="text" x-model="form.cittaResidenza"></div>
+                <div x-show="lang === 'it'">
+                    <label>Cod. Fiscale / VAT Number *</label>
+                    <input type="text" x-model="form.codiceFiscale" style="text-transform:uppercase">
                 </div>
-                <div class="grid">
-                    <div><label>Prov. *</label><input type="text" x-model="form.provResidenza" maxlength="2"></div>
-                    <div><label>Paese *</label><input type="text" x-model="form.paeseResidenza"></div>
-                </div>
-                <label>Cellulare / Tel. *</label><input type="text" x-model="form.telefono">
 
-                <h2>3. INTERESSI</h2>
-                <label>Sono interessato/a a... *</label>
+                <h2 x-text="lang === 'it' ? '2. RESIDENZA & RECAPITI' : '2. ADDRESS & CONTACTS'"></h2>
+                <label x-text="lang === 'it' ? 'Indirizzo *' : 'Address *'"></label>
+                <input type="text" x-model="form.indirizzo">
+                <div class="grid">
+                    <div>
+                        <label x-text="lang === 'it' ? 'CAP *' : 'ZIP Code *'"></label>
+                        <input type="text" x-model="form.cap">
+                    </div>
+                    <div>
+                        <label x-text="lang === 'it' ? 'Città *' : 'City *'"></label>
+                        <input type="text" x-model="form.cittaResidenza">
+                    </div>
+                </div>
+                <div class="grid">
+                    <div>
+                        <label x-text="lang === 'it' ? 'Prov. *' : 'Province *'"></label>
+                        <input type="text" x-model="form.provResidenza" maxlength="2">
+                    </div>
+                    <div>
+                        <label x-text="lang === 'it' ? 'Paese *' : 'Country *'"></label>
+                        <input type="text" x-model="form.paeseResidenza">
+                    </div>
+                </div>
+                <label x-text="lang === 'it' ? 'Cellulare / Tel. *' : 'Phone *'"></label>
+                <input type="text" x-model="form.telefono">
+
+                <h2 x-text="lang === 'it' ? '3. INTERESSI' : '3. INTERESTS'"></h2>
+                <label x-text="lang === 'it' ? 'Sono interessato/a a... *' : 'I\'m interested in... *'"></label>
                 <template x-for="opt in interessiOpts">
                     <label class="checkbox-group">
                         <input type="checkbox" :value="opt" x-model="form.interessi"> <span x-text="opt"></span>
                     </label>
                 </template>
 
-                <h2>4. PAGAMENTO</h2>
-                <label>Metodo di pagamento *</label>
+                <h2 x-text="lang === 'it' ? '4. PAGAMENTO' : '4. PAYMENT'"></h2>
+                <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
                 <select x-model="form.metodoPagamento">
-                    <option value="">Scegli...</option>
+                    <option value="" x-text="lang === 'it' ? 'Scegli...' : 'Choose...'"></option>
                     <option value="HabitatPaypal">HABITAT >> PAYPAL</option>
                     <option value="HabitatIban">HABITAT >> IBAN</option>
                     <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
@@ -192,30 +263,34 @@
                 <div class="payment-box" x-show="form.metodoPagamento">
                     <p x-show="form.metodoPagamento.includes('Habitat')">IBAN: IT88Q0623023704000030225469</p>
                     <p x-show="form.metodoPagamento.includes('Distretto')">IBAN: IT80B0303223701010000636901</p>
-                    <p>Causale: "Quota associativa [Tuo Nome]"</p>
+                    <p x-text="lang === 'it'
+                        ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
+                        : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
                 </div>
 
-                <h2>CONDIZIONI</h2>
+                <h2 x-text="lang === 'it' ? 'CONDIZIONI' : 'CONDITIONS'"></h2>
                 <label class="checkbox-group">
-                    <input type="checkbox" x-model="form.privacy"> <span>Acconsento al trattamento dati
-                        (obbligatorio)</span>
+                    <input type="checkbox" x-model="form.privacy">
+                    <span x-text="lang === 'it' ? 'Acconsento al trattamento dati (obbligatorio)' : 'I consent to data processing (required)'"></span>
                 </label>
                 <label class="checkbox-group">
-                    <input type="checkbox" x-model="form.adesione"> <span>Aderisco all'Associazione
-                        (obbligatorio)</span>
+                    <input type="checkbox" x-model="form.adesione">
+                    <span x-text="lang === 'it' ? 'Aderisco all\'Associazione (obbligatorio)' : 'I join the Association (required)'"></span>
                 </label>
 
                 <button class="btn-send" @click="submit()" :disabled="loading"
-                    x-text="loading ? 'INVIO...' : 'INVIA DOMANDA'"></button>
+                    x-text="loading
+                        ? (lang === 'it' ? 'INVIO...' : 'SUBMITTING...')
+                        : (lang === 'it' ? 'INVIA DOMANDA' : 'SUBMIT APPLICATION')"></button>
             </div>
         </template>
 
         <template x-if="submitted">
             <div style="text-align: center; padding: 40px;">
-                <h1>DOMANDA RICEVUTA</h1>
-                <p>Grazie per esserti unito a noi.</p>
-                <button class="btn-send" style="width:auto; padding:10px 30px" @click="location.reload()">Invia
-                    un'altra</button>
+                <h1 x-text="lang === 'it' ? 'DOMANDA RICEVUTA' : 'APPLICATION RECEIVED'"></h1>
+                <p x-text="lang === 'it' ? 'Grazie per esserti unito a noi.' : 'Thank you for joining us.'"></p>
+                <button class="btn-send" style="width:auto; padding:10px 30px" @click="location.reload()"
+                    x-text="lang === 'it' ? 'Invia un\'altra' : 'Send another'"></button>
             </div>
         </template>
     </div>
@@ -227,6 +302,7 @@
                 loading: false,
                 submitted: false,
                 errorMessage: '',
+                lang: 'it',
                 interessiOpts: ['Habitat / Ca\' dei Monti', 'DAWE / Cena itinerante', 'Quazar - Coworking', 'Laboratori / Workshop'],
                 form: {
                     email: '', cognome: '', nome: '', dataNascita: '', luogoNascita: '', provNascita: '', paeseNascita: '', codiceFiscale: '',
@@ -235,14 +311,20 @@
                 },
                 async submit() {
                     const required = ['email', 'cognome', 'nome', 'dataNascita', 'luogoNascita', 'provNascita',
-                        'paeseNascita', 'codiceFiscale', 'indirizzo', 'cap', 'cittaResidenza',
+                        'paeseNascita', 'indirizzo', 'cap', 'cittaResidenza',
                         'provResidenza', 'paeseResidenza', 'telefono', 'metodoPagamento'];
+                    if (this.lang === 'it') required.push('codiceFiscale');
+
                     if (required.some(k => !this.form[k])) {
-                        this.errorMessage = "Compila tutti i campi obbligatori";
+                        this.errorMessage = this.lang === 'it'
+                            ? "Compila tutti i campi obbligatori"
+                            : "Please fill in all required fields";
                         return;
                     }
                     if (!this.form.privacy || !this.form.adesione) {
-                        this.errorMessage = "Accetta le condizioni obbligatorie";
+                        this.errorMessage = this.lang === 'it'
+                            ? "Accetta le condizioni obbligatorie"
+                            : "Please accept the required conditions";
                         return;
                     }
 
@@ -269,7 +351,7 @@
                         birthPlace: this.form.luogoNascita,
                         birthProvince: this.form.provNascita,
                         birthCountry: this.form.paeseNascita,
-                        vatNumber: this.form.codiceFiscale,
+                        vatNumber: this.lang === 'it' ? this.form.codiceFiscale : '',
                         address: this.form.indirizzo,
                         zipcode: this.form.cap,
                         city: this.form.cittaResidenza,
@@ -290,11 +372,17 @@
                         });
 
                         if (res.status === 401) {
-                            this.errorMessage = "Errore di configurazione server: accesso negato a risorsa pubblica.";
+                            this.errorMessage = this.lang === 'it'
+                                ? "Errore di configurazione server: accesso negato a risorsa pubblica."
+                                : "Server configuration error: access denied to public resource.";
                             return;
                         }
 
-                        if (!res.ok) throw new Error("Errore durante l'invio dei dati.");
+                        if (!res.ok) throw new Error(
+                            this.lang === 'it'
+                                ? "Errore durante l'invio dei dati."
+                                : "Error submitting the form."
+                        );
 
                         this.submitted = true;
                     } catch (e) {

@@ -232,7 +232,16 @@ document.addEventListener('alpine:init', () => {
             else { alert("Login fallito: credenziali non valide"); }
         },
 
-        logout() { this.token = ''; localStorage.removeItem('token'); },
+        async logout() {
+            try {
+                await fetch(`${this.BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+            } catch (e) { /* logout should always succeed client-side */ }
+            this.token = '';
+            localStorage.removeItem('token');
+        },
 
         openCreate() {
             this.editingItem = {
