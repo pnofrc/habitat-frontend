@@ -169,6 +169,7 @@
         <template x-if="!submitted">
             <div>
                 <div class="card-header">
+                    <img src="https://habitattt.it/images/h.logo.png" alt="Habitat" style="height:10vh;flex-shrink:0;padding-left: 2%;">
                     <h1 x-text="lang === 'it' ? 'DOMANDA DI ISCRIZIONE' : 'MEMBERSHIP APPLICATION'"></h1>
                     <div class="lang-toggle">
                         <button @click="lang = 'it'" :class="lang === 'it' && 'active'">IT</button>

@@ -189,6 +189,7 @@
     <template x-if="!token">
         <div style="display: flex; height: 100vh; align-items: center; justify-content: center;">
             <div class="logincard" @keydown.enter="login">
+                <img src="https://habitattt.it/images/h.logo.png" alt="Habitat" style="height: 40px; margin-bottom: 15px;">
                 <label>Username</label><input type="text" x-model="loginData.username">
                 <label>Password</label><input type="password" x-model="loginData.password">
                 <button class="btn-blk" @click="login">ENTRA</button>
@@ -199,6 +200,7 @@
     <template x-if="token">
         <main>
             <nav>
+                <img src="https://habitattt.it/images/h.logo.png" alt="Habitat" style="height: 28px; margin-right: 10px;">
                 <button :class="view === 'expenses' && 'active'" @click="setView('expenses')">Flow Cassa</button>
                 <button :class="view === 'guests' && 'active'" @click="setView('guests')">Ospitalita'</button>
                 <button :class="view === 'bookings' && 'active'" @click="setView('bookings')">Prenotazioni</button>
