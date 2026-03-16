@@ -29,8 +29,48 @@ document.addEventListener('alpine:init', () => {
         stats: { totalIn: 0, totalOut: 0, balance: 0 },
         loginData: { username: '', password: '' },
 
+        // User management state
+        currentUser: null,
+        usersList: [],
+        editingUser: null,
+
+        get canWrite() {
+            return this.currentUser && this.currentUser.role === 'admin';
+        },
+
+        get visibleTabs() {
+            if (!this.currentUser) return [];
+            const allTabs = ['expenses', 'guests', 'bookings', 'residency', 'membership'];
+            if (this.currentUser.role === 'admin') return [...allTabs, 'users'];
+            if (this.currentUser.role === 'reader') return allTabs;
+            // reader_limited
+            return (this.currentUser.allowedTabs || []);
+        },
+
         async init() {
-            if (this.token) await this.fetchData();
+            if (this.token) {
+                const ok = await this.fetchCurrentUser();
+                if (ok) await this.fetchData();
+            }
+        },
+
+        async fetchCurrentUser() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.status === 401) { this.logout(); return false; }
+                if (!res.ok) return false;
+                this.currentUser = await res.json();
+                // Ensure current view is allowed
+                if (!this.visibleTabs.includes(this.view)) {
+                    this.view = this.visibleTabs[0] || 'expenses';
+                }
+                return true;
+            } catch (e) {
+                console.error(e);
+                return false;
+            }
         },
 
         showConfirm(message) {
@@ -46,12 +86,16 @@ document.addEventListener('alpine:init', () => {
         },
 
         async setView(v) {
+            if (!this.visibleTabs.includes(v)) {
+                v = this.visibleTabs[0] || 'expenses';
+            }
             this.view = v;
             this.selectedGuest = null;
             this.editingItem = null;
             this.editingBooking = null;
             this.editingResidency = null;
             this.editingGuest = null;
+            this.editingUser = null;
             this.confirmModal = null;
             await this.fetchData();
         },
@@ -59,6 +103,11 @@ document.addEventListener('alpine:init', () => {
         async fetchData() {
             if (!this.token) return;
             try {
+                if (this.view === 'users') {
+                    await this.fetchUsers();
+                    return;
+                }
+
                 const res = await fetch(`${this.BASE_URL}/${this.view}/`, {
                     headers: { 'Authorization': `Bearer ${this.token}` }
                 });
@@ -196,9 +245,9 @@ document.addEventListener('alpine:init', () => {
             const today = new Date().setHours(0, 0, 0, 0);
             const start = new Date(b.checkIn).setHours(0, 0, 0, 0);
             const end = new Date(b.checkOut).setHours(0, 0, 0, 0);
-            if (today < start) return '🔜 Futuro';
-            if (today > end) return '✅ Concluso';
-            return '🏠 In corso';
+            if (today < start) return 'Futuro';
+            if (today > end) return 'Concluso';
+            return 'In corso';
         },
 
         openCreateGuest() {
@@ -271,7 +320,12 @@ document.addEventListener('alpine:init', () => {
         async login() {
             const res = await fetch(`${this.BASE_URL}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.loginData) });
             const d = await res.json();
-            if (d.token) { this.token = d.token; localStorage.setItem('token', d.token); await this.fetchData(); }
+            if (d.token) {
+                this.token = d.token;
+                localStorage.setItem('token', d.token);
+                await this.fetchCurrentUser();
+                await this.fetchData();
+            }
             else { alert("Login fallito: credenziali non valide"); }
         },
 
@@ -283,6 +337,7 @@ document.addEventListener('alpine:init', () => {
                 });
             } catch (e) { /* logout should always succeed client-side */ }
             this.token = '';
+            this.currentUser = null;
             localStorage.removeItem('token');
         },
 
@@ -430,6 +485,72 @@ document.addEventListener('alpine:init', () => {
                     await this.fetchData();
                 } catch (e) { alert(e.message); }
             }
+        },
+
+        // ── User Management ──
+
+        async fetchUsers() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/users/`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore caricamento utenti");
+                this.usersList = await res.json();
+            } catch (e) { alert(e.message); }
+        },
+
+        openCreateUser() {
+            this.editingUser = { username: '', password: '', email: '', role: 'reader', allowedTabs: [], active: true };
+        },
+
+        openEditUser(user) {
+            this.editingUser = { ...user, password: '', allowedTabs: user.allowedTabs || [] };
+        },
+
+        toggleTab(tab) {
+            if (!this.editingUser) return;
+            const idx = this.editingUser.allowedTabs.indexOf(tab);
+            if (idx === -1) {
+                this.editingUser.allowedTabs.push(tab);
+            } else {
+                this.editingUser.allowedTabs.splice(idx, 1);
+            }
+        },
+
+        async saveUser() {
+            try {
+                const isUpdate = !!this.editingUser.id;
+                const payload = { ...this.editingUser };
+                // Don't send empty password on update
+                if (isUpdate && !payload.password) delete payload.password;
+                const url = isUpdate ? `${this.BASE_URL}/users/${this.editingUser.id}` : `${this.BASE_URL}/users/`;
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore salvataggio utente");
+                }
+                this.editingUser = null;
+                await this.fetchUsers();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteUser(id) {
+            if (!await this.showConfirm("Eliminare questo utente?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/users/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore eliminazione utente");
+                }
+                await this.fetchUsers();
+            } catch (e) { alert(e.message); }
         }
     }));
 });

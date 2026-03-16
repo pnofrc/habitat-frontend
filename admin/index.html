@@ -203,6 +203,31 @@
             margin: 0 5px;
             padding: 8px 20px;
         }
+
+        .role-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border: 1px solid currentColor;
+            text-transform: uppercase;
+        }
+
+        .role-admin { color: #c53030; }
+        .role-reader { color: #2b6cb0; }
+        .role-reader_limited { color: #b7791f; }
+
+        .tab-chip {
+            display: inline-block;
+            font-size: 10px;
+            padding: 1px 5px;
+            border: 1px solid #ccc;
+            margin: 1px;
+        }
+
+        .user-info {
+            font-size: 11px;
+            color: #666;
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -225,19 +250,24 @@
             <nav>
                 <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
                     style="height: 28px; margin-right: 10px;">
-                <button :class="view === 'expenses' && 'active'" @click="setView('expenses')">Flow Cassa</button>
-                <button :class="view === 'guests' && 'active'" @click="setView('guests')">Ospitalita'</button>
-                <button :class="view === 'bookings' && 'active'" @click="setView('bookings')">Prenotazioni</button>
-                <button :class="view === 'residency' && 'active'" @click="setView('residency')">Residenze <span x-show="residencyCount > 0" x-text="'(' + residencyCount + ')'"></span></button>
-                <button :class="view === 'membership' && membershipTab === 'requests' && 'active'"
+                <button x-show="visibleTabs.includes('expenses')" :class="view === 'expenses' && 'active'" @click="setView('expenses')">Flow Cassa</button>
+                <button x-show="visibleTabs.includes('guests')" :class="view === 'guests' && 'active'" @click="setView('guests')">Ospitalita'</button>
+                <button x-show="visibleTabs.includes('bookings')" :class="view === 'bookings' && 'active'" @click="setView('bookings')">Prenotazioni</button>
+                <button x-show="visibleTabs.includes('residency')" :class="view === 'residency' && 'active'" @click="setView('residency')">Residenze <span x-show="residencyCount > 0" x-text="'(' + residencyCount + ')'"></span></button>
+                <button x-show="visibleTabs.includes('membership')" :class="view === 'membership' && membershipTab === 'requests' && 'active'"
                     @click="membershipTab = 'requests'; setView('membership')">Richiesta Tessere <span x-show="membershipRequestCount > 0" x-text="'(' + membershipRequestCount + ')'"></span></button>
-                <button :class="view === 'membership' && membershipTab === 'confirmed' && 'active'"
+                <button x-show="visibleTabs.includes('membership')" :class="view === 'membership' && membershipTab === 'confirmed' && 'active'"
                     @click="membershipTab = 'confirmed'; setView('membership')">Tesserati <span x-show="membershipConfirmedCount > 0" x-text="'(' + membershipConfirmedCount + ')'"></span></button>
-                <button @click="logout" style="margin-left: auto; color: red;">LOGOUT</button>
+                <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'" @click="setView('users')">Gestione Utenti</button>
+                <span style="margin-left: auto; display: flex; align-items: center;">
+                    <span class="user-info" x-show="currentUser" x-text="currentUser?.username"></span>
+                    <button @click="logout" style="color: red;">LOGOUT</button>
+                </span>
             </nav>
 
             <div class="container">
 
+                <!-- MEMBERSHIP -->
                 <div x-show="view === 'membership'">
                     <div class="card">
                         <div
@@ -252,7 +282,7 @@
                                 <tr>
                                     <th>Socio</th>
                                     <th>Email</th>
-                                    <th>Città</th>
+                                    <th>Citta</th>
                                     <th>Interessi</th>
                                     <th>Pagamento</th>
                                     <th></th>
@@ -272,9 +302,9 @@
                                         </td>
                                         <td x-text="m.paymentMethod"></td>
                                         <td>
-                                            <span>
+                                            <span x-show="canWrite">
                                                 <button x-show="membershipTab === 'requests'" @click="confirmMembership(m)"
-                                                    class="btn-del" style="color:green">✓</button>
+                                                    class="btn-del" style="color:green">V</button>
                                                 <button @click="deleteItem(m.id)" class="btn-del">X</button>
                                             </span>
                                         </td>
@@ -302,7 +332,7 @@
                                         <td x-text="m.email"></td>
                                         <td x-text="formatDate(m.deletedAt)"></td>
                                         <td>
-                                            <button @click="restoreMembership(m)" class="btn-del" style="color:green" title="Ripristina">↩</button>
+                                            <button x-show="canWrite" @click="restoreMembership(m)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -312,19 +342,20 @@
                 </div>
 
 
+                <!-- EXPENSES -->
                 <div x-show="view === 'expenses'">
                     <div class="card" style="height: 180px;"><canvas id="expenseChart"></canvas></div>
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
-                        <div class="card" style="flex:1"><small>IN</small><br><b x-text="stats.totalIn + '€'"
+                        <div class="card" style="flex:1"><small>IN</small><br><b x-text="stats.totalIn + '&#x20AC;'"
                                 style="color:green"></b></div>
-                        <div class="card" style="flex:1"><small>OUT</small><br><b x-text="stats.totalOut + '€'"
+                        <div class="card" style="flex:1"><small>OUT</small><br><b x-text="stats.totalOut + '&#x20AC;'"
                                 style="color:red"></b></div>
-                        <div class="card" style="flex:1"><small>SALDO</small><br><b x-text="stats.balance + '€'"></b>
+                        <div class="card" style="flex:1"><small>SALDO</small><br><b x-text="stats.balance + '&#x20AC;'"></b>
                         </div>
                         <button
                             @click="window.open(`sheet-flow.html?filter=${filter}&habitante=${habitanteFilter}&type=${typeFilter}`, '_blank')"
                             class="card">
-                            APRI FOGLIO CALCOLO ↗
+                            APRI FOGLIO CALCOLO &#x2197;
                         </button>
                     </div>
 
@@ -362,7 +393,7 @@
                                     <option value="acquisto">Acquisto</option>
                                 </select>
                             </div>
-                            <button @click="openCreate()"
+                            <button x-show="canWrite" @click="openCreate()"
                                 style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+
                                 NUOVA VOCE</button>
                         </div>
@@ -371,27 +402,27 @@
                             <thead>
                                 <tr>
                                     <th>Titolo</th>
-                                    <th>€</th>
+                                    <th>&#x20AC;</th>
                                     <th>Data</th>
                                     <th>Tipo</th>
                                     <template x-if="filter === 'out'">
                                         <th style="background: #fdf2f2;">Pagato da</th>
                                     </template>
                                     <template x-if="filter === 'out'">
-                                        <th style="background: #fdf2f2;">Modalità</th>
+                                        <th style="background: #fdf2f2;">Modalita</th>
                                     </template>
                                     <template x-if="filter === 'out'">
                                         <th style="background: #fdf2f2;">Documento</th>
                                     </template>
-                                    <th></th>
+                                    <th x-show="canWrite"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-for="item in filteredItems" :key="item.id">
                                     <tr>
-                                        <td @click="openEdit(item)" x-text="item.title"
-                                            style="cursor:pointer; text-decoration:underline;"></td>
-                                        <td x-text="item.amount + '€'"
+                                        <td @click="canWrite && openEdit(item)" x-text="item.title"
+                                            :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"></td>
+                                        <td x-text="item.amount + '&#x20AC;'"
                                             :style="item.isExit ? 'color:red' : 'color:green'"></td>
                                         <td x-text="formatDate(item.date)"></td>
                                         <td x-text="item.expenseType || '-'"
@@ -409,7 +440,7 @@
                                                 style="font-size: 11px;"></td>
                                         </template>
 
-                                        <td><button @click="deleteItem(item.id)" class="btn-del">X</button></td>
+                                        <td x-show="canWrite"><button @click="deleteItem(item.id)" class="btn-del">X</button></td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -417,12 +448,13 @@
                     </div>
                 </div>
 
+                <!-- GUESTS -->
                 <div x-show="view === 'guests'">
                     <template x-if="!selectedGuest">
                         <div class="card">
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <button @click="openCreateGuest()" class="create">+ NUOVO OSPITE</button>
+                                <button x-show="canWrite" @click="openCreateGuest()" class="create">+ NUOVO OSPITE</button>
                             </div>
                             <table>
                                 <thead>
@@ -430,7 +462,7 @@
                                         <th>Ospite</th>
                                         <th>Stato</th>
                                         <th>In casa?</th>
-                                        <th></th>
+                                        <th x-show="canWrite"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -446,7 +478,7 @@
                                             </td>
                                             <td><span class="in-casa" x-show="isGuestPresent(g.id)">in casa.</span>
                                             </td>
-                                            <td><button @click="deleteItem(g.id)" class="btn-del">X</button></td>
+                                            <td x-show="canWrite"><button @click="deleteItem(g.id)" class="btn-del">X</button></td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -456,12 +488,12 @@
 
                     <template x-if="selectedGuest">
                         <div>
-                            <button @click="selectedGuest = null" style="margin-bottom:10px; cursor:pointer;">←
+                            <button @click="selectedGuest = null" style="margin-bottom:10px; cursor:pointer;">&#x2190;
                                 LISTA</button>
                             <div class="card">
                                 <div style="display:flex; justify-content: space-between;">
                                     <h2 x-text="selectedGuest.name" style="margin:0"></h2>
-                                    <button @click="editingGuest = {...selectedGuest}" style="cursor:pointer;">MODIFICA
+                                    <button x-show="canWrite" @click="editingGuest = {...selectedGuest}" style="cursor:pointer;">MODIFICA
                                         SCHEDA</button>
                                 </div>
                                 <p><small>EMAIL:</small> <span x-text="selectedGuest.email || '-'"></span></p>
@@ -496,9 +528,10 @@
 
                 </div>
 
+                <!-- BOOKINGS -->
                 <div x-show="view === 'bookings'">
                     <div class="card">
-                        <button @click="openCreateBooking()" class="create">+ NUOVA PRENOTAZIONE</button>
+                        <button x-show="canWrite" @click="openCreateBooking()" class="create">+ NUOVA PRENOTAZIONE</button>
                         <table>
                             <thead>
                                 <tr>
@@ -506,18 +539,18 @@
                                     <th>Stanza</th>
                                     <th>Da</th>
                                     <th>A</th>
-                                    <th></th>
+                                    <th x-show="canWrite"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-for="b in items" :key="b.id">
                                     <tr :class="b.room === 'da assegnare' && 'alert-red'">
-                                        <td @click="openEditBooking(b)" x-text="b.guest?.name || b.guest || 'N/A'"
-                                            style="cursor:pointer; text-decoration:underline;"></td>
+                                        <td @click="canWrite && openEditBooking(b)" x-text="b.guest?.name || b.guest || 'N/A'"
+                                            :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"></td>
                                         <td x-text="b.room"></td>
                                         <td x-text="formatDate(b.checkIn)"></td>
                                         <td x-text="formatDate(b.checkOut)"></td>
-                                        <td><button @click="deleteItem(b.id)" class="btn-del">X</button></td>
+                                        <td x-show="canWrite"><button @click="deleteItem(b.id)" class="btn-del">X</button></td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -525,9 +558,10 @@
                     </div>
                 </div>
 
+                <!-- RESIDENCY -->
                 <div x-show="view === 'residency'">
                     <div class="card">
-                        <button @click="openCreateResidency()" class="create">+ NUOVA RICHIESTA</button>
+                        <button x-show="canWrite" @click="openCreateResidency()" class="create">+ NUOVA RICHIESTA</button>
                         <table>
                             <thead>
                                 <tr>
@@ -536,7 +570,7 @@
                                     <th>Dal</th>
                                     <th>Al</th>
                                     <th>Proposta</th>
-                                    <th></th>
+                                    <th x-show="canWrite"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -547,9 +581,9 @@
                                         <td x-text="formatDate(r.fromDate)"></td>
                                         <td x-text="formatDate(r.toDate)"></td>
                                         <td x-text="r.proposal" style="white-space:normal; max-width:300px"></td>
-                                        <td>
+                                        <td x-show="canWrite">
                                             <button @click="startResidencyApproval(r)" class="btn-del"
-                                                style="color:green">✓</button>
+                                                style="color:green">V</button>
                                             <button @click="deleteItem(r.id)" class="btn-del">X</button>
                                         </td>
                                     </tr>
@@ -558,14 +592,66 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- USER MANAGEMENT -->
+                <div x-show="view === 'users'">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin:0">Gestione Utenti</h3>
+                            <button @click="openCreateUser()" class="create">+ NUOVO UTENTE</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Ruolo</th>
+                                    <th>Tab consentite</th>
+                                    <th>Stato</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="u in usersList" :key="u.id">
+                                    <tr>
+                                        <td @click="openEditUser(u)" style="cursor:pointer; text-decoration:underline;" x-text="u.username"></td>
+                                        <td x-text="u.email || '-'"></td>
+                                        <td>
+                                            <span class="role-badge" :class="'role-' + u.role" x-text="u.role"></span>
+                                        </td>
+                                        <td>
+                                            <template x-if="u.role === 'reader_limited'">
+                                                <span>
+                                                    <template x-for="tab in (u.allowedTabs || [])" :key="tab">
+                                                        <span class="tab-chip" x-text="tab"></span>
+                                                    </template>
+                                                </span>
+                                            </template>
+                                            <span x-show="u.role !== 'reader_limited'" style="color:#999; font-size:11px;">tutte</span>
+                                        </td>
+                                        <td>
+                                            <span x-show="u.active" class="status-tag" style="color:green; border-color:green;">ATTIVO</span>
+                                            <span x-show="!u.active" class="status-tag" style="color:red; border-color:red;">DISATTIVO</span>
+                                        </td>
+                                        <td>
+                                            <button x-show="u.id !== currentUser?.id" @click="deleteUser(u.id)" class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
 
+            <!-- SIDEBAR: Edit Expense -->
             <template x-if="editingItem">
                 <div class="sidebar">
                     <h3 x-text="editingItem.id ? 'Modifica Voce' : 'Nuova Voce'"></h3>
                     <label>Titolo</label><input type="text" x-model="editingItem.title">
                     <label>Descrizione</label><textarea x-model="editingItem.description" rows="2"></textarea>
-                    <label>Importo (€)</label><input type="number" x-model.number="editingItem.amount">
+                    <label>Importo (&#x20AC;)</label><input type="number" x-model.number="editingItem.amount">
                     <label>Data</label><input type="date" x-model="editingItem.date">
                     <label>Tipo</label>
                     <select :value="editingItem.isExit.toString()"
@@ -586,7 +672,7 @@
                     </select>
                     <template x-if="String(editingItem.isExit) === 'true'">
                         <div class="sub-box">
-                            <label>Attività pagata</label><input type="text" x-model="editingItem.paidActivity">
+                            <label>Attivita pagata</label><input type="text" x-model="editingItem.paidActivity">
                             <label>Documento</label>
                             <select x-model="editingItem.receiptType">
                                 <option value="nessuno">Nessuno</option>
@@ -615,7 +701,7 @@
                         </div>
                     </template>
                     <br>
-                    <label>Modalità di pagamento</label>
+                    <label>Modalita di pagamento</label>
                     <select x-model="editingItem.paymentMethod">
                         <option value="cash">Cash</option>
                         <option value="iban">IBAN</option>
@@ -641,6 +727,7 @@
                 </div>
             </template>
 
+            <!-- SIDEBAR: Edit Guest -->
             <template x-if="editingGuest">
                 <div class="sidebar">
                     <h3 x-text="editingGuest.id ? 'MODIFICA OSPITE' : 'NUOVO OSPITE'"></h3>
@@ -656,6 +743,7 @@
                 </div>
             </template>
 
+            <!-- SIDEBAR: Edit Residency -->
             <template x-if="editingResidency">
                 <div class="sidebar">
                     <h3 x-text="editingResidency.id ? 'MODIFICA RICHIESTA' : 'NUOVA RICHIESTA'"></h3>
@@ -670,6 +758,7 @@
                 </div>
             </template>
 
+            <!-- SIDEBAR: Edit Booking -->
             <template x-if="editingBooking">
                 <div class="sidebar">
                     <h3>RESIDENZA</h3>
@@ -706,6 +795,45 @@
                 </div>
             </template>
 
+            <!-- SIDEBAR: Edit User -->
+            <template x-if="editingUser">
+                <div class="sidebar">
+                    <h3 x-text="editingUser.id ? 'MODIFICA UTENTE' : 'NUOVO UTENTE'"></h3>
+                    <label>Username</label><input type="text" x-model="editingUser.username">
+                    <label x-text="editingUser.id ? 'Nuova Password (lascia vuoto per non cambiare)' : 'Password'"></label>
+                    <input type="password" x-model="editingUser.password">
+                    <label>Email</label><input type="email" x-model="editingUser.email">
+                    <label>Ruolo</label>
+                    <select x-model="editingUser.role">
+                        <option value="admin">Admin</option>
+                        <option value="reader">Reader</option>
+                        <option value="reader_limited">Reader Limitato</option>
+                    </select>
+                    <template x-if="editingUser.role === 'reader_limited'">
+                        <div class="sub-box">
+                            <label>Tab consentite</label>
+                            <div style="margin-top:5px;">
+                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership']" :key="tab">
+                                    <label style="display:inline-block; margin-right:10px; font-weight:normal;">
+                                        <input type="checkbox" style="width:auto"
+                                            :checked="editingUser.allowedTabs.includes(tab)"
+                                            @change="toggleTab(tab)">
+                                        <span x-text="tab" style="text-transform:capitalize;"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    <label style="margin-top:10px;">
+                        <input type="checkbox" x-model="editingUser.active" style="width:auto"> Attivo
+                    </label>
+                    <button class="btn-blk" @click="saveUser()">SALVA</button>
+                    <button @click="editingUser = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
+
+            <!-- MODAL: Confirm -->
             <template x-if="confirmModal">
                 <div class="modal-overlay">
                     <div class="modal-box">
@@ -718,6 +846,7 @@
                 </div>
             </template>
 
+            <!-- MODAL: Residency Approval -->
             <template x-if="residencyApproval">
                 <div class="modal-overlay">
                     <div class="modal-box" style="text-align:left; min-width:400px;">
