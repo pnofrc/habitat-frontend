@@ -622,21 +622,24 @@ document.addEventListener('alpine:init', () => {
                     body: JSON.stringify({ confirmed: true })
                 });
                 if (!res.ok) throw new Error("Errore conferma tesseramento");
-                const paymentMap = { HabitatPaypal: 'paypal', HabitatIban: 'iban', DistrettoPaypal: 'paypal', DistrettoIban: 'iban', Cash: 'cash' };
-                const resE = await fetch(`${this.BASE_URL}/expenses/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({
-                        title: `Tessera ${m.surname} ${m.name}`,
-                        amount: 10,
-                        date: new Date().toISOString().split('T')[0],
-                        isExit: false,
-                        category: 'entrata',
-                        paymentMethod: paymentMap[m.paymentMethod] || 'cash',
-                        expenseType: 'tessera'
-                    })
-                });
-                if (!resE.ok) throw new Error("Errore creazione spesa tessera");
+                const habitatMethods = ['HabitatPaypal', 'HabitatIban', 'CashHabitat'];
+                if (habitatMethods.includes(m.paymentMethod)) {
+                    const paymentMap = { HabitatPaypal: 'paypal', HabitatIban: 'iban', CashHabitat: 'cash' };
+                    const resE = await fetch(`${this.BASE_URL}/expenses/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                        body: JSON.stringify({
+                            title: `Tessera ${m.surname} ${m.name}`,
+                            amount: 10,
+                            date: new Date().toISOString().split('T')[0],
+                            isExit: false,
+                            category: 'entrata',
+                            paymentMethod: paymentMap[m.paymentMethod] || 'cash',
+                            expenseType: 'tessera'
+                        })
+                    });
+                    if (!resE.ok) throw new Error("Errore creazione spesa tessera");
+                }
                 await this.fetchData();
             } catch (e) { alert(e.message); }
         },

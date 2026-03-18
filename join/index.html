@@ -267,11 +267,24 @@
                 <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
                 <select x-model="form.metodoPagamento">
                     <option value="" x-text="lang === 'it' ? 'Scegli...' : 'Choose...'"></option>
-                    <option value="HabitatPaypal">HABITAT >> PAYPAL</option>
-                    <option value="HabitatIban">HABITAT >> IBAN</option>
-                    <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
-                    <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
-                    <option value="Cash">CONTANTI / CASH</option>
+                    <template x-if="form.interessi.includes('Habitat - Cà De Monti')">
+                        <option value="CashHabitat">HABITAT >> CONTANTI / CASH</option>
+                    </template>
+                    <template x-if="form.interessi.includes('Habitat - Cà De Monti')">
+                        <option value="HabitatPaypal">HABITAT >> PAYPAL</option>
+                    </template>
+                    <template x-if="form.interessi.includes('Habitat - Cà De Monti')">
+                        <option value="HabitatIban">HABITAT >> IBAN</option>
+                    </template>
+                    <template x-if="form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i))">
+                        <option value="CashDistrettoA">DISTRETTO A >> CONTANTI / CASH</option>
+                    </template>
+                    <template x-if="form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i))">
+                        <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
+                    </template>
+                    <template x-if="form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i))">
+                        <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
+                    </template>
                 </select>
                 <div class="payment-box" x-show="form.metodoPagamento">
                     <template x-if="form.metodoPagamento === 'HabitatIban'">
@@ -298,6 +311,9 @@
                             <a href="https://www.paypal.com/ncp/payment/5E4P5CFASVLMA" target="_blank"
                                 style="display:inline-block; margin-top:8px; background:#000; color:#fff; padding:10px 20px; text-decoration:none; font-weight:bold;"
                                 x-text="lang === 'it' ? 'PAGA CON PAYPAL' : 'PAY WITH PAYPAL'"></a>
+                            <p style="font-size:0.8em; color:#666; margin-top:8px;" x-text="lang === 'it'
+                                ? 'Puoi pagare anche con Apple Pay e Carta'
+                                : 'You can also pay with Apple Pay and Card'"></p>
                         </div>
                     </template>
                     <template x-if="form.metodoPagamento === 'DistrettoPaypal'">
@@ -310,7 +326,12 @@
                                 x-text="lang === 'it' ? 'PAGA CON PAYPAL' : 'PAY WITH PAYPAL'"></a>
                         </div>
                     </template>
-                    <template x-if="form.metodoPagamento === 'Cash'">
+                    <template x-if="form.metodoPagamento === 'CashHabitat'">
+                        <p x-text="lang === 'it'
+                            ? 'Pagamento in contanti presso la sede'
+                            : 'Cash payment at the venue'"></p>
+                    </template>
+                    <template x-if="form.metodoPagamento === 'CashDistrettoA'">
                         <p x-text="lang === 'it'
                             ? 'Pagamento in contanti presso la sede'
                             : 'Cash payment at the venue'"></p>
@@ -354,11 +375,26 @@
                 submitted: false,
                 errorMessage: '',
                 lang: 'it',
-                interessiOpts: ['Habitat / Ca\' dei Monti', 'DAWE / Cena itinerante', 'Quazar - Coworking', 'Laboratori / Workshop'],
+                interessiOpts: ['Habitat - Cà De Monti', 'Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'],
                 form: {
                     email: '', cognome: '', nome: '', dataNascita: '', luogoNascita: '', provNascita: '', paeseNascita: '', codiceFiscale: '',
                     indirizzo: '', cap: '', cittaResidenza: '', provResidenza: '', paeseResidenza: '', telefono: '',
                     interessi: [], metodoPagamento: '', privacy: false, adesione: false
+                },
+                init() {
+                    this.$watch('form.interessi', () => {
+                        const hasHabitat = this.form.interessi.includes('Habitat - Cà De Monti');
+                        const hasDistretto = this.form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i));
+                        const habitatMethods = ['CashHabitat', 'HabitatPaypal', 'HabitatIban'];
+                        const distrettoMethods = ['CashDistrettoA', 'DistrettoPaypal', 'DistrettoIban'];
+                        const current = this.form.metodoPagamento;
+                        if (!current) return;
+                        const isHabitatMethod = habitatMethods.includes(current);
+                        const isDistrettoMethod = distrettoMethods.includes(current);
+                        if ((isHabitatMethod && !hasHabitat) || (isDistrettoMethod && !hasDistretto)) {
+                            this.form.metodoPagamento = '';
+                        }
+                    });
                 },
                 async submit() {
                     const required = ['email', 'cognome', 'nome', 'dataNascita', 'luogoNascita', 'provNascita',
@@ -383,10 +419,10 @@
                     this.errorMessage = '';
 
                     const interestiMap = {
-                        'Habitat / Ca\' dei Monti': 'habitat',
-                        'DAWE / Cena itinerante': 'dawe',
-                        'Quazar - Coworking': 'quazar',
-                        'Laboratori / Workshop': 'workshops'
+                        'Habitat - Cà De Monti': 'habitat',
+                        'Distretto A': 'distrettoA',
+                        'Dawe - Cena Itinerante': 'dawe',
+                        'Quazar - Coworking': 'quazar'
                     };
                     const interests = {};
                     this.form.interessi.forEach(i => {
