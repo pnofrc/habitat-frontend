@@ -18,6 +18,8 @@ document.addEventListener('alpine:init', () => {
         newGuestToggle: false,
         newGuestName: '',
         deletedMemberships: [],
+        deletedBookings: [],
+        deletedResidencies: [],
         membershipRequestCount: 0,
         membershipConfirmedCount: 0,
         residencyApproval: null,
@@ -39,6 +41,13 @@ document.addEventListener('alpine:init', () => {
         editingCalendarEvent: null,
         calendarInstance: null,
 
+        // Telegram state
+        telegramChats: [],
+        telegramSettings: {},
+        editingChat: null,
+        digestPreview: null,
+        digestSending: false,
+
         get canWrite() {
             return this.currentUser && this.currentUser.role === 'admin';
         },
@@ -46,7 +55,7 @@ document.addEventListener('alpine:init', () => {
         get visibleTabs() {
             if (!this.currentUser) return [];
             const allTabs = ['expenses', 'guests', 'bookings', 'residency', 'membership', 'calendar'];
-            if (this.currentUser.role === 'admin') return [...allTabs, 'users'];
+            if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram'];
             if (this.currentUser.role === 'reader') return allTabs;
             // reader_limited
             return (this.currentUser.allowedTabs || []);
@@ -102,6 +111,8 @@ document.addEventListener('alpine:init', () => {
             this.editingGuest = null;
             this.editingUser = null;
             this.editingCalendarEvent = null;
+            this.editingChat = null;
+            this.digestPreview = null;
             this.confirmModal = null;
             await this.fetchData();
         },
@@ -111,6 +122,11 @@ document.addEventListener('alpine:init', () => {
             try {
                 if (this.view === 'users') {
                     await this.fetchUsers();
+                    return;
+                }
+
+                if (this.view === 'telegram') {
+                    await this.fetchTelegramData();
                     return;
                 }
 
@@ -136,6 +152,20 @@ document.addEventListener('alpine:init', () => {
                         headers: { 'Authorization': `Bearer ${this.token}` }
                     });
                     this.deletedMemberships = await resD.json();
+                }
+
+                if (this.view === 'bookings') {
+                    const resD = await fetch(`${this.BASE_URL}/bookings/bin`, {
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    this.deletedBookings = await resD.json();
+                }
+
+                if (this.view === 'residency') {
+                    const resD = await fetch(`${this.BASE_URL}/residency/bin`, {
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    this.deletedResidencies = await resD.json();
                 }
 
                 if (this.view === 'expenses') {
@@ -172,8 +202,6 @@ document.addEventListener('alpine:init', () => {
                 let matchType = true;
                 if (this.filter === 'in') matchType = !isExit;
                 if (this.filter === 'out') matchType = isExit;
-
-                if (this.filter !== 'out') return matchType && (this.typeFilter === 'all' || i.expenseType === this.typeFilter);
 
                 let matchHabitante = true;
                 if (this.habitanteFilter !== 'all') {
@@ -266,6 +294,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         async saveGuest() {
+            if (!this.editingGuest.name?.trim()) {
+                alert('Il nome è obbligatorio');
+                return;
+            }
             try {
                 const isUpdate = !!this.editingGuest.id;
                 const url = isUpdate ? `${this.BASE_URL}/guests/${this.editingGuest.id}` : `${this.BASE_URL}/guests/`;
@@ -283,6 +315,18 @@ document.addEventListener('alpine:init', () => {
         },
 
         async saveData() {
+            if (!this.editingItem.title?.trim()) {
+                alert('Il titolo è obbligatorio');
+                return;
+            }
+            if (!this.editingItem.amount || Number(this.editingItem.amount) <= 0) {
+                alert('L\'importo deve essere maggiore di 0');
+                return;
+            }
+            if (!this.editingItem.date) {
+                alert('La data è obbligatoria');
+                return;
+            }
             try {
                 const isUpdate = !!this.editingItem.id;
                 const payload = {
@@ -303,6 +347,18 @@ document.addEventListener('alpine:init', () => {
         },
 
         async saveBooking() {
+            if (!this.newGuestToggle && !this.editingBooking.guest) {
+                alert('Seleziona un ospite');
+                return;
+            }
+            if (this.newGuestToggle && !this.newGuestName?.trim()) {
+                alert('Inserisci il nome del nuovo ospite');
+                return;
+            }
+            if (!this.editingBooking.checkIn || !this.editingBooking.checkOut) {
+                alert('Le date di check-in e check-out sono obbligatorie');
+                return;
+            }
             try {
                 let guestId = this.editingBooking.guest;
                 if (this.newGuestToggle && this.newGuestName) {
@@ -406,7 +462,7 @@ document.addEventListener('alpine:init', () => {
                 ]);
                 const allBookings = await resB.json();
                 const { subject: emailSubject, body: emailBody } = await resT.json();
-                const allRooms = ['ex poni', 'monolocale', 'camerata'];
+                const allRooms = ['monolocale', 'ex poni', 'ex ronco', 'cameratina', 'secondo piano'];
                 const from = new Date(r.fromDate);
                 const to = new Date(r.toDate);
                 const availableRooms = allRooms.filter(room =>
@@ -422,6 +478,10 @@ document.addEventListener('alpine:init', () => {
 
         async confirmResidency() {
             const { residency, room, emailSubject, emailBody } = this.residencyApproval;
+            if (!room) {
+                alert('Seleziona una stanza prima di confermare');
+                return;
+            }
             try {
                 const res = await fetch(`${this.BASE_URL}/residency/${residency.id}/approve`, {
                     method: 'POST',
@@ -463,6 +523,18 @@ document.addEventListener('alpine:init', () => {
         },
 
         async saveResidency() {
+            if (!this.editingResidency.name?.trim()) {
+                alert('Il nome è obbligatorio');
+                return;
+            }
+            if (!this.editingResidency.fromDate || !this.editingResidency.toDate) {
+                alert('Le date sono obbligatorie');
+                return;
+            }
+            if (!this.editingResidency.proposal?.trim()) {
+                alert('La proposta è obbligatoria');
+                return;
+            }
             try {
                 const isUpdate = !!this.editingResidency.id;
                 const url = isUpdate ? `${this.BASE_URL}/residency/${this.editingResidency.id}` : `${this.BASE_URL}/residency/`;
@@ -508,6 +580,30 @@ document.addEventListener('alpine:init', () => {
             if (!await this.showConfirm("Ripristinare questo socio?")) return;
             try {
                 const res = await fetch(`${this.BASE_URL}/membership/${m.id}/restore`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore ripristino");
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async restoreBooking(b) {
+            if (!await this.showConfirm("Ripristinare questa prenotazione?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/bookings/${b.id}/restore`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore ripristino");
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async restoreResidency(r) {
+            if (!await this.showConfirm("Ripristinare questa richiesta?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/residency/${r.id}/restore`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${this.token}` }
                 });
@@ -737,6 +833,100 @@ document.addEventListener('alpine:init', () => {
                 }
                 await this.fetchUsers();
             } catch (e) { alert(e.message); }
+        },
+
+        // ── Telegram Bot Management ──
+
+        async fetchTelegramData() {
+            try {
+                const [chatsRes, settingsRes] = await Promise.all([
+                    fetch(`${this.BASE_URL}/telegram/chats`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/telegram/settings`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                ]);
+                if (chatsRes.ok) this.telegramChats = await chatsRes.json();
+                if (settingsRes.ok) this.telegramSettings = await settingsRes.json();
+            } catch (e) { console.error(e); }
+        },
+
+        openAddChat() {
+            this.editingChat = { chatId: '', label: '', active: true, notifyDigest: true, notifyResidency: true, notifyMembership: true };
+        },
+
+        openEditChat(chat) {
+            this.editingChat = { ...chat };
+        },
+
+        async saveChat() {
+            if (!this.editingChat.chatId?.trim()) {
+                alert('Chat ID obbligatorio');
+                return;
+            }
+            try {
+                const isUpdate = !!this.editingChat.id;
+                const url = isUpdate
+                    ? `${this.BASE_URL}/telegram/chats/${this.editingChat.id}`
+                    : `${this.BASE_URL}/telegram/chats`;
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(this.editingChat)
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || 'Errore salvataggio chat');
+                }
+                this.editingChat = null;
+                await this.fetchTelegramData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteChat(id) {
+            if (!await this.showConfirm("Eliminare questa chat?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/telegram/chats/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione chat");
+                await this.fetchTelegramData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async saveTelegramSettings() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/telegram/settings`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(this.telegramSettings)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio impostazioni");
+                alert('Impostazioni salvate');
+            } catch (e) { alert(e.message); }
+        },
+
+        async previewDigest() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/telegram/digest/preview`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore caricamento anteprima");
+                const data = await res.json();
+                this.digestPreview = data.text;
+            } catch (e) { alert(e.message); }
+        },
+
+        async sendDigestNow() {
+            if (!await this.showConfirm("Inviare il riepilogo ora?")) return;
+            this.digestSending = true;
+            try {
+                const res = await fetch(`${this.BASE_URL}/telegram/digest/send`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore invio riepilogo");
+                alert('Riepilogo inviato!');
+            } catch (e) { alert(e.message); }
+            finally { this.digestSending = false; }
         }
     }));
 });

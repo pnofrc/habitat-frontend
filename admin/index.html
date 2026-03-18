@@ -289,6 +289,7 @@
                     @click="membershipTab = 'confirmed'; setView('membership')">Tesserati <span x-show="membershipConfirmedCount > 0" x-text="'(' + membershipConfirmedCount + ')'"></span></button>
                 <button x-show="visibleTabs.includes('calendar')" :class="view === 'calendar' && 'active'" @click="setView('calendar')">Calendario</button>
                 <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'" @click="setView('users')">Gestione Utenti</button>
+                <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'" @click="setView('telegram')">Telegram Bot</button>
                 <span style="margin-left: auto; display: flex; align-items: center;">
                     <span class="user-info" x-show="currentUser" x-text="currentUser?.username"></span>
                     <button @click="logout" style="color: red;">LOGOUT</button>
@@ -393,14 +394,13 @@
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px;">
                             <div style="display: flex; gap: 5px; align-items: center;">
-                                <select x-model="filter" style="width: auto; margin:0"
-                                    @change="if(filter !== 'out') habitanteFilter = 'all'">
+                                <select x-model="filter" style="width: auto; margin:0">
                                     <option value="all">Tutti i movimenti</option>
                                     <option value="in">Entrate</option>
                                     <option value="out">Uscite</option>
                                 </select>
 
-                                <div x-show="filter === 'out'" x-transition>
+                                <div x-transition>
                                     <select x-model="habitanteFilter" style="width: auto; margin:0">
                                         <option value="all">Tutti i pagatori</option>
                                         <option value="habitat">Habitat (Cassa)</option>
@@ -435,15 +435,9 @@
                                     <th>&#x20AC;</th>
                                     <th>Data</th>
                                     <th>Tipo</th>
-                                    <template x-if="filter === 'out'">
-                                        <th style="background: #fdf2f2;">Pagato da</th>
-                                    </template>
-                                    <template x-if="filter === 'out'">
-                                        <th style="background: #fdf2f2;">Modalita</th>
-                                    </template>
-                                    <template x-if="filter === 'out'">
-                                        <th style="background: #fdf2f2;">Documento</th>
-                                    </template>
+                                    <th style="background: #fdf2f2;">Pagato da</th>
+                                    <th style="background: #fdf2f2;">Modalita</th>
+                                    <th style="background: #fdf2f2;">Documento</th>
                                     <th x-show="canWrite"></th>
                                 </tr>
                             </thead>
@@ -458,17 +452,11 @@
                                         <td x-text="item.expenseType || '-'"
                                             style="text-transform: capitalize; font-size: 11px;"></td>
 
-                                        <template x-if="filter === 'out'">
-                                            <td x-text="item.payerType === 'habitat' ? 'Habitat' : item.specificHabitante"
-                                                style="text-transform: capitalize; font-size: 11px;"></td>
-                                        </template>
-                                        <template x-if="filter === 'out'">
-                                            <td x-text="item.paymentMethod" style="font-size: 11px; color: #666;"></td>
-                                        </template>
-                                        <template x-if="filter === 'out'">
-                                            <td x-text="item.receiptType === 'nessuno' ? '-' : item.receiptType"
-                                                style="font-size: 11px;"></td>
-                                        </template>
+                                        <td x-text="item.payerType === 'habitat' ? 'Habitat' : (item.specificHabitante || '-')"
+                                            style="text-transform: capitalize; font-size: 11px;"></td>
+                                        <td x-text="item.paymentMethod || '-'" style="font-size: 11px; color: #666;"></td>
+                                        <td x-text="item.receiptType === 'nessuno' ? '-' : (item.receiptType || '-')"
+                                            style="font-size: 11px;"></td>
 
                                         <td x-show="canWrite"><button @click="deleteItem(item.id)" class="btn-del">X</button></td>
                                     </tr>
@@ -586,6 +574,36 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <div class="card" x-show="deletedBookings.length > 0">
+                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedBookings.length + ')'"></span></h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ospite</th>
+                                    <th>Stanza</th>
+                                    <th>Da</th>
+                                    <th>A</th>
+                                    <th>Eliminato il</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="b in deletedBookings" :key="b.id">
+                                    <tr>
+                                        <td x-text="b.guest?.name || 'N/A'"></td>
+                                        <td x-text="b.room"></td>
+                                        <td x-text="formatDate(b.checkIn)"></td>
+                                        <td x-text="formatDate(b.checkOut)"></td>
+                                        <td x-text="formatDate(b.deletedAt)"></td>
+                                        <td>
+                                            <button x-show="canWrite" @click="restoreBooking(b)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- RESIDENCY -->
@@ -615,6 +633,36 @@
                                             <button @click="startResidencyApproval(r)" class="btn-del"
                                                 style="color:green">V</button>
                                             <button @click="startResidencyRejection(r)" class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card" x-show="deletedResidencies.length > 0">
+                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedResidencies.length + ')'"></span></h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Dal</th>
+                                    <th>Al</th>
+                                    <th>Eliminato il</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="r in deletedResidencies" :key="r.id">
+                                    <tr>
+                                        <td x-text="r.name"></td>
+                                        <td x-text="r.email"></td>
+                                        <td x-text="formatDate(r.fromDate)"></td>
+                                        <td x-text="formatDate(r.toDate)"></td>
+                                        <td x-text="formatDate(r.deletedAt)"></td>
+                                        <td>
+                                            <button x-show="canWrite" @click="restoreResidency(r)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -682,6 +730,91 @@
                                 </template>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- TELEGRAM BOT -->
+                <div x-show="view === 'telegram'">
+                    <!-- Chat Table -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin:0">Chat Telegram</h3>
+                            <button @click="openAddChat()" class="create">+ AGGIUNGI CHAT</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Chat ID</th>
+                                    <th>Nome</th>
+                                    <th>Stato</th>
+                                    <th>Notifiche</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="c in telegramChats" :key="c.id">
+                                    <tr>
+                                        <td @click="openEditChat(c)" style="cursor:pointer; text-decoration:underline;" x-text="c.chatId"></td>
+                                        <td x-text="c.label || '-'"></td>
+                                        <td>
+                                            <span x-show="c.active" class="status-tag" style="color:green; border-color:green;">ATTIVO</span>
+                                            <span x-show="!c.active" class="status-tag" style="color:red; border-color:red;">INATTIVO</span>
+                                        </td>
+                                        <td>
+                                            <span x-show="c.notifyDigest" class="tab-chip">Digest</span>
+                                            <span x-show="c.notifyResidency" class="tab-chip">Residenze</span>
+                                            <span x-show="c.notifyMembership" class="tab-chip">Tessere</span>
+                                        </td>
+                                        <td>
+                                            <button @click="deleteChat(c.id)" class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                        <p x-show="telegramChats.length === 0" style="color:#999; font-size:12px;">Nessuna chat configurata. Le chat vengono scoperte automaticamente quando qualcuno scrive al bot, oppure puoi aggiungerle manualmente.</p>
+                    </div>
+
+                    <!-- Digest Settings -->
+                    <div class="card">
+                        <h3 style="margin:0 0 15px">Riepilogo Giornaliero</h3>
+                        <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                            <div>
+                                <label>Abilitato</label>
+                                <select x-model="telegramSettings['telegram.digest.enabled']" style="width:auto;">
+                                    <option value="true">Si</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Orario</label>
+                                <input type="time" x-model="telegramSettings['telegram.digest.time']" style="width:auto;">
+                            </div>
+                            <div>
+                                <label>Timezone</label>
+                                <select x-model="telegramSettings['telegram.digest.timezone']" style="width:auto;">
+                                    <option value="Europe/Rome">Europe/Rome</option>
+                                    <option value="Europe/London">Europe/London</option>
+                                    <option value="Europe/Berlin">Europe/Berlin</option>
+                                    <option value="Europe/Paris">Europe/Paris</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                            </div>
+                            <button @click="saveTelegramSettings()" class="btn-blk" style="width:auto; margin:0; padding:8px 20px;">SALVA</button>
+                        </div>
+                    </div>
+
+                    <!-- Digest Preview & Send -->
+                    <div class="card">
+                        <h3 style="margin:0 0 15px">Anteprima & Invio Manuale</h3>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button @click="previewDigest()" style="border:1px solid #000; padding:6px 15px; cursor:pointer;">ANTEPRIMA</button>
+                            <button @click="sendDigestNow()" class="btn-blk" style="width:auto; margin:0; padding:6px 15px;" :disabled="digestSending"
+                                x-text="digestSending ? 'INVIO...' : 'INVIA ORA'"></button>
+                        </div>
+                        <template x-if="digestPreview">
+                            <div style="background:#f5f5f5; border:1px solid #ddd; padding:15px; white-space:pre-wrap; font-size:13px;" x-html="digestPreview"></div>
+                        </template>
                     </div>
                 </div>
 
@@ -824,9 +957,11 @@
                     <label>Stanza</label>
                     <select x-model="editingBooking.room">
                         <option value="da assegnare">da assegnare</option>
-                        <option value="ex poni">ex poni</option>
                         <option value="monolocale">monolocale</option>
-                        <option value="camerata">camerata</option>
+                        <option value="ex poni">ex poni</option>
+                        <option value="ex ronco">ex ronco</option>
+                        <option value="cameratina">cameratina</option>
+                        <option value="secondo piano">secondo piano</option>
                     </select>
                     <label>Feedback</label>
                     <textarea x-model="editingBooking.feedback" rows="4" placeholder=""></textarea>
@@ -855,7 +990,7 @@
                         <div class="sub-box">
                             <label>Tab consentite</label>
                             <div style="margin-top:5px;">
-                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'calendar']" :key="tab">
+                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'calendar', 'telegram']" :key="tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
                                             :checked="editingUser.allowedTabs.includes(tab)"
@@ -893,6 +1028,40 @@
                     <button x-show="editingCalendarEvent.uid" @click="deleteCalendarEvent(editingCalendarEvent.uid)"
                         class="btn-del" style="width:100%; margin-top:10px; text-align:center;">ELIMINA EVENTO</button>
                     <button @click="editingCalendarEvent = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
+
+            <!-- SIDEBAR: Edit Telegram Chat -->
+            <template x-if="editingChat">
+                <div class="sidebar">
+                    <h3 x-text="editingChat.id ? 'MODIFICA CHAT' : 'NUOVA CHAT'"></h3>
+                    <label>Chat ID</label>
+                    <input type="text" x-model="editingChat.chatId" :disabled="!!editingChat.id">
+                    <label>Nome</label>
+                    <input type="text" x-model="editingChat.label">
+                    <label style="margin-top:10px;">
+                        <input type="checkbox" x-model="editingChat.active" style="width:auto"> Attiva
+                    </label>
+                    <div class="sub-box" style="margin-top:10px;">
+                        <label>Notifiche abilitate</label>
+                        <div style="margin-top:5px;">
+                            <label style="display:block; font-weight:normal; margin-bottom:5px;">
+                                <input type="checkbox" x-model="editingChat.notifyDigest" style="width:auto">
+                                Riepilogo giornaliero
+                            </label>
+                            <label style="display:block; font-weight:normal; margin-bottom:5px;">
+                                <input type="checkbox" x-model="editingChat.notifyResidency" style="width:auto">
+                                Nuove residenze
+                            </label>
+                            <label style="display:block; font-weight:normal;">
+                                <input type="checkbox" x-model="editingChat.notifyMembership" style="width:auto">
+                                Nuove tessere
+                            </label>
+                        </div>
+                    </div>
+                    <button class="btn-blk" @click="saveChat()">SALVA</button>
+                    <button @click="editingChat = null"
                         style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                 </div>
             </template>

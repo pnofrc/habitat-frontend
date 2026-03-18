@@ -274,11 +274,37 @@
                     <option value="Cash">CONTANTI / CASH</option>
                 </select>
                 <div class="payment-box" x-show="form.metodoPagamento">
-                    <p x-show="form.metodoPagamento.includes('Habitat')">IBAN: IT88Q0623023704000030225469</p>
-                    <p x-show="form.metodoPagamento.includes('Distretto')">IBAN: IT80B0303223701010000636901</p>
-                    <p x-text="lang === 'it'
-                        ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
-                        : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
+                    <template x-if="form.metodoPagamento === 'HabitatIban'">
+                        <div>
+                            <p>IBAN: IT88Q0623023704000030225469</p>
+                            <p x-text="lang === 'it'
+                                ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
+                                : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
+                        </div>
+                    </template>
+                    <template x-if="form.metodoPagamento === 'DistrettoIban'">
+                        <div>
+                            <p>IBAN: IT80B0303223701010000636901</p>
+                            <p x-text="lang === 'it'
+                                ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
+                                : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
+                        </div>
+                    </template>
+                    <template x-if="form.metodoPagamento === 'HabitatPaypal'">
+                        <p x-text="lang === 'it'
+                            ? 'Invia il pagamento tramite PayPal a Habitat'
+                            : 'Send payment via PayPal to Habitat'"></p>
+                    </template>
+                    <template x-if="form.metodoPagamento === 'DistrettoPaypal'">
+                        <p x-text="lang === 'it'
+                            ? 'Invia il pagamento tramite PayPal a Distretto A'
+                            : 'Send payment via PayPal to Distretto A'"></p>
+                    </template>
+                    <template x-if="form.metodoPagamento === 'Cash'">
+                        <p x-text="lang === 'it'
+                            ? 'Pagamento in contanti presso la sede'
+                            : 'Cash payment at the venue'"></p>
+                    </template>
                 </div>
 
                 <h2 x-text="lang === 'it' ? 'CONDIZIONI' : 'CONDITIONS'"></h2>
