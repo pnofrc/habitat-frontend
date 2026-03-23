@@ -287,6 +287,7 @@
                     @click="membershipTab = 'requests'; setView('membership')">Richiesta Tessere <span x-show="membershipRequestCount > 0" x-text="'(' + membershipRequestCount + ')'"></span></button>
                 <button x-show="visibleTabs.includes('membership')" :class="view === 'membership' && membershipTab === 'confirmed' && 'active'"
                     @click="membershipTab = 'confirmed'; setView('membership')">Tesserati <span x-show="membershipConfirmedCount > 0" x-text="'(' + membershipConfirmedCount + ')'"></span></button>
+                <button x-show="visibleTabs.includes('festival')" :class="view === 'festival' && 'active'" @click="setView('festival')">Festival <span x-show="festivalTicketCount > 0" x-text="'(' + festivalTicketCount + ')'"></span></button>
                 <button x-show="visibleTabs.includes('calendar')" :class="view === 'calendar' && 'active'" @click="setView('calendar')">Calendario</button>
                 <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'" @click="setView('users')">Gestione Utenti</button>
                 <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'" @click="setView('telegram')">Telegram Bot</button>
@@ -745,6 +746,75 @@
                     </div>
                 </div>
 
+                <!-- FESTIVAL -->
+                <div x-show="view === 'festival'">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
+                        <div class="card" style="flex:1"><small>PRENOTATI</small><br><b x-text="festivalTicketCount"></b></div>
+                        <div class="card" style="flex:1"><small>CONFERMATI</small><br><b x-text="festivalConfirmedCount" style="color:green"></b></div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin:0 0 15px">Biglietti Festival</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cognome</th>
+                                    <th>Email</th>
+                                    <th>Pagamento</th>
+                                    <th>Stato</th>
+                                    <th x-show="canWrite"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="t in festivalTickets" :key="t.id">
+                                    <tr>
+                                        <td x-text="t.name"></td>
+                                        <td x-text="t.surname"></td>
+                                        <td x-text="t.email"></td>
+                                        <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
+                                        <td>
+                                            <span x-show="t.confirmed" class="status-tag" style="color:green; border-color:green;">CONFERMATO</span>
+                                            <span x-show="!t.confirmed" class="status-tag" style="color:#999; border-color:#999;">IN ATTESA</span>
+                                        </td>
+                                        <td x-show="canWrite">
+                                            <button x-show="!t.confirmed" @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
+                                            <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card" x-show="deletedFestivalTickets.length > 0">
+                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedFestivalTickets.length + ')'"></span></h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cognome</th>
+                                    <th>Email</th>
+                                    <th>Eliminato il</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="t in deletedFestivalTickets" :key="t.id">
+                                    <tr>
+                                        <td x-text="t.name"></td>
+                                        <td x-text="t.surname"></td>
+                                        <td x-text="t.email"></td>
+                                        <td x-text="formatDate(t.deletedAt)"></td>
+                                        <td>
+                                            <button x-show="canWrite" @click="restoreFestivalTicket(t)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- CALENDAR -->
                 <div x-show="view === 'calendar'">
                     <div class="card">
@@ -1064,7 +1134,7 @@
                         <div class="sub-box">
                             <label>Tab consentite</label>
                             <div style="margin-top:5px;">
-                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'calendar', 'telegram']" :key="tab">
+                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'telegram']" :key="tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
                                             :checked="editingUser.allowedTabs.includes(tab)"
@@ -1248,6 +1318,29 @@
                         <div style="white-space:pre-wrap; font-size:13px; line-height:1.5;" x-text="proposalModal.proposal"></div>
                         <button @click="proposalModal = null"
                             style="width:100%; margin-top:15px; border:1px solid #000; padding:8px 20px; cursor:pointer;">Chiudi</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Festival Approval -->
+            <template x-if="festivalApproval">
+                <div class="modal-overlay">
+                    <div class="modal-box" style="text-align:left; min-width:400px;">
+                        <h3 style="margin:0 0 10px">Conferma Biglietto Festival</h3>
+                        <p style="margin:0 0 15px;">
+                            <b x-text="festivalApproval.ticket.name + ' ' + festivalApproval.ticket.surname"></b> &mdash;
+                            <span x-text="festivalApproval.ticket.email"></span>
+                        </p>
+
+                        <label>Oggetto Email</label>
+                        <input type="text" x-model="festivalApproval.emailSubject">
+
+                        <label>Corpo Email</label>
+                        <textarea x-model="festivalApproval.emailBody" rows="6"></textarea>
+
+                        <button class="btn-blk" @click="confirmFestivalApproval()">CONFERMA E INVIA</button>
+                        <button @click="festivalApproval = null"
+                            style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>
                 </div>
             </template>

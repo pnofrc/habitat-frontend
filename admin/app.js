@@ -20,6 +20,11 @@ document.addEventListener('alpine:init', () => {
         deletedMemberships: [],
         deletedBookings: [],
         deletedResidencies: [],
+        deletedFestivalTickets: [],
+        festivalTickets: [],
+        festivalTicketCount: 0,
+        festivalConfirmedCount: 0,
+        festivalApproval: null,
         membershipRequestCount: 0,
         membershipConfirmedCount: 0,
         checkoutModal: null,
@@ -56,7 +61,7 @@ document.addEventListener('alpine:init', () => {
 
         get visibleTabs() {
             if (!this.currentUser) return [];
-            const allTabs = ['expenses', 'guests', 'bookings', 'residency', 'membership', 'calendar'];
+            const allTabs = ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar'];
             if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram'];
             if (this.currentUser.role === 'reader') return allTabs;
             // reader_limited
@@ -112,6 +117,7 @@ document.addEventListener('alpine:init', () => {
             this.editingResidency = null;
             this.editingGuest = null;
             this.editingUser = null;
+            this.festivalApproval = null;
             this.editingCalendarEvent = null;
             this.editingChat = null;
             this.digestPreview = null;
@@ -137,12 +143,23 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
-                const res = await fetch(`${this.BASE_URL}/${this.view}/`, {
-                    headers: { 'Authorization': `Bearer ${this.token}` }
-                });
-                if (res.status === 401) return this.logout();
-                const data = await res.json();
-                this.items = Array.isArray(data) ? data : [];
+                if (this.view === 'festival') {
+                    const [ticketsRes, binRes] = await Promise.all([
+                        fetch(`${this.BASE_URL}/festival/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                        fetch(`${this.BASE_URL}/festival/bin`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                    ]);
+                    if (ticketsRes.status === 401) return this.logout();
+                    this.festivalTickets = await ticketsRes.json();
+                    this.deletedFestivalTickets = await binRes.json();
+                    this.items = [];
+                } else {
+                    const res = await fetch(`${this.BASE_URL}/${this.view}/`, {
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    if (res.status === 401) return this.logout();
+                    const data = await res.json();
+                    this.items = Array.isArray(data) ? data : [];
+                }
 
                 if (this.view === 'guests' || this.view === 'bookings') {
                     const resB = await fetch(`${this.BASE_URL}/bookings/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
@@ -176,15 +193,19 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 // always refresh nav badge counts
-                const [memRes, resRes] = await Promise.all([
+                const [memRes, resRes, festRes] = await Promise.all([
                     fetch(`${this.BASE_URL}/membership/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
-                    fetch(`${this.BASE_URL}/residency/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                    fetch(`${this.BASE_URL}/residency/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/festival/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
                 ]);
                 const memData = await memRes.json();
                 const resData = await resRes.json();
+                const festData = await festRes.json();
                 this.membershipRequestCount = Array.isArray(memData) ? memData.filter(m => !m.confirmed).length : 0;
                 this.membershipConfirmedCount = Array.isArray(memData) ? memData.filter(m => m.confirmed).length : 0;
                 this.residencyCount = Array.isArray(resData) ? resData.length : 0;
+                this.festivalTicketCount = Array.isArray(festData) ? festData.length : 0;
+                this.festivalConfirmedCount = Array.isArray(festData) ? festData.filter(t => t.confirmed).length : 0;
             } catch (e) { console.error(e); }
         },
 
@@ -684,6 +705,57 @@ document.addEventListener('alpine:init', () => {
             if (await this.showConfirm("Eliminare?")) {
                 try {
                     const res = await fetch(`${this.BASE_URL}/${this.view}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${this.token}` } });
+                    if (!res.ok) throw new Error("Errore eliminazione");
+                    await this.fetchData();
+                } catch (e) { alert(e.message); }
+            }
+        },
+
+        // ── Festival ──
+
+        async startFestivalApproval(t) {
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/${t.id}/email-template`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                const { subject: emailSubject, body: emailBody } = await res.json();
+                this.festivalApproval = { ticket: t, emailSubject, emailBody };
+            } catch (e) { alert(e.message); }
+        },
+
+        async confirmFestivalApproval() {
+            const { ticket, emailSubject, emailBody } = this.festivalApproval;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/${ticket.id}/confirm`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ emailSubject, emailBody })
+                });
+                if (!res.ok) throw new Error("Errore conferma biglietto");
+                this.festivalApproval = null;
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async restoreFestivalTicket(t) {
+            if (!await this.showConfirm("Ripristinare questo biglietto?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/${t.id}/restore`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore ripristino");
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteFestivalTicket(id) {
+            if (await this.showConfirm("Eliminare questo biglietto?")) {
+                try {
+                    const res = await fetch(`${this.BASE_URL}/festival/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
                     if (!res.ok) throw new Error("Errore eliminazione");
                     await this.fetchData();
                 } catch (e) { alert(e.message); }
