@@ -1216,10 +1216,10 @@
                                 <div class="timeline-today" :style="`left:${timelineTodayPosition}%`" title="Oggi"></div>
                                 <template x-for="(d, idx) in timelineDeadlines" :key="d.id">
                                     <div class="timeline-dot"
-                                        :style="`left:${timelinePosition(d.date)}%`"
+                                        :style="`left:${timelinePosition(d.date)}%; border-color:${['#2b6cb0','#2c7a7b','#b7791f','#9f7aea','#c53030','#38a169'][idx % 6]};`"
                                         @click="canWrite && openEditDeadline(d)">
                                         <span class="label"
-                                            :style="`top:${idx % 2 === 0 ? '-22px' : '16px'};`"
+                                            :style="`top:${idx % 2 === 0 ? '-22px' : '16px'}; border-color:${['#2b6cb0','#2c7a7b','#b7791f','#9f7aea','#c53030','#38a169'][idx % 6]};`"
                                             x-text="d.title"></span>
                                     </div>
                                 </template>
