@@ -25,6 +25,27 @@ document.addEventListener('alpine:init', () => {
         festivalTicketCount: 0,
         festivalConfirmedCount: 0,
         festivalApproval: null,
+        festivalTab: 'tickets',
+        plannerVenues: [],
+        plannerActs: [],
+        plannerSelectedDay: '2026-07-16',
+        editingAct: null,
+        editingVenue: null,
+        showVenueManager: false,
+        newVenueName: '',
+        volunteers: [],
+        editingVolunteer: null,
+        timelineDeadlines: [],
+        editingDeadline: null,
+        timelineStart: '2026-03-19',
+        timelineEnd: '2026-07-16',
+        plannerDays: [
+            { value: '2026-07-16', label: 'Gio 16', startHour: 8, endHour: 8 },
+            { value: '2026-07-17', label: 'Ven 17', startHour: 8, endHour: 8 },
+            { value: '2026-07-18', label: 'Sab 18', startHour: 8, endHour: 8 },
+            { value: '2026-07-19', label: 'Dom 19', startHour: 8, endHour: 8 },
+            { value: '2026-07-20', label: 'Lun 20', startHour: 8, endHour: 8 },
+        ],
         membershipRequestCount: 0,
         membershipConfirmedCount: 0,
         checkoutModal: null,
@@ -118,6 +139,11 @@ document.addEventListener('alpine:init', () => {
             this.editingGuest = null;
             this.editingUser = null;
             this.festivalApproval = null;
+            this.editingAct = null;
+            this.editingVenue = null;
+            this.showVenueManager = false;
+            this.editingVolunteer = null;
+            this.editingDeadline = null;
             this.editingCalendarEvent = null;
             this.editingChat = null;
             this.digestPreview = null;
@@ -151,6 +177,15 @@ document.addEventListener('alpine:init', () => {
                     if (ticketsRes.status === 401) return this.logout();
                     this.festivalTickets = await ticketsRes.json();
                     this.deletedFestivalTickets = await binRes.json();
+                    if (this.festivalTab === 'planner') {
+                        await this.fetchPlannerData();
+                    }
+                    if (this.festivalTab === 'volunteers') {
+                        await this.fetchVolunteers();
+                    }
+                    if (this.festivalTab === 'timeline') {
+                        await this.fetchTimeline();
+                    }
                     this.items = [];
                 } else {
                     const res = await fetch(`${this.BASE_URL}/${this.view}/`, {
@@ -239,6 +274,53 @@ document.addEventListener('alpine:init', () => {
 
                 return matchType && matchHabitante && matchExpenseType;
             });
+        },
+
+        get plannerTimeSlots() {
+            const day = this.plannerDays.find(d => d.value === this.plannerSelectedDay);
+            if (!day) return [];
+            const slots = [];
+            const addSlot = (hour) => {
+                const label = `${String(hour).padStart(2, '0')}:00`;
+                slots.push({ value: label, label, hour });
+            };
+            if (day.endHour === day.startHour) {
+                for (let i = 0; i < 24; i++) {
+                    const h = (day.startHour + i) % 24;
+                    addSlot(h);
+                }
+            } else if (day.endHour < day.startHour) {
+                for (let h = day.startHour; h <= 23; h++) addSlot(h);
+                for (let h = 0; h < day.endHour; h++) addSlot(h);
+            } else {
+                for (let h = day.startHour; h < day.endHour; h++) addSlot(h);
+            }
+            return slots;
+        },
+
+        get scheduledActs() {
+            if (!Array.isArray(this.plannerActs)) return [];
+            return this.plannerActs.filter(a =>
+                a.day === this.plannerSelectedDay &&
+                a.venueId &&
+                a.startTime &&
+                a.endTime
+            );
+        },
+
+        get unscheduledActs() {
+            if (!Array.isArray(this.plannerActs)) return [];
+            return this.plannerActs.filter(a =>
+                !a.day || !a.venueId || !a.startTime || !a.endTime
+            );
+        },
+
+        get confirmedActsBudget() {
+            if (!Array.isArray(this.plannerActs)) return 0;
+            return this.plannerActs.reduce((sum, act) => {
+                if (act.status !== 'confirmed') return sum;
+                return sum + (parseFloat(act.price) || 0);
+            }, 0);
         },
 
         updateStats() {
@@ -712,6 +794,498 @@ document.addEventListener('alpine:init', () => {
         },
 
         // ── Festival ──
+
+        async switchFestivalTab(tab) {
+            this.festivalTab = tab;
+            if (tab === 'planner') {
+                await this.fetchPlannerData();
+            }
+            if (tab === 'volunteers') {
+                await this.fetchVolunteers();
+            }
+            if (tab === 'timeline') {
+                await this.fetchTimeline();
+            }
+        },
+
+        async fetchTimeline() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/timeline`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.status === 401) return this.logout();
+                this.timelineDeadlines = await res.json();
+            } catch (e) { console.error(e); }
+        },
+
+        openCreateDeadline() {
+            this.editingDeadline = {
+                title: '',
+                date: this.timelineStart,
+                notes: ''
+            };
+        },
+
+        openEditDeadline(d) {
+            this.editingDeadline = { ...d };
+        },
+
+        async saveDeadline() {
+            if (!this.editingDeadline?.title?.trim()) {
+                alert('Il titolo è obbligatorio');
+                return;
+            }
+            if (!this.editingDeadline?.date) {
+                alert('La data è obbligatoria');
+                return;
+            }
+            try {
+                const isUpdate = !!this.editingDeadline.id;
+                const url = isUpdate
+                    ? `${this.BASE_URL}/festival/timeline/${this.editingDeadline.id}`
+                    : `${this.BASE_URL}/festival/timeline`;
+                const payload = {
+                    title: this.editingDeadline.title,
+                    date: this.editingDeadline.date,
+                    notes: this.editingDeadline.notes
+                };
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio scadenza");
+                this.editingDeadline = null;
+                await this.fetchTimeline();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteDeadline(id) {
+            if (!await this.showConfirm("Eliminare questa scadenza?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/timeline/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione scadenza");
+                await this.fetchTimeline();
+            } catch (e) { alert(e.message); }
+        },
+
+        timelinePosition(dateStr) {
+            if (!dateStr) return 0;
+            const start = new Date(this.timelineStart).getTime();
+            const end = new Date(this.timelineEnd).getTime();
+            const cur = new Date(dateStr).getTime();
+            if (Number.isNaN(start) || Number.isNaN(end) || Number.isNaN(cur) || end <= start) return 0;
+            const clamped = Math.max(start, Math.min(cur, end));
+            const pct = ((clamped - start) / (end - start)) * 100;
+            return Math.max(0, Math.min(100, pct));
+        },
+
+        get timelineTodayPosition() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            return this.timelinePosition(todayStr);
+        },
+
+        async fetchVolunteers() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/volunteers`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.status === 401) return this.logout();
+                this.volunteers = await res.json();
+            } catch (e) { console.error(e); }
+        },
+
+        openCreateVolunteer() {
+            this.editingVolunteer = {
+                name: '',
+                email: '',
+                role: '',
+                availability: '',
+                notes: '',
+                tasksText: ''
+            };
+        },
+
+        openEditVolunteer(v) {
+            const tasksText = Array.isArray(v.tasks) ? v.tasks.map(t => t.task).join(', ') : '';
+            this.editingVolunteer = {
+                ...v,
+                tasksText
+            };
+        },
+
+        async saveVolunteer() {
+            if (!this.editingVolunteer?.name?.trim()) {
+                alert('Il nome è obbligatorio');
+                return;
+            }
+            try {
+                const isUpdate = !!this.editingVolunteer.id;
+                const url = isUpdate
+                    ? `${this.BASE_URL}/festival/volunteers/${this.editingVolunteer.id}`
+                    : `${this.BASE_URL}/festival/volunteers`;
+                const payload = {
+                    name: this.editingVolunteer.name,
+                    email: this.editingVolunteer.email,
+                    role: this.editingVolunteer.role,
+                    availability: this.editingVolunteer.availability,
+                    notes: this.editingVolunteer.notes,
+                    tasks: this.editingVolunteer.tasksText
+                        ? this.editingVolunteer.tasksText.split(',').map(t => t.trim()).filter(Boolean)
+                        : []
+                };
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio volontario");
+                this.editingVolunteer = null;
+                await this.fetchVolunteers();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteVolunteer(id) {
+            if (!await this.showConfirm("Eliminare questo volontario?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/volunteers/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione volontario");
+                await this.fetchVolunteers();
+            } catch (e) { alert(e.message); }
+        },
+
+        async fetchPlannerData() {
+            try {
+                const [venuesRes, actsRes] = await Promise.all([
+                    fetch(`${this.BASE_URL}/festival/planner/venues`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/festival/planner/acts`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                ]);
+                if (venuesRes.status === 401 || actsRes.status === 401) return this.logout();
+                this.plannerVenues = await venuesRes.json();
+                this.plannerActs = await actsRes.json();
+            } catch (e) { console.error(e); }
+        },
+
+        openCreateVenue() {
+            this.editingVenue = { name: '', sortOrder: 0 };
+        },
+
+        openEditVenue(v) {
+            this.editingVenue = { ...v };
+        },
+
+        async saveVenue() {
+            if (!this.editingVenue?.name?.trim()) {
+                alert('Il nome è obbligatorio');
+                return;
+            }
+            try {
+                const isUpdate = !!this.editingVenue.id;
+                const url = isUpdate
+                    ? `${this.BASE_URL}/festival/planner/venues/${this.editingVenue.id}`
+                    : `${this.BASE_URL}/festival/planner/venues`;
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({
+                        name: this.editingVenue.name,
+                        sortOrder: this.editingVenue.sortOrder
+                    })
+                });
+                if (!res.ok) throw new Error("Errore salvataggio venue");
+                this.editingVenue = null;
+                await this.fetchPlannerData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteVenue(id) {
+            if (!await this.showConfirm("Eliminare questa venue?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/planner/venues/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione venue");
+                await this.fetchPlannerData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async createQuickVenue() {
+            if (!this.newVenueName.trim()) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/planner/venues`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ name: this.newVenueName, sortOrder: this.plannerVenues.length })
+                });
+                if (!res.ok) throw new Error("Errore creazione venue");
+                this.newVenueName = '';
+                await this.fetchPlannerData();
+            } catch (e) { alert(e.message); }
+        },
+
+        openCreateAct() {
+            this.editingAct = {
+                title: '',
+                description: '',
+                status: 'draft',
+                category: 'other',
+                venueId: null,
+                day: this.plannerSelectedDay,
+                startTime: '',
+                endTime: '',
+                price: 0,
+            };
+        },
+
+        openEditAct(act) {
+            this.editingAct = {
+                ...act,
+                venueId: act.venueId || act.venue?.id || null,
+            };
+            delete this.editingAct.venue;
+        },
+
+        async saveAct() {
+            if (!this.editingAct?.title?.trim()) {
+                alert('Il titolo è obbligatorio');
+                return;
+            }
+            try {
+                const isUpdate = !!this.editingAct.id;
+                const url = isUpdate
+                    ? `${this.BASE_URL}/festival/planner/acts/${this.editingAct.id}`
+                    : `${this.BASE_URL}/festival/planner/acts`;
+                const payload = {
+                    title: this.editingAct.title,
+                    description: this.editingAct.description,
+                    status: this.editingAct.status,
+                    category: this.editingAct.category,
+                    venueId: this.editingAct.venueId || null,
+                    day: this.editingAct.day || null,
+                    startTime: this.editingAct.startTime || null,
+                    endTime: this.editingAct.endTime || null,
+                    price: parseFloat(this.editingAct.price) || 0
+                };
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio atto");
+                this.editingAct = null;
+                await this.fetchPlannerData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteAct(id) {
+            if (!await this.showConfirm("Eliminare questo atto?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/planner/acts/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione atto");
+                this.editingAct = null;
+                await this.fetchPlannerData();
+            } catch (e) { alert(e.message); }
+        },
+
+        timeToSlotIndex(time) {
+            if (!time) return null;
+            const hour = parseInt(String(time).split(':')[0], 10);
+            if (Number.isNaN(hour)) return null;
+            const label = `${String(hour).padStart(2, '0')}:00`;
+            return this.plannerTimeSlots.findIndex(s => s.value === label);
+        },
+
+        actGridRow(act) {
+            const startIndex = this.timeToSlotIndex(act.startTime);
+            if (startIndex === null || startIndex < 0) return null;
+            const day = this.plannerDays.find(d => d.value === this.plannerSelectedDay);
+            const slotsLen = this.plannerTimeSlots.length;
+            let endIndex = null;
+
+            if (act.endTime) {
+                endIndex = this.timeToSlotIndex(act.endTime);
+                const endHour = parseInt(String(act.endTime).split(':')[0], 10);
+                if ((endIndex === null || endIndex < 0) && day && endHour === day.endHour) {
+                    endIndex = slotsLen;
+                }
+                if (endIndex === null || endIndex < 0 || endIndex <= startIndex) {
+                    endIndex = slotsLen;
+                }
+            } else {
+                endIndex = startIndex + 1;
+            }
+
+            const gridStart = startIndex + 2;
+            const gridEnd = endIndex + 2;
+            return `${gridStart} / ${gridEnd}`;
+        },
+
+        actGridColumn(act) {
+            if (!act.venueId) return null;
+            const idx = this.plannerVenues.findIndex(v => v.id === act.venueId);
+            if (idx < 0) return null;
+            return `${idx + 2}`;
+        },
+
+        getActDurationSlots(act) {
+            const startIndex = this.timeToSlotIndex(act.startTime);
+            if (startIndex === null || startIndex < 0) return 1;
+            const day = this.plannerDays.find(d => d.value === this.plannerSelectedDay);
+            const slotsLen = this.plannerTimeSlots.length;
+            const endIndex = this.timeToSlotIndex(act.endTime);
+            if (endIndex === null || endIndex < 0 || endIndex <= startIndex) {
+                if (day && act.endTime) {
+                    const endHour = parseInt(String(act.endTime).split(':')[0], 10);
+                    if (!Number.isNaN(endHour) && endHour === day.endHour) {
+                        return Math.max(1, slotsLen - startIndex);
+                    }
+                }
+                return Math.max(1, slotsLen - startIndex);
+            }
+            return Math.max(1, endIndex - startIndex);
+        },
+
+        onActDragStart(act, event) {
+            if (!this.canWrite) return;
+            const durationSlots = this.getActDurationSlots(act);
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('application/json', JSON.stringify({
+                id: act.id,
+                durationSlots,
+            }));
+        },
+
+        onGridDragOver(event) {
+            if (!this.canWrite) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+        },
+
+        async onGridDrop(event, slotIndex, venueId) {
+            if (!this.canWrite) return;
+            event.preventDefault();
+            try {
+                const raw = event.dataTransfer.getData('application/json');
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                const act = this.plannerActs.find(a => a.id === data.id);
+                if (!act) return;
+                const duration = Math.max(1, data.durationSlots || 1);
+                const slotsLen = this.plannerTimeSlots.length;
+                const newStartIndex = Math.max(0, Math.min(slotIndex, slotsLen - 1));
+                const newEndIndex = Math.min(slotsLen, newStartIndex + duration);
+
+                const startLabel = this.plannerTimeSlots[newStartIndex]?.value || null;
+                let endLabel = null;
+                if (newEndIndex >= slotsLen) {
+                    const day = this.plannerDays.find(d => d.value === this.plannerSelectedDay);
+                    if (day) {
+                        endLabel = `${String(day.endHour).padStart(2, '0')}:00`;
+                    }
+                } else {
+                    endLabel = this.plannerTimeSlots[newEndIndex]?.value || null;
+                }
+
+                const payload = {
+                    title: act.title,
+                    description: act.description,
+                    status: act.status,
+                    category: act.category,
+                    venueId: venueId || null,
+                    day: this.plannerSelectedDay,
+                    startTime: startLabel,
+                    endTime: endLabel,
+                    price: parseFloat(act.price) || 0
+                };
+
+                const res = await fetch(`${this.BASE_URL}/festival/planner/acts/${act.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio atto");
+                await this.fetchPlannerData();
+            } catch (e) {
+                alert(e.message);
+            }
+        },
+
+        async onUnscheduledDrop(event) {
+            if (!this.canWrite) return;
+            event.preventDefault();
+            try {
+                const raw = event.dataTransfer.getData('application/json');
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                const act = this.plannerActs.find(a => a.id === data.id);
+                if (!act) return;
+
+                const payload = {
+                    title: act.title,
+                    description: act.description,
+                    status: act.status,
+                    category: act.category,
+                    venueId: null,
+                    day: null,
+                    startTime: null,
+                    endTime: null,
+                    price: parseFloat(act.price) || 0
+                };
+
+                const res = await fetch(`${this.BASE_URL}/festival/planner/acts/${act.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio atto");
+                await this.fetchPlannerData();
+            } catch (e) {
+                alert(e.message);
+            }
+        },
+
+        actColor(act) {
+            const map = {
+                draft: '#e2e8f0',
+                tentative: '#fefcbf',
+                confirmed: '#c6f6d5',
+                cancelled: '#fed7d7',
+            };
+            return map[act.status] || '#e2e8f0';
+        },
+
+        actBorderColor(act) {
+            const map = {
+                draft: '#a0aec0',
+                tentative: '#d69e2e',
+                confirmed: '#38a169',
+                cancelled: '#e53e3e',
+            };
+            return map[act.status] || '#a0aec0';
+        },
+
+        categoryLabel(cat) {
+            const labels = {
+                talk: 'Talk',
+                djset: 'DJ Set',
+                walk: 'Walk',
+                performance: 'Performance',
+                workshop: 'Workshop',
+                concert: 'Concerto',
+                other: 'Altro',
+            };
+            return labels[cat] || cat;
+        },
 
         async startFestivalApproval(t) {
             try {

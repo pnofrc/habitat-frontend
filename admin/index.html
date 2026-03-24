@@ -257,6 +257,222 @@
         .fc .fc-daygrid-event {
             font-size: 11px;
         }
+
+        .planner-sub-tabs,
+        .day-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .planner-sub-tabs button,
+        .day-tabs button {
+            border: 1px solid #000;
+            padding: 6px 10px;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .planner-sub-tabs button.active,
+        .day-tabs button.active {
+            background: #000;
+            color: #fff;
+        }
+
+        .planner-grid {
+            display: grid;
+            gap: 0;
+            position: relative;
+            border: 1px solid #000;
+            background: #fff;
+        }
+
+        .time-label {
+            font-size: 10px;
+            color: #666;
+            padding: 2px 4px;
+            border-right: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            text-align: right;
+        }
+
+        .time-label.header {
+            border-bottom: 1px solid #000;
+            background: #f7f7f7;
+        }
+
+        .venue-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 6px 8px;
+            border-bottom: 1px solid #000;
+            border-left: 1px solid #eee;
+            background: #f7f7f7;
+        }
+
+        .grid-cell {
+            border-left: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .act-card {
+            position: relative;
+            border: 1px solid #000;
+            padding: 6px 6px;
+            font-size: 11px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .act-card small {
+            display: block;
+            font-size: 9px;
+            color: #333;
+        }
+
+        .act-card.cancelled {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .act-badge {
+            display: inline-block;
+            font-size: 8px;
+            padding: 1px 4px;
+            border: 1px solid #000;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .unscheduled-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .unscheduled-chip {
+            border: 1px solid #000;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .unscheduled-chip.cancelled {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .planner-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 10px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #000;
+            padding: 3px 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border: 1px solid #000;
+            display: inline-block;
+        }
+
+        .task-chip {
+            display: inline-block;
+            border: 1px solid #000;
+            padding: 2px 6px;
+            font-size: 10px;
+            margin: 2px 4px 2px 0;
+        }
+
+        .timeline-wrap {
+            border: 1px solid #000;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .timeline-line {
+            position: relative;
+            height: 2px;
+            background: #000;
+            margin: 20px 0 10px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            top: -5px;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+        }
+
+        .timeline-dot .label {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .timeline-today {
+            position: absolute;
+            top: -10px;
+            width: 2px;
+            height: 24px;
+            background: #e53e3e;
+            transform: translateX(-50%);
+        }
+
+        .timeline-axis {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #555;
+        }
+
+        .venue-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .planner-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .planner-actions button {
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 14px;
+        }
+
+        .planner-actions .create {
+            padding: 0 14px;
+            margin-bottom: 0;
+        }
     </style>
 </head>
 
@@ -756,70 +972,285 @@
 
                 <!-- FESTIVAL -->
                 <div x-show="view === 'festival'">
-                    <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
-                        <div class="card" style="flex:1"><small>PRENOTATI</small><br><b x-text="festivalTicketCount"></b></div>
-                        <div class="card" style="flex:1"><small>CONFERMATI</small><br><b x-text="festivalConfirmedCount" style="color:green"></b></div>
-                    </div>
-                    <div class="card">
-                        <h3 style="margin:0 0 15px">Biglietti Festival</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Cognome</th>
-                                    <th>Email</th>
-                                    <th>Pagamento</th>
-                                    <th>Stato</th>
-                                    <th x-show="canWrite"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template x-for="t in festivalTickets" :key="t.id">
-                                    <tr>
-                                        <td x-text="t.name"></td>
-                                        <td x-text="t.surname"></td>
-                                        <td x-text="t.email"></td>
-                                        <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
-                                        <td>
-                                            <span x-show="t.confirmed" class="status-tag" style="color:green; border-color:green;">CONFERMATO</span>
-                                            <span x-show="!t.confirmed" class="status-tag" style="color:#999; border-color:#999;">IN ATTESA</span>
-                                        </td>
-                                        <td x-show="canWrite">
-                                            <button x-show="!t.confirmed" @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
-                                            <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
+                    <div class="planner-sub-tabs">
+                        <button :class="festivalTab === 'tickets' && 'active'" @click="switchFestivalTab('tickets')">Biglietti</button>
+                        <button :class="festivalTab === 'planner' && 'active'" @click="switchFestivalTab('planner')">Planner</button>
+                        <button :class="festivalTab === 'volunteers' && 'active'" @click="switchFestivalTab('volunteers')">Volontari</button>
+                        <button :class="festivalTab === 'timeline' && 'active'" @click="switchFestivalTab('timeline')">Timeline</button>
                     </div>
 
-                    <div class="card" x-show="deletedFestivalTickets.length > 0">
-                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedFestivalTickets.length + ')'"></span></h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Cognome</th>
-                                    <th>Email</th>
-                                    <th>Eliminato il</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template x-for="t in deletedFestivalTickets" :key="t.id">
+                    <div x-show="festivalTab === 'tickets'">
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
+                            <div class="card" style="flex:1"><small>PRENOTATI</small><br><b x-text="festivalTicketCount"></b></div>
+                            <div class="card" style="flex:1"><small>CONFERMATI</small><br><b x-text="festivalConfirmedCount" style="color:green"></b></div>
+                        </div>
+                        <div class="card">
+                            <h3 style="margin:0 0 15px">Biglietti Festival</h3>
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td x-text="t.name"></td>
-                                        <td x-text="t.surname"></td>
-                                        <td x-text="t.email"></td>
-                                        <td x-text="formatDate(t.deletedAt)"></td>
-                                        <td>
-                                            <button x-show="canWrite" @click="restoreFestivalTicket(t)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
-                                        </td>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Email</th>
+                                        <th>Pagamento</th>
+                                        <th>Stato</th>
+                                        <th x-show="canWrite"></th>
                                     </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="t in festivalTickets" :key="t.id">
+                                        <tr>
+                                            <td x-text="t.name"></td>
+                                            <td x-text="t.surname"></td>
+                                            <td x-text="t.email"></td>
+                                            <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
+                                            <td>
+                                                <span x-show="t.confirmed" class="status-tag" style="color:green; border-color:green;">CONFERMATO</span>
+                                                <span x-show="!t.confirmed" class="status-tag" style="color:#999; border-color:#999;">IN ATTESA</span>
+                                            </td>
+                                            <td x-show="canWrite">
+                                                <button x-show="!t.confirmed" @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
+                                                <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card" x-show="deletedFestivalTickets.length > 0">
+                            <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedFestivalTickets.length + ')'"></span></h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Email</th>
+                                        <th>Eliminato il</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="t in deletedFestivalTickets" :key="t.id">
+                                        <tr>
+                                            <td x-text="t.name"></td>
+                                            <td x-text="t.surname"></td>
+                                            <td x-text="t.email"></td>
+                                            <td x-text="formatDate(t.deletedAt)"></td>
+                                            <td>
+                                                <button x-show="canWrite" @click="restoreFestivalTicket(t)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div x-show="festivalTab === 'planner'">
+                        <div style="display:flex; gap:10px; margin-bottom:20px; align-items:stretch;">
+                            <div class="card" style="flex:1; text-align:center;">
+                                <small>BUDGET CONFERMATO</small><br>
+                                <b x-text="'€ ' + confirmedActsBudget.toFixed(2)"></b>
+                            </div>
+                            <div class="planner-actions">
+                                <button x-show="canWrite" class="create" @click="openCreateAct()">+ NUOVO ATTO</button>
+                                <button x-show="canWrite" @click="showVenueManager = !showVenueManager"
+                                    style="border:1px solid #000; padding:8px 15px;">GESTISCI VENUES</button>
+                            </div>
+                        </div>
+
+                        <div class="card" x-show="showVenueManager">
+                            <h3 style="margin:0 0 10px">Venues</h3>
+                            <div>
+                                <template x-for="v in plannerVenues" :key="v.id">
+                                    <div class="venue-list-item">
+                                        <div>
+                                            <b x-text="v.name"></b>
+                                            <small style="margin-left:8px; color:#666;" x-text="'Ordine ' + (v.sortOrder ?? 0)"></small>
+                                        </div>
+                                        <div>
+                                            <button x-show="canWrite" @click="openEditVenue(v)" class="btn-del" style="color:#2b6cb0">MOD</button>
+                                            <button x-show="canWrite" @click="deleteVenue(v.id)" class="btn-del">X</button>
+                                        </div>
+                                    </div>
                                 </template>
-                            </tbody>
-                        </table>
+                            </div>
+                            <div x-show="canWrite" style="display:flex; gap:10px; margin-top:10px;">
+                                <input type="text" placeholder="Nuova venue" x-model="newVenueName" style="margin:0;">
+                                <button @click="createQuickVenue()" style="border:1px solid #000; padding:6px 10px;">AGGIUNGI</button>
+                            </div>
+                            <button x-show="canWrite" @click="openCreateVenue()" class="create" style="margin-top:10px;">+ NUOVA VENUE</button>
+                        </div>
+
+                        <div class="day-tabs">
+                            <template x-for="d in plannerDays" :key="d.value">
+                                <button :class="plannerSelectedDay === d.value && 'active'" @click="plannerSelectedDay = d.value" x-text="d.label"></button>
+                            </template>
+                        </div>
+
+                        <div class="card" style="overflow:auto;">
+                            <div class="planner-grid"
+                                :style="`grid-template-columns: 50px repeat(${Math.max(plannerVenues.length, 1)}, minmax(140px, 1fr)); grid-template-rows: 40px repeat(${plannerTimeSlots.length}, 18px);`">
+                                <div class="time-label header" style="grid-row:1; grid-column:1;">ORA</div>
+                                <template x-for="(v, vIndex) in plannerVenues" :key="v.id">
+                                    <div class="venue-header" :style="`grid-row:1; grid-column:${vIndex + 2};`" x-text="v.name"></div>
+                                </template>
+
+                                <template x-for="(slot, sIndex) in plannerTimeSlots" :key="slot.value">
+                                    <div class="time-label" :style="`grid-row:${sIndex + 2}; grid-column:1;`" x-text="slot.label"></div>
+                                </template>
+
+                                <template x-for="(slot, sIndex) in plannerTimeSlots" :key="'cells-' + sIndex">
+                                    <template x-for="(v, vIndex) in plannerVenues" :key="v.id + '-' + sIndex">
+                                        <div class="grid-cell"
+                                            :style="`grid-row:${sIndex + 2}; grid-column:${vIndex + 2};`"
+                                            @dragover="onGridDragOver($event)"
+                                            @drop="onGridDrop($event, sIndex, v.id)"></div>
+                                    </template>
+                                </template>
+
+                                <template x-for="act in scheduledActs" :key="act.id">
+                                    <div class="act-card" :class="act.status === 'cancelled' && 'cancelled'"
+                                        :style="`grid-row: ${actGridRow(act)}; grid-column: ${actGridColumn(act)}; background: ${actColor(act)}; border-color: ${actBorderColor(act)};`"
+                                        @click="canWrite && openEditAct(act)"
+                                        :draggable="canWrite"
+                                        @dragstart="onActDragStart(act, $event)">
+                                        <b x-text="act.title"></b>
+                                        <small x-text="(act.startTime || '') + ' - ' + (act.endTime || '')"></small>
+                                        <span class="act-badge" x-text="categoryLabel(act.category)"></span>
+                                        <small x-text="act.price ? ('€ ' + parseFloat(act.price).toFixed(2)) : '€ 0.00'"></small>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="card" @dragover="onGridDragOver($event)" @drop="onUnscheduledDrop($event)">
+                            <h3 style="margin:0 0 10px">Non schedulati</h3>
+                            <div class="unscheduled-list">
+                                <template x-for="act in unscheduledActs" :key="'uns-' + act.id">
+                                    <div class="unscheduled-chip"
+                                        :class="act.status === 'cancelled' && 'cancelled'"
+                                        :style="`background:${actColor(act)}; border-color:${actBorderColor(act)};`"
+                                        @click="canWrite && openEditAct(act)"
+                                        :draggable="canWrite"
+                                        @dragstart="onActDragStart(act, $event)">
+                                        <b x-text="act.title"></b>
+                                        <small style="display:block; color:#666;" x-text="categoryLabel(act.category)"></small>
+                                    </div>
+                                </template>
+                                <div x-show="unscheduledActs.length === 0" style="font-size:11px; color:#666;">Nessun atto non schedulato.</div>
+                            </div>
+                            <div class="planner-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#c6f6d5; border-color:#38a169;"></span>
+                                    Confermato
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#fefcbf; border-color:#d69e2e;"></span>
+                                    Tentativo
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#e2e8f0; border-color:#a0aec0;"></span>
+                                    Bozza
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#fed7d7; border-color:#e53e3e;"></span>
+                                    Rifiutato
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="festivalTab === 'volunteers'">
+                        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+                            <h3 style="margin:0">Volontari</h3>
+                            <button x-show="canWrite" class="create" @click="openCreateVolunteer()">+ NUOVO VOLONTARIO</button>
+                        </div>
+                        <div class="card">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Ruolo</th>
+                                        <th>Disponibilità</th>
+                                        <th>Compiti</th>
+                                        <th>Note</th>
+                                        <th x-show="canWrite"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="v in volunteers" :key="v.id">
+                                        <tr>
+                                            <td @click="canWrite && openEditVolunteer(v)" style="cursor:pointer; text-decoration:underline;" x-text="v.name"></td>
+                                            <td x-text="v.email || '-'"></td>
+                                            <td x-text="v.role || '-'"></td>
+                                            <td x-text="v.availability || '-'"></td>
+                                            <td>
+                                                <template x-for="t in (v.tasks || [])" :key="t.id">
+                                                    <span class="task-chip" x-text="t.task"></span>
+                                                </template>
+                                            </td>
+                                            <td x-text="v.notes || '-'"></td>
+                                            <td x-show="canWrite">
+                                                <button @click="openEditVolunteer(v)" class="btn-del" style="color:#2b6cb0">MOD</button>
+                                                <button @click="deleteVolunteer(v.id)" class="btn-del">X</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div x-show="festivalTab === 'timeline'">
+                        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+                            <h3 style="margin:0">Timeline</h3>
+                            <button x-show="canWrite" class="create" @click="openCreateDeadline()">+ NUOVA SCADENZA</button>
+                        </div>
+                        <div class="timeline-wrap">
+                            <div class="timeline-line">
+                                <div class="timeline-today" :style="`left:${timelineTodayPosition}%`" title="Oggi"></div>
+                                <template x-for="d in timelineDeadlines" :key="d.id">
+                                    <div class="timeline-dot"
+                                        :style="`left:${timelinePosition(d.date)}%`"
+                                        @click="canWrite && openEditDeadline(d)">
+                                        <span class="label" x-text="d.title"></span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="timeline-axis">
+                                <span>19 Mar 2026</span>
+                                <span>16 Lug 2026</span>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Titolo</th>
+                                        <th>Note</th>
+                                        <th x-show="canWrite"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="d in timelineDeadlines" :key="d.id">
+                                        <tr>
+                                            <td x-text="formatDate(d.date)"></td>
+                                            <td @click="canWrite && openEditDeadline(d)" style="cursor:pointer; text-decoration:underline;" x-text="d.title"></td>
+                                            <td x-text="d.notes || '-'"></td>
+                                            <td x-show="canWrite">
+                                                <button @click="openEditDeadline(d)" class="btn-del" style="color:#2b6cb0">MOD</button>
+                                                <button @click="deleteDeadline(d.id)" class="btn-del">X</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -1353,6 +1784,156 @@
 
                         <button class="btn-blk" @click="confirmFestivalApproval()">CONFERMA E INVIA</button>
                         <button @click="festivalApproval = null"
+                            style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Act Edit -->
+            <template x-if="editingAct">
+                <div class="modal-overlay" @click.self="editingAct = null">
+                    <div class="modal-box" style="text-align:left; min-width:420px;">
+                        <h3 style="margin:0 0 10px">Atto Festival</h3>
+
+                        <label>Titolo</label>
+                        <input type="text" x-model="editingAct.title">
+
+                        <label>Descrizione</label>
+                        <textarea x-model="editingAct.description" rows="3"></textarea>
+
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:1;">
+                                <label>Stato</label>
+                                <select x-model="editingAct.status">
+                                    <option value="draft">Draft</option>
+                                    <option value="tentative">Tentative</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label>Categoria</label>
+                                <select x-model="editingAct.category">
+                                    <option value="talk">Talk</option>
+                                    <option value="djset">DJ Set</option>
+                                    <option value="walk">Walk</option>
+                                    <option value="performance">Performance</option>
+                                    <option value="workshop">Workshop</option>
+                                    <option value="concert">Concerto</option>
+                                    <option value="other">Altro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label>Venue</label>
+                        <select x-model.number="editingAct.venueId">
+                            <option value="">Nessuna</option>
+                            <template x-for="v in plannerVenues" :key="v.id">
+                                <option :value="v.id" x-text="v.name"></option>
+                            </template>
+                        </select>
+
+                        <label>Giorno</label>
+                        <select x-model="editingAct.day">
+                            <template x-for="d in plannerDays" :key="d.value">
+                                <option :value="d.value" x-text="d.label"></option>
+                            </template>
+                        </select>
+
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:1;">
+                                <label>Inizio</label>
+                                <input type="time" x-model="editingAct.startTime">
+                            </div>
+                            <div style="flex:1;">
+                                <label>Fine</label>
+                                <input type="time" x-model="editingAct.endTime">
+                            </div>
+                        </div>
+
+                        <label>Prezzo</label>
+                        <input type="number" step="0.01" x-model="editingAct.price">
+
+                        <button class="btn-blk" @click="saveAct()">SALVA</button>
+                        <button x-show="editingAct.id" @click="deleteAct(editingAct.id)"
+                            style="width:100%; margin-top:8px; border:1px solid #000; background:none; cursor:pointer;">ELIMINA</button>
+                        <button @click="editingAct = null"
+                            style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Venue Edit -->
+            <template x-if="editingVenue">
+                <div class="modal-overlay" @click.self="editingVenue = null">
+                    <div class="modal-box" style="text-align:left; min-width:360px;">
+                        <h3 style="margin:0 0 10px">Venue</h3>
+
+                        <label>Nome</label>
+                        <input type="text" x-model="editingVenue.name">
+
+                        <label>Ordine</label>
+                        <input type="number" x-model.number="editingVenue.sortOrder">
+
+                        <button class="btn-blk" @click="saveVenue()">SALVA</button>
+                        <button @click="editingVenue = null"
+                            style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Volunteer Edit -->
+            <template x-if="editingVolunteer">
+                <div class="modal-overlay" @click.self="editingVolunteer = null">
+                    <div class="modal-box" style="text-align:left; min-width:420px;">
+                        <h3 style="margin:0 0 10px">Volontario</h3>
+
+                        <label>Nome</label>
+                        <input type="text" x-model="editingVolunteer.name">
+
+                        <label>Email</label>
+                        <input type="text" x-model="editingVolunteer.email">
+
+                        <label>Ruolo</label>
+                        <input type="text" x-model="editingVolunteer.role">
+
+                        <label>Disponibilità</label>
+                        <input type="text" x-model="editingVolunteer.availability">
+
+                        <label>Compiti (separati da virgola)</label>
+                        <input type="text" x-model="editingVolunteer.tasksText">
+
+                        <label>Note</label>
+                        <textarea x-model="editingVolunteer.notes" rows="3"></textarea>
+
+                        <button class="btn-blk" @click="saveVolunteer()">SALVA</button>
+                        <button x-show="editingVolunteer.id" @click="deleteVolunteer(editingVolunteer.id)"
+                            style="width:100%; margin-top:8px; border:1px solid #000; background:none; cursor:pointer;">ELIMINA</button>
+                        <button @click="editingVolunteer = null"
+                            style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Timeline Deadline -->
+            <template x-if="editingDeadline">
+                <div class="modal-overlay" @click.self="editingDeadline = null">
+                    <div class="modal-box" style="text-align:left; min-width:360px;">
+                        <h3 style="margin:0 0 10px">Scadenza</h3>
+
+                        <label>Titolo</label>
+                        <input type="text" x-model="editingDeadline.title">
+
+                        <label>Data</label>
+                        <input type="date" x-model="editingDeadline.date">
+
+                        <label>Note</label>
+                        <textarea x-model="editingDeadline.notes" rows="3"></textarea>
+
+                        <button class="btn-blk" @click="saveDeadline()">SALVA</button>
+                        <button x-show="editingDeadline.id" @click="deleteDeadline(editingDeadline.id)"
+                            style="width:100%; margin-top:8px; border:1px solid #000; background:none; cursor:pointer;">ELIMINA</button>
+                        <button @click="editingDeadline = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>
                 </div>
