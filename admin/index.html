@@ -601,6 +601,7 @@
                                     <th>Da</th>
                                     <th>A</th>
                                     <th>Stato Ospite</th>
+                                    <th>Proposta</th>
                                     <th x-show="canWrite">Azioni</th>
                                 </tr>
                             </thead>
@@ -621,6 +622,9 @@
                                             <span class="status-tag"
                                                 :style="'color:' + getGuestStatusColor(b.guestStatus) + '; border-color:' + getGuestStatusColor(b.guestStatus)"
                                                 x-text="getGuestStatusLabel(b.guestStatus)"></span>
+                                        </td>
+                                        <td>
+                                            <button x-show="b.residency?.proposal" @click="proposalModal = b.residency" style="font-size:10px; color:#2b6cb0;">LEGGI</button>
                                         </td>
                                         <td x-show="canWrite">
                                             <template x-if="b.guestStatus === 'standby' && b.status !== 'cancelled'">
@@ -719,6 +723,7 @@
                                     <th>Dal</th>
                                     <th>Al</th>
                                     <th>Esito</th>
+                                    <th>Proposta</th>
                                     <th>Eliminato il</th>
                                     <th></th>
                                 </tr>
@@ -734,6 +739,9 @@
                                             <span x-show="r.status === 'approved'" class="status-tag" style="color:green; border-color:green;">APPROVATA</span>
                                             <span x-show="r.status === 'rejected'" class="status-tag" style="color:red; border-color:red;">RIFIUTATA</span>
                                             <span x-show="r.status === 'pending' || !r.status" class="status-tag" style="color:#999; border-color:#999;">ELIMINATA</span>
+                                        </td>
+                                        <td>
+                                            <button x-show="r.proposal" @click="proposalModal = r" style="font-size:10px; color:#2b6cb0;">LEGGI</button>
                                         </td>
                                         <td x-text="formatDate(r.deletedAt)"></td>
                                         <td>
