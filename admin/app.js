@@ -76,8 +76,17 @@ document.addEventListener('alpine:init', () => {
         digestPreview: null,
         digestSending: false,
 
+        canWriteTab(tab) {
+            if (!this.currentUser) return false;
+            if (this.currentUser.role === 'admin') return true;
+            if (tab === 'users' || tab === 'telegram') return false;
+            const allowed = this.currentUser.allowedWriteTabs || [];
+            return allowed.includes(tab);
+        },
+
         get canWrite() {
-            return this.currentUser && this.currentUser.role === 'admin';
+            const tab = this.view === 'festival' ? 'festival' : this.view;
+            return this.canWriteTab(tab);
         },
 
         get visibleTabs() {
@@ -1496,11 +1505,24 @@ document.addEventListener('alpine:init', () => {
         },
 
         openCreateUser() {
-            this.editingUser = { username: '', password: '', email: '', role: 'reader', allowedTabs: [], active: true };
+            this.editingUser = {
+                username: '',
+                password: '',
+                email: '',
+                role: 'reader',
+                allowedTabs: [],
+                allowedWriteTabs: [],
+                active: true
+            };
         },
 
         openEditUser(user) {
-            this.editingUser = { ...user, password: '', allowedTabs: user.allowedTabs || [] };
+            this.editingUser = {
+                ...user,
+                password: '',
+                allowedTabs: user.allowedTabs || [],
+                allowedWriteTabs: user.allowedWriteTabs || []
+            };
         },
 
         toggleTab(tab) {
@@ -1510,6 +1532,16 @@ document.addEventListener('alpine:init', () => {
                 this.editingUser.allowedTabs.push(tab);
             } else {
                 this.editingUser.allowedTabs.splice(idx, 1);
+            }
+        },
+
+        toggleWriteTab(tab) {
+            if (!this.editingUser) return;
+            const idx = this.editingUser.allowedWriteTabs.indexOf(tab);
+            if (idx === -1) {
+                this.editingUser.allowedWriteTabs.push(tab);
+            } else {
+                this.editingUser.allowedWriteTabs.splice(idx, 1);
             }
         },
 

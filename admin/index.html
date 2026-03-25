@@ -1578,11 +1578,26 @@
                         <div class="sub-box">
                             <label>Tab consentite</label>
                             <div style="margin-top:5px;">
-                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'telegram']" :key="tab">
+                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']" :key="tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
                                             :checked="editingUser.allowedTabs.includes(tab)"
                                             @change="toggleTab(tab)">
+                                        <span x-text="tab" style="text-transform:capitalize;"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="editingUser.role !== 'admin'">
+                        <div class="sub-box">
+                            <label>Permessi Scrittura</label>
+                            <div style="margin-top:5px;">
+                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']" :key="'write-' + tab">
+                                    <label style="display:inline-block; margin-right:10px; font-weight:normal;">
+                                        <input type="checkbox" style="width:auto"
+                                            :checked="editingUser.allowedWriteTabs.includes(tab)"
+                                            @change="toggleWriteTab(tab)">
                                         <span x-text="tab" style="text-transform:capitalize;"></span>
                                     </label>
                                 </template>
