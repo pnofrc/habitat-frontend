@@ -455,6 +455,17 @@
             transform: translateX(-50%);
         }
 
+        .timeline-today .today-label {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            white-space: nowrap;
+            color: #e53e3e;
+            margin-top: 2px;
+        }
+
         .timeline-axis {
             display: flex;
             justify-content: space-between;
@@ -1299,6 +1310,7 @@
                         <div class="timeline-wrap">
                             <div class="timeline-line">
                                 <div class="timeline-today" :style="`left:${timelineTodayPosition}%`" title="Oggi">
+                                    <span class="today-label" x-text="timelineTodayLabel"></span>
                                 </div>
                                 <template x-for="(d, idx) in timelineDeadlines" :key="d.id">
                                     <div class="timeline-dot"

@@ -908,6 +908,10 @@ document.addEventListener('alpine:init', () => {
             return this.timelinePosition(todayStr);
         },
 
+        get timelineTodayLabel() {
+            return new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+        },
+
         async fetchVolunteers() {
             try {
                 const res = await fetch(`${this.BASE_URL}/festival/volunteers`, {
