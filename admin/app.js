@@ -649,13 +649,17 @@ document.addEventListener('alpine:init', () => {
                         new Date(b.checkOut) > from
                     )
                 );
+                const roomOptions = allRooms.map(name => ({
+                    name,
+                    available: availableRooms.includes(name),
+                    label: availableRooms.includes(name) ? name : name + ' (occupata)'
+                }));
                 this.residencyApproval = {
                     residency: r,
                     room: '',
                     emailSubject,
                     emailBody,
-                    availableRooms,
-                    allRooms
+                    roomOptions
                 };
             } catch (e) { alert(e.message); }
         },
