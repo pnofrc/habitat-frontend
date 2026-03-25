@@ -31,6 +31,7 @@ document.addEventListener('alpine:init', () => {
         plannerSelectedDay: '2026-07-16',
         editingAct: null,
         editingVenue: null,
+        plannerDayVenueIds: [],
         showVenueManager: false,
         newVenueName: '',
         volunteers: [],
@@ -305,6 +306,10 @@ document.addEventListener('alpine:init', () => {
                 for (let h = day.startHour; h < day.endHour; h++) addSlot(h);
             }
             return slots;
+        },
+
+        get plannerDayVenues() {
+            return this.plannerVenues.filter(v => this.plannerDayVenueIds.includes(v.id));
         },
 
         get scheduledActs() {
@@ -993,6 +998,34 @@ document.addEventListener('alpine:init', () => {
                 if (venuesRes.status === 401 || actsRes.status === 401) return this.logout();
                 this.plannerVenues = await venuesRes.json();
                 this.plannerActs = await actsRes.json();
+                await this.fetchDayVenues();
+            } catch (e) { console.error(e); }
+        },
+
+        async fetchDayVenues() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/planner/day-venues?day=${this.plannerSelectedDay}`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.status === 401) return this.logout();
+                const venues = await res.json();
+                this.plannerDayVenueIds = venues.map(v => v.id);
+            } catch (e) { console.error(e); }
+        },
+
+        async toggleDayVenue(venueId) {
+            const idx = this.plannerDayVenueIds.indexOf(venueId);
+            if (idx === -1) {
+                this.plannerDayVenueIds.push(venueId);
+            } else {
+                this.plannerDayVenueIds.splice(idx, 1);
+            }
+            try {
+                await fetch(`${this.BASE_URL}/festival/planner/day-venues`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ day: this.plannerSelectedDay, venueIds: this.plannerDayVenueIds })
+                });
             } catch (e) { console.error(e); }
         },
 
@@ -1156,7 +1189,7 @@ document.addEventListener('alpine:init', () => {
 
         actGridColumn(act) {
             if (!act.venueId) return null;
-            const idx = this.plannerVenues.findIndex(v => v.id === act.venueId);
+            const idx = this.plannerDayVenues.findIndex(v => v.id === act.venueId);
             if (idx < 0) return null;
             return `${idx + 2}`;
         },

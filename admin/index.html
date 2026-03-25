@@ -293,6 +293,10 @@
             color: #fff;
         }
 
+        .day-venue-toggles { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+        .venue-toggle { padding: 4px 10px; border: 1px solid #ccc; border-radius: 12px; font-size: 11px; cursor: pointer; color: #999; }
+        .venue-toggle.active { background: #2b6cb0; color: #fff; border-color: #2b6cb0; }
+
         .planner-grid {
             display: grid;
             gap: 0;
@@ -1175,15 +1179,25 @@
                         <div class="day-tabs">
                             <template x-for="d in plannerDays" :key="d.value">
                                 <button :class="plannerSelectedDay === d.value && 'active'"
-                                    @click="plannerSelectedDay = d.value" x-text="d.label"></button>
+                                    @click="plannerSelectedDay = d.value; fetchDayVenues()" x-text="d.label"></button>
+                            </template>
+                        </div>
+
+                        <div class="day-venue-toggles" x-show="canWrite">
+                            <template x-for="v in plannerVenues" :key="'dv-' + v.id">
+                                <label class="venue-toggle" :class="plannerDayVenueIds.includes(v.id) && 'active'">
+                                    <input type="checkbox" :checked="plannerDayVenueIds.includes(v.id)"
+                                        @change="toggleDayVenue(v.id)" style="display:none;">
+                                    <span x-text="v.name"></span>
+                                </label>
                             </template>
                         </div>
 
                         <div class="card" style="overflow:auto;">
                             <div class="planner-grid"
-                                :style="`grid-template-columns: 50px repeat(${Math.max(plannerVenues.length, 1)}, minmax(140px, 1fr)); grid-template-rows: 40px repeat(${plannerTimeSlots.length}, 18px);`">
+                                :style="`grid-template-columns: 50px repeat(${Math.max(plannerDayVenues.length, 1)}, minmax(140px, 1fr)); grid-template-rows: 40px repeat(${plannerTimeSlots.length}, 18px);`">
                                 <div class="time-label header" style="grid-row:1; grid-column:1;">ORA</div>
-                                <template x-for="(v, vIndex) in plannerVenues" :key="v.id">
+                                <template x-for="(v, vIndex) in plannerDayVenues" :key="v.id">
                                     <div class="venue-header" :style="`grid-row:1; grid-column:${vIndex + 2};`"
                                         x-text="v.name"></div>
                                 </template>
@@ -1194,7 +1208,7 @@
                                 </template>
 
                                 <template x-for="(slot, sIndex) in plannerTimeSlots" :key="'cells-' + sIndex">
-                                    <template x-for="(v, vIndex) in plannerVenues" :key="v.id + '-' + sIndex">
+                                    <template x-for="(v, vIndex) in plannerDayVenues" :key="v.id + '-' + sIndex">
                                         <div class="grid-cell"
                                             :style="`grid-row:${sIndex + 2}; grid-column:${vIndex + 2};`"
                                             @dragover="onGridDragOver($event)" @drop="onGridDrop($event, sIndex, v.id)">
