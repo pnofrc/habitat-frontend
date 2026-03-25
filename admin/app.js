@@ -649,7 +649,14 @@ document.addEventListener('alpine:init', () => {
                         new Date(b.checkOut) > from
                     )
                 );
-                this.residencyApproval = { residency: r, room: '', emailSubject, emailBody, availableRooms };
+                this.residencyApproval = {
+                    residency: r,
+                    room: '',
+                    emailSubject,
+                    emailBody,
+                    availableRooms,
+                    allRooms
+                };
             } catch (e) { alert(e.message); }
         },
 

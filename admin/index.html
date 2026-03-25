@@ -1869,8 +1869,10 @@
                         <label>Stanza</label>
                         <select x-model="residencyApproval.room">
                             <option value="">Scegli...</option>
-                            <template x-for="room in residencyApproval.availableRooms" :key="room">
-                                <option :value="room" x-text="room"></option>
+                            <template x-for="room in (residencyApproval.allRooms || [])" :key="room">
+                                <option :value="room"
+                                    :disabled="!residencyApproval.availableRooms.includes(room)"
+                                    x-text="residencyApproval.availableRooms.includes(room) ? room : (room + ' (occupata)')"></option>
                             </template>
                         </select>
 
