@@ -212,9 +212,17 @@
             text-transform: uppercase;
         }
 
-        .role-admin { color: #c53030; }
-        .role-reader { color: #2b6cb0; }
-        .role-reader_limited { color: #b7791f; }
+        .role-admin {
+            color: #c53030;
+        }
+
+        .role-reader {
+            color: #2b6cb0;
+        }
+
+        .role-reader_limited {
+            color: #b7791f;
+        }
 
         .tab-chip {
             display: inline-block;
@@ -235,10 +243,12 @@
             font-family: courier, monospace;
             font-size: 13px;
         }
+
         .fc .fc-toolbar-title {
             font-size: 16px;
             text-transform: uppercase;
         }
+
         .fc .fc-button {
             font-family: courier, monospace;
             font-size: 11px;
@@ -246,14 +256,17 @@
             background: #000;
             border-color: #000;
         }
+
         .fc .fc-button:hover {
             background: #333;
             border-color: #333;
         }
+
         .fc .fc-button-active {
             background: #333 !important;
             border-color: #333 !important;
         }
+
         .fc .fc-daygrid-event {
             font-size: 11px;
         }
@@ -497,18 +510,33 @@
             <nav>
                 <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
                     style="height: 28px; margin-right: 10px;">
-                <button x-show="visibleTabs.includes('expenses')" :class="view === 'expenses' && 'active'" @click="setView('expenses')">Flow Cassa</button>
-                <button x-show="visibleTabs.includes('guests')" :class="view === 'guests' && 'active'" @click="setView('guests')">Ospitalita'</button>
-                <button x-show="visibleTabs.includes('bookings')" :class="view === 'bookings' && 'active'" @click="setView('bookings')">Prenotazioni</button>
-                <button x-show="visibleTabs.includes('residency')" :class="view === 'residency' && 'active'" @click="setView('residency')">Residenze <span x-show="residencyCount > 0" x-text="'(' + residencyCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('membership')" :class="view === 'membership' && membershipTab === 'requests' && 'active'"
-                    @click="membershipTab = 'requests'; setView('membership')">Richiesta Tessere <span x-show="membershipRequestCount > 0" x-text="'(' + membershipRequestCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('membership')" :class="view === 'membership' && membershipTab === 'confirmed' && 'active'"
-                    @click="membershipTab = 'confirmed'; setView('membership')">Tesserati <span x-show="membershipConfirmedCount > 0" x-text="'(' + membershipConfirmedCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('festival')" :class="view === 'festival' && 'active'" @click="setView('festival')">Festival <span x-show="festivalTicketCount > 0" x-text="'(' + festivalTicketCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('calendar')" :class="view === 'calendar' && 'active'" @click="setView('calendar')">Calendario</button>
-                <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'" @click="setView('users')">Gestione Utenti</button>
-                <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'" @click="setView('telegram')">Telegram Bot</button>
+                <button x-show="visibleTabs.includes('expenses')" :class="view === 'expenses' && 'active'"
+                    @click="setView('expenses')">Flow Cassa</button>
+                <button x-show="visibleTabs.includes('guests')" :class="view === 'guests' && 'active'"
+                    @click="setView('guests')">Ospitalita'</button>
+                <button x-show="visibleTabs.includes('bookings')" :class="view === 'bookings' && 'active'"
+                    @click="setView('bookings')">Prenotazioni</button>
+                <button x-show="visibleTabs.includes('residency')" :class="view === 'residency' && 'active'"
+                    @click="setView('residency')">Residenze <span x-show="residencyCount > 0"
+                        x-text="'(' + residencyCount + ')'"></span></button>
+                <button x-show="visibleTabs.includes('membership')"
+                    :class="view === 'membership' && membershipTab === 'requests' && 'active'"
+                    @click="membershipTab = 'requests'; setView('membership')">Richiesta Tessere <span
+                        x-show="membershipRequestCount > 0" x-text="'(' + membershipRequestCount + ')'"></span></button>
+                <button x-show="visibleTabs.includes('membership')"
+                    :class="view === 'membership' && membershipTab === 'confirmed' && 'active'"
+                    @click="membershipTab = 'confirmed'; setView('membership')">Tesserati <span
+                        x-show="membershipConfirmedCount > 0"
+                        x-text="'(' + membershipConfirmedCount + ')'"></span></button>
+                <button x-show="visibleTabs.includes('festival')" :class="view === 'festival' && 'active'"
+                    @click="setView('festival')">Festival <span x-show="festivalTicketCount > 0"
+                        x-text="'(' + festivalTicketCount + ')'"></span></button>
+                <button x-show="visibleTabs.includes('calendar')" :class="view === 'calendar' && 'active'"
+                    @click="setView('calendar')">Calendario</button>
+                <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'"
+                    @click="setView('users')">Gestione Utenti</button>
+                <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'"
+                    @click="setView('telegram')">Telegram Bot</button>
                 <span style="margin-left: auto; display: flex; align-items: center;">
                     <span class="user-info" x-show="currentUser" x-text="currentUser?.username"></span>
                     <button @click="logout" style="color: red;">LOGOUT</button>
@@ -553,8 +581,9 @@
                                         <td x-text="m.paymentMethod"></td>
                                         <td>
                                             <span x-show="canWrite">
-                                                <button x-show="membershipTab === 'requests'" @click="confirmMembership(m)"
-                                                    class="btn-del" style="color:green">V</button>
+                                                <button x-show="membershipTab === 'requests'"
+                                                    @click="confirmMembership(m)" class="btn-del"
+                                                    style="color:green">V</button>
                                                 <button @click="deleteItem(m.id)" class="btn-del">X</button>
                                             </span>
                                         </td>
@@ -565,7 +594,8 @@
                     </div>
 
                     <div class="card" x-show="membershipTab === 'confirmed' && deletedMemberships.length > 0">
-                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedMemberships.length + ')'"></span></h3>
+                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;"
+                                x-text="'(' + deletedMemberships.length + ')'"></span></h3>
                         <table>
                             <thead>
                                 <tr>
@@ -582,7 +612,8 @@
                                         <td x-text="m.email"></td>
                                         <td x-text="formatDate(m.deletedAt)"></td>
                                         <td>
-                                            <button x-show="canWrite" @click="restoreMembership(m)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
+                                            <button x-show="canWrite" @click="restoreMembership(m)" class="btn-del"
+                                                style="color:green" title="Ripristina">&#x21A9;</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -600,7 +631,8 @@
                                 style="color:green"></b></div>
                         <div class="card" style="flex:1"><small>OUT</small><br><b x-text="stats.totalOut + '&#x20AC;'"
                                 style="color:red"></b></div>
-                        <div class="card" style="flex:1"><small>SALDO</small><br><b x-text="stats.balance + '&#x20AC;'"></b>
+                        <div class="card" style="flex:1"><small>SALDO</small><br><b
+                                x-text="stats.balance + '&#x20AC;'"></b>
                         </div>
                         <button
                             @click="window.open(`sheet-flow.html?filter=${filter}&habitante=${habitanteFilter}&type=${typeFilter}`, '_blank')"
@@ -673,11 +705,13 @@
 
                                         <td x-text="item.payerType === 'habitat' ? 'Habitat' : (item.specificHabitante || '-')"
                                             style="text-transform: capitalize; font-size: 11px;"></td>
-                                        <td x-text="item.paymentMethod || '-'" style="font-size: 11px; color: #666;"></td>
+                                        <td x-text="item.paymentMethod || '-'" style="font-size: 11px; color: #666;">
+                                        </td>
                                         <td x-text="item.receiptType === 'nessuno' ? '-' : (item.receiptType || '-')"
                                             style="font-size: 11px;"></td>
 
-                                        <td x-show="canWrite"><button @click="deleteItem(item.id)" class="btn-del">X</button></td>
+                                        <td x-show="canWrite"><button @click="deleteItem(item.id)"
+                                                class="btn-del">X</button></td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -691,7 +725,8 @@
                         <div class="card">
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <button x-show="canWrite" @click="openCreateGuest()" class="create">+ NUOVO OSPITE</button>
+                                <button x-show="canWrite" @click="openCreateGuest()" class="create">+ NUOVO
+                                    OSPITE</button>
                             </div>
                             <table>
                                 <thead>
@@ -715,7 +750,8 @@
                                             </td>
                                             <td><span class="in-casa" x-show="isGuestPresent(g.id)">in casa.</span>
                                             </td>
-                                            <td x-show="canWrite"><button @click="deleteItem(g.id)" class="btn-del">X</button></td>
+                                            <td x-show="canWrite"><button @click="deleteItem(g.id)"
+                                                    class="btn-del">X</button></td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -730,7 +766,8 @@
                             <div class="card">
                                 <div style="display:flex; justify-content: space-between;">
                                     <h2 x-text="selectedGuest.name" style="margin:0"></h2>
-                                    <button x-show="canWrite" @click="editingGuest = {...selectedGuest}" style="cursor:pointer;">MODIFICA
+                                    <button x-show="canWrite" @click="editingGuest = {...selectedGuest}"
+                                        style="cursor:pointer;">MODIFICA
                                         SCHEDA</button>
                                 </div>
                                 <p><small>EMAIL:</small> <span x-text="selectedGuest.email || '-'"></span></p>
@@ -763,7 +800,8 @@
                                                         x-text="getGuestStatusLabel(b.guestStatus)"></span>
                                                 </td>
                                                 <td x-show="canWrite">
-                                                    <template x-if="b.guestStatus === 'standby' && b.status !== 'cancelled'">
+                                                    <template
+                                                        x-if="b.guestStatus === 'standby' && b.status !== 'cancelled'">
                                                         <button @click="checkinGuest(b.id)"
                                                             style="background:#2c7a7b; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;">CHECK-IN</button>
                                                     </template>
@@ -771,7 +809,8 @@
                                                         <span>
                                                             <button @click="openCheckout(b.id)"
                                                                 style="background:#000; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;">CHECKOUT</button>
-                                                            <span x-show="b.invoice" style="font-size:11px; margin-left:5px;"
+                                                            <span x-show="b.invoice"
+                                                                style="font-size:11px; margin-left:5px;"
                                                                 x-text="'€' + (b.invoice?.totalAmount || 0).toFixed(2)"></span>
                                                         </span>
                                                     </template>
@@ -782,18 +821,25 @@
                                 </table>
 
                                 <!-- Invoice summary for active/completed bookings -->
-                                <template x-for="b in guestHistory.filter(b => b.guestStatus === 'in_progress' || b.guestStatus === 'checkout')" :key="'inv-' + b.id">
+                                <template
+                                    x-for="b in guestHistory.filter(b => b.guestStatus === 'in_progress' || b.guestStatus === 'checkout')"
+                                    :key="'inv-' + b.id">
                                     <div class="sub-box" style="margin-top:10px;">
-                                        <strong x-text="'Fattura — ' + formatDate(b.checkIn) + ' → ' + formatDate(b.checkOut)"></strong>
+                                        <strong
+                                            x-text="'Fattura — ' + formatDate(b.checkIn) + ' → ' + formatDate(b.checkOut)"></strong>
                                         <div style="margin-top:8px; font-size:13px;">
-                                            <div>Soggiorno: <b x-text="'€' + (b.invoice?.stayAmount || 0).toFixed(2)"></b></div>
-                                            <div>Vitto: <b x-text="'€' + (b.invoice?.foodAmount || 0).toFixed(2)"></b></div>
+                                            <div>Soggiorno: <b
+                                                    x-text="'€' + (b.invoice?.stayAmount || 0).toFixed(2)"></b></div>
+                                            <div>Vitto: <b x-text="'€' + (b.invoice?.foodAmount || 0).toFixed(2)"></b>
+                                            </div>
                                             <div style="border-top:1px solid #ccc; margin-top:5px; padding-top:5px;">
-                                                <strong x-text="'TOTALE: €' + (b.invoice?.totalAmount || 0).toFixed(2)"></strong>
+                                                <strong
+                                                    x-text="'TOTALE: €' + (b.invoice?.totalAmount || 0).toFixed(2)"></strong>
                                             </div>
                                             <template x-if="b.invoice?.isPaid">
                                                 <div style="margin-top:5px;">
-                                                    <span class="status-tag" style="color:green; border-color:green;">PAGATO</span>
+                                                    <span class="status-tag"
+                                                        style="color:green; border-color:green;">PAGATO</span>
                                                     <span style="font-size:11px; margin-left:5px;"
                                                         x-text="(b.invoice.paymentMethod || '').toUpperCase() + ' — ' + formatDate(b.invoice.paidAt)"></span>
                                                 </div>
@@ -810,7 +856,8 @@
                 <!-- BOOKINGS -->
                 <div x-show="view === 'bookings'">
                     <div class="card">
-                        <button x-show="canWrite" @click="openCreateBooking()" class="create">+ NUOVA PRENOTAZIONE</button>
+                        <button x-show="canWrite" @click="openCreateBooking()" class="create">+ NUOVA
+                            PRENOTAZIONE</button>
                         <table>
                             <thead>
                                 <tr>
@@ -825,13 +872,14 @@
                             </thead>
                             <tbody>
                                 <template x-for="b in items" :key="b.id">
-                                    <tr :class="(b.room === 'da assegnare' || (!b.hasMembership && b.guestStatus === 'standby')) && 'alert-red'">
+                                    <tr
+                                        :class="(b.room === 'da assegnare' || (!b.hasMembership && b.guestStatus === 'standby')) && 'alert-red'">
                                         <td @click="canWrite && openEditBooking(b)"
                                             :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
                                             <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
                                             <span x-show="!b.hasMembership && b.guestStatus === 'standby'"
-                                                  title="Tessera associativa mancante"
-                                                  style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
+                                                title="Tessera associativa mancante"
+                                                style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
                                         </td>
                                         <td x-text="b.room"></td>
                                         <td x-text="formatDate(b.checkIn)"></td>
@@ -842,7 +890,8 @@
                                                 x-text="getGuestStatusLabel(b.guestStatus)"></span>
                                         </td>
                                         <td>
-                                            <button x-show="b.residency?.proposal" @click="proposalModal = b.residency" style="font-size:10px; color:#2b6cb0;">LEGGI</button>
+                                            <button x-show="b.residency?.proposal" @click="proposalModal = b.residency"
+                                                style="font-size:10px; color:#2b6cb0;">LEGGI</button>
                                         </td>
                                         <td x-show="canWrite">
                                             <template x-if="b.guestStatus === 'standby' && b.status !== 'cancelled'">
@@ -865,7 +914,8 @@
                     </div>
 
                     <div class="card" x-show="deletedBookings.length > 0">
-                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedBookings.length + ')'"></span></h3>
+                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;"
+                                x-text="'(' + deletedBookings.length + ')'"></span></h3>
                         <table>
                             <thead>
                                 <tr>
@@ -886,7 +936,8 @@
                                         <td x-text="formatDate(b.checkOut)"></td>
                                         <td x-text="formatDate(b.deletedAt)"></td>
                                         <td>
-                                            <button x-show="canWrite" @click="restoreBooking(b)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
+                                            <button x-show="canWrite" @click="restoreBooking(b)" class="btn-del"
+                                                style="color:green" title="Ripristina">&#x21A9;</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -898,7 +949,8 @@
                 <!-- RESIDENCY -->
                 <div x-show="view === 'residency'">
                     <div class="card">
-                        <button x-show="canWrite" @click="openCreateResidency()" class="create">+ NUOVA RICHIESTA</button>
+                        <button x-show="canWrite" @click="openCreateResidency()" class="create">+ NUOVA
+                            RICHIESTA</button>
                         <table>
                             <thead>
                                 <tr>
@@ -918,7 +970,8 @@
                                         <td x-text="formatDate(r.fromDate)"></td>
                                         <td x-text="formatDate(r.toDate)"></td>
                                         <td>
-                                            <button x-show="r.proposal" @click="proposalModal = r" style="font-size:10px; color:#2b6cb0;">LEGGI</button>
+                                            <button x-show="r.proposal" @click="proposalModal = r"
+                                                style="font-size:10px; color:#2b6cb0;">LEGGI</button>
                                         </td>
                                         <td x-show="canWrite">
                                             <button @click="startResidencyApproval(r)" class="btn-del"
@@ -932,7 +985,8 @@
                     </div>
 
                     <div class="card" x-show="deletedResidencies.length > 0">
-                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedResidencies.length + ')'"></span></h3>
+                        <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;"
+                                x-text="'(' + deletedResidencies.length + ')'"></span></h3>
                         <table>
                             <thead>
                                 <tr>
@@ -954,16 +1008,21 @@
                                         <td x-text="formatDate(r.fromDate)"></td>
                                         <td x-text="formatDate(r.toDate)"></td>
                                         <td>
-                                            <span x-show="r.status === 'approved'" class="status-tag" style="color:green; border-color:green;">APPROVATA</span>
-                                            <span x-show="r.status === 'rejected'" class="status-tag" style="color:red; border-color:red;">RIFIUTATA</span>
-                                            <span x-show="r.status === 'pending' || !r.status" class="status-tag" style="color:#999; border-color:#999;">ELIMINATA</span>
+                                            <span x-show="r.status === 'approved'" class="status-tag"
+                                                style="color:green; border-color:green;">APPROVATA</span>
+                                            <span x-show="r.status === 'rejected'" class="status-tag"
+                                                style="color:red; border-color:red;">RIFIUTATA</span>
+                                            <span x-show="r.status === 'pending' || !r.status" class="status-tag"
+                                                style="color:#999; border-color:#999;">ELIMINATA</span>
                                         </td>
                                         <td>
-                                            <button x-show="r.proposal" @click="proposalModal = r" style="font-size:10px; color:#2b6cb0;">LEGGI</button>
+                                            <button x-show="r.proposal" @click="proposalModal = r"
+                                                style="font-size:10px; color:#2b6cb0;">LEGGI</button>
                                         </td>
                                         <td x-text="formatDate(r.deletedAt)"></td>
                                         <td>
-                                            <button x-show="canWrite" @click="restoreResidency(r)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
+                                            <button x-show="canWrite" @click="restoreResidency(r)" class="btn-del"
+                                                style="color:green" title="Ripristina">&#x21A9;</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -975,16 +1034,22 @@
                 <!-- FESTIVAL -->
                 <div x-show="view === 'festival'">
                     <div class="planner-sub-tabs">
-                        <button :class="festivalTab === 'tickets' && 'active'" @click="switchFestivalTab('tickets')">Biglietti</button>
-                        <button :class="festivalTab === 'planner' && 'active'" @click="switchFestivalTab('planner')">Planner</button>
-                        <button :class="festivalTab === 'volunteers' && 'active'" @click="switchFestivalTab('volunteers')">Volontari</button>
-                        <button :class="festivalTab === 'timeline' && 'active'" @click="switchFestivalTab('timeline')">Timeline</button>
+                        <button :class="festivalTab === 'tickets' && 'active'"
+                            @click="switchFestivalTab('tickets')">Biglietti</button>
+                        <button :class="festivalTab === 'planner' && 'active'"
+                            @click="switchFestivalTab('planner')">Planner</button>
+                        <button :class="festivalTab === 'volunteers' && 'active'"
+                            @click="switchFestivalTab('volunteers')">Volontari</button>
+                        <button :class="festivalTab === 'timeline' && 'active'"
+                            @click="switchFestivalTab('timeline')">Timeline</button>
                     </div>
 
                     <div x-show="festivalTab === 'tickets'">
                         <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
-                            <div class="card" style="flex:1"><small>PRENOTATI</small><br><b x-text="festivalTicketCount"></b></div>
-                            <div class="card" style="flex:1"><small>CONFERMATI</small><br><b x-text="festivalConfirmedCount" style="color:green"></b></div>
+                            <div class="card" style="flex:1"><small>PRENOTATI</small><br><b
+                                    x-text="festivalTicketCount"></b></div>
+                            <div class="card" style="flex:1"><small>CONFERMATI</small><br><b
+                                    x-text="festivalConfirmedCount" style="color:green"></b></div>
                         </div>
                         <div class="card">
                             <h3 style="margin:0 0 15px">Biglietti Festival</h3>
@@ -1007,11 +1072,14 @@
                                             <td x-text="t.email"></td>
                                             <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
                                             <td>
-                                                <span x-show="t.confirmed" class="status-tag" style="color:green; border-color:green;">CONFERMATO</span>
-                                                <span x-show="!t.confirmed" class="status-tag" style="color:#999; border-color:#999;">IN ATTESA</span>
+                                                <span x-show="t.confirmed" class="status-tag"
+                                                    style="color:green; border-color:green;">CONFERMATO</span>
+                                                <span x-show="!t.confirmed" class="status-tag"
+                                                    style="color:#999; border-color:#999;">IN ATTESA</span>
                                             </td>
                                             <td x-show="canWrite">
-                                                <button x-show="!t.confirmed" @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
+                                                <button x-show="!t.confirmed" @click="startFestivalApproval(t)"
+                                                    class="btn-del" style="color:green">V</button>
                                                 <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
                                             </td>
                                         </tr>
@@ -1021,7 +1089,8 @@
                         </div>
 
                         <div class="card" x-show="deletedFestivalTickets.length > 0">
-                            <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;" x-text="'(' + deletedFestivalTickets.length + ')'"></span></h3>
+                            <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;"
+                                    x-text="'(' + deletedFestivalTickets.length + ')'"></span></h3>
                             <table>
                                 <thead>
                                     <tr>
@@ -1040,7 +1109,9 @@
                                             <td x-text="t.email"></td>
                                             <td x-text="formatDate(t.deletedAt)"></td>
                                             <td>
-                                                <button x-show="canWrite" @click="restoreFestivalTicket(t)" class="btn-del" style="color:green" title="Ripristina">&#x21A9;</button>
+                                                <button x-show="canWrite" @click="restoreFestivalTicket(t)"
+                                                    class="btn-del" style="color:green"
+                                                    title="Ripristina">&#x21A9;</button>
                                             </td>
                                         </tr>
                                     </template>
@@ -1069,25 +1140,31 @@
                                     <div class="venue-list-item">
                                         <div>
                                             <b x-text="v.name"></b>
-                                            <small style="margin-left:8px; color:#666;" x-text="'Ordine ' + (v.sortOrder ?? 0)"></small>
+                                            <small style="margin-left:8px; color:#666;"
+                                                x-text="'Ordine ' + (v.sortOrder ?? 0)"></small>
                                         </div>
                                         <div>
-                                            <button x-show="canWrite" @click="openEditVenue(v)" class="btn-del" style="color:#2b6cb0">MOD</button>
-                                            <button x-show="canWrite" @click="deleteVenue(v.id)" class="btn-del">X</button>
+                                            <button x-show="canWrite" @click="openEditVenue(v)" class="btn-del"
+                                                style="color:#2b6cb0">MOD</button>
+                                            <button x-show="canWrite" @click="deleteVenue(v.id)"
+                                                class="btn-del">X</button>
                                         </div>
                                     </div>
                                 </template>
                             </div>
                             <div x-show="canWrite" style="display:flex; gap:10px; margin-top:10px;">
                                 <input type="text" placeholder="Nuova venue" x-model="newVenueName" style="margin:0;">
-                                <button @click="createQuickVenue()" style="border:1px solid #000; padding:6px 10px;">AGGIUNGI</button>
+                                <button @click="createQuickVenue()"
+                                    style="border:1px solid #000; padding:6px 10px;">AGGIUNGI</button>
                             </div>
-                            <button x-show="canWrite" @click="openCreateVenue()" class="create" style="margin-top:10px;">+ NUOVA VENUE</button>
+                            <button x-show="canWrite" @click="openCreateVenue()" class="create"
+                                style="margin-top:10px;">+ NUOVA VENUE</button>
                         </div>
 
                         <div class="day-tabs">
                             <template x-for="d in plannerDays" :key="d.value">
-                                <button :class="plannerSelectedDay === d.value && 'active'" @click="plannerSelectedDay = d.value" x-text="d.label"></button>
+                                <button :class="plannerSelectedDay === d.value && 'active'"
+                                    @click="plannerSelectedDay = d.value" x-text="d.label"></button>
                             </template>
                         </div>
 
@@ -1096,32 +1173,34 @@
                                 :style="`grid-template-columns: 50px repeat(${Math.max(plannerVenues.length, 1)}, minmax(140px, 1fr)); grid-template-rows: 40px repeat(${plannerTimeSlots.length}, 18px);`">
                                 <div class="time-label header" style="grid-row:1; grid-column:1;">ORA</div>
                                 <template x-for="(v, vIndex) in plannerVenues" :key="v.id">
-                                    <div class="venue-header" :style="`grid-row:1; grid-column:${vIndex + 2};`" x-text="v.name"></div>
+                                    <div class="venue-header" :style="`grid-row:1; grid-column:${vIndex + 2};`"
+                                        x-text="v.name"></div>
                                 </template>
 
                                 <template x-for="(slot, sIndex) in plannerTimeSlots" :key="slot.value">
-                                    <div class="time-label" :style="`grid-row:${sIndex + 2}; grid-column:1;`" x-text="slot.label"></div>
+                                    <div class="time-label" :style="`grid-row:${sIndex + 2}; grid-column:1;`"
+                                        x-text="slot.label"></div>
                                 </template>
 
                                 <template x-for="(slot, sIndex) in plannerTimeSlots" :key="'cells-' + sIndex">
                                     <template x-for="(v, vIndex) in plannerVenues" :key="v.id + '-' + sIndex">
                                         <div class="grid-cell"
                                             :style="`grid-row:${sIndex + 2}; grid-column:${vIndex + 2};`"
-                                            @dragover="onGridDragOver($event)"
-                                            @drop="onGridDrop($event, sIndex, v.id)"></div>
+                                            @dragover="onGridDragOver($event)" @drop="onGridDrop($event, sIndex, v.id)">
+                                        </div>
                                     </template>
                                 </template>
 
                                 <template x-for="act in scheduledActs" :key="act.id">
                                     <div class="act-card" :class="act.status === 'cancelled' && 'cancelled'"
                                         :style="`grid-row: ${actGridRow(act)}; grid-column: ${actGridColumn(act)}; background: ${actColor(act)}; border-color: ${actBorderColor(act)};`"
-                                        @click="canWrite && openEditAct(act)"
-                                        :draggable="canWrite"
+                                        @click="canWrite && openEditAct(act)" :draggable="canWrite"
                                         @dragstart="onActDragStart(act, $event)">
                                         <b x-text="act.title"></b>
                                         <small x-text="(act.startTime || '') + ' - ' + (act.endTime || '')"></small>
                                         <span class="act-badge" x-text="categoryLabel(act.category)"></span>
-                                        <small x-text="act.price ? ('€ ' + parseFloat(act.price).toFixed(2)) : '€ 0.00'"></small>
+                                        <small
+                                            x-text="act.price ? ('€ ' + parseFloat(act.price).toFixed(2)) : '€ 0.00'"></small>
                                     </div>
                                 </template>
                             </div>
@@ -1131,17 +1210,17 @@
                             <h3 style="margin:0 0 10px">Non schedulati</h3>
                             <div class="unscheduled-list">
                                 <template x-for="act in unscheduledActs" :key="'uns-' + act.id">
-                                    <div class="unscheduled-chip"
-                                        :class="act.status === 'cancelled' && 'cancelled'"
+                                    <div class="unscheduled-chip" :class="act.status === 'cancelled' && 'cancelled'"
                                         :style="`background:${actColor(act)}; border-color:${actBorderColor(act)};`"
-                                        @click="canWrite && openEditAct(act)"
-                                        :draggable="canWrite"
+                                        @click="canWrite && openEditAct(act)" :draggable="canWrite"
                                         @dragstart="onActDragStart(act, $event)">
                                         <b x-text="act.title"></b>
-                                        <small style="display:block; color:#666;" x-text="categoryLabel(act.category)"></small>
+                                        <small style="display:block; color:#666;"
+                                            x-text="categoryLabel(act.category)"></small>
                                     </div>
                                 </template>
-                                <div x-show="unscheduledActs.length === 0" style="font-size:11px; color:#666;">Nessun atto non schedulato.</div>
+                                <div x-show="unscheduledActs.length === 0" style="font-size:11px; color:#666;">Nessun
+                                    atto non schedulato.</div>
                             </div>
                             <div class="planner-legend">
                                 <div class="legend-item">
@@ -1165,9 +1244,11 @@
                     </div>
 
                     <div x-show="festivalTab === 'volunteers'">
-                        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+                        <div
+                            style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
                             <h3 style="margin:0">Volontari</h3>
-                            <button x-show="canWrite" class="create" @click="openCreateVolunteer()">+ NUOVO VOLONTARIO</button>
+                            <button x-show="canWrite" class="create" @click="openCreateVolunteer()">+ NUOVO
+                                VOLONTARIO</button>
                         </div>
                         <div class="card">
                             <table>
@@ -1185,7 +1266,8 @@
                                 <tbody>
                                     <template x-for="v in volunteers" :key="v.id">
                                         <tr>
-                                            <td @click="canWrite && openEditVolunteer(v)" style="cursor:pointer; text-decoration:underline;" x-text="v.name"></td>
+                                            <td @click="canWrite && openEditVolunteer(v)"
+                                                style="cursor:pointer; text-decoration:underline;" x-text="v.name"></td>
                                             <td x-text="v.email || '-'"></td>
                                             <td x-text="v.role || '-'"></td>
                                             <td x-text="v.availability || '-'"></td>
@@ -1196,7 +1278,8 @@
                                             </td>
                                             <td x-text="v.notes || '-'"></td>
                                             <td x-show="canWrite">
-                                                <button @click="openEditVolunteer(v)" class="btn-del" style="color:#2b6cb0">MOD</button>
+                                                <button @click="openEditVolunteer(v)" class="btn-del"
+                                                    style="color:#2b6cb0">MOD</button>
                                                 <button @click="deleteVolunteer(v.id)" class="btn-del">X</button>
                                             </td>
                                         </tr>
@@ -1207,13 +1290,16 @@
                     </div>
 
                     <div x-show="festivalTab === 'timeline'">
-                        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+                        <div
+                            style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
                             <h3 style="margin:0">Timeline</h3>
-                            <button x-show="canWrite" class="create" @click="openCreateDeadline()">+ NUOVA SCADENZA</button>
+                            <button x-show="canWrite" class="create" @click="openCreateDeadline()">+ NUOVA
+                                SCADENZA</button>
                         </div>
                         <div class="timeline-wrap">
                             <div class="timeline-line">
-                                <div class="timeline-today" :style="`left:${timelineTodayPosition}%`" title="Oggi"></div>
+                                <div class="timeline-today" :style="`left:${timelineTodayPosition}%`" title="Oggi">
+                                </div>
                                 <template x-for="(d, idx) in timelineDeadlines" :key="d.id">
                                     <div class="timeline-dot"
                                         :style="`left:${timelinePosition(d.date)}%; border-color:${['#2b6cb0','#2c7a7b','#b7791f','#9f7aea','#c53030','#38a169'][idx % 6]};`"
@@ -1244,10 +1330,13 @@
                                     <template x-for="d in timelineDeadlines" :key="d.id">
                                         <tr>
                                             <td x-text="formatDate(d.date)"></td>
-                                            <td @click="canWrite && openEditDeadline(d)" style="cursor:pointer; text-decoration:underline;" x-text="d.title"></td>
+                                            <td @click="canWrite && openEditDeadline(d)"
+                                                style="cursor:pointer; text-decoration:underline;" x-text="d.title">
+                                            </td>
                                             <td x-text="d.notes || '-'"></td>
                                             <td x-show="canWrite">
-                                                <button @click="openEditDeadline(d)" class="btn-del" style="color:#2b6cb0">MOD</button>
+                                                <button @click="openEditDeadline(d)" class="btn-del"
+                                                    style="color:#2b6cb0">MOD</button>
                                                 <button @click="deleteDeadline(d.id)" class="btn-del">X</button>
                                             </td>
                                         </tr>
@@ -1261,10 +1350,12 @@
                 <!-- CALENDAR -->
                 <div x-show="view === 'calendar'">
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <h3 style="margin:0">Calendario</h3>
                             <button x-show="canWrite" @click="openCreateCalendarEvent()"
-                                style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+ NUOVO EVENTO</button>
+                                style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+
+                                NUOVO EVENTO</button>
                         </div>
                         <div id="fullcalendar"></div>
                     </div>
@@ -1273,7 +1364,8 @@
                 <!-- USER MANAGEMENT -->
                 <div x-show="view === 'users'">
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <h3 style="margin:0">Gestione Utenti</h3>
                             <button @click="openCreateUser()" class="create">+ NUOVO UTENTE</button>
                         </div>
@@ -1291,7 +1383,8 @@
                             <tbody>
                                 <template x-for="u in usersList" :key="u.id">
                                     <tr>
-                                        <td @click="openEditUser(u)" style="cursor:pointer; text-decoration:underline;" x-text="u.username"></td>
+                                        <td @click="openEditUser(u)" style="cursor:pointer; text-decoration:underline;"
+                                            x-text="u.username"></td>
                                         <td x-text="u.email || '-'"></td>
                                         <td>
                                             <span class="role-badge" :class="'role-' + u.role" x-text="u.role"></span>
@@ -1304,14 +1397,18 @@
                                                     </template>
                                                 </span>
                                             </template>
-                                            <span x-show="u.role !== 'reader_limited'" style="color:#999; font-size:11px;">tutte</span>
+                                            <span x-show="u.role !== 'reader_limited'"
+                                                style="color:#999; font-size:11px;">tutte</span>
                                         </td>
                                         <td>
-                                            <span x-show="u.active" class="status-tag" style="color:green; border-color:green;">ATTIVO</span>
-                                            <span x-show="!u.active" class="status-tag" style="color:red; border-color:red;">DISATTIVO</span>
+                                            <span x-show="u.active" class="status-tag"
+                                                style="color:green; border-color:green;">ATTIVO</span>
+                                            <span x-show="!u.active" class="status-tag"
+                                                style="color:red; border-color:red;">DISATTIVO</span>
                                         </td>
                                         <td>
-                                            <button x-show="u.id !== currentUser?.id" @click="deleteUser(u.id)" class="btn-del">X</button>
+                                            <button x-show="u.id !== currentUser?.id" @click="deleteUser(u.id)"
+                                                class="btn-del">X</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -1324,7 +1421,8 @@
                 <div x-show="view === 'telegram'">
                     <!-- Chat Table -->
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <h3 style="margin:0">Chat Telegram</h3>
                             <button @click="openAddChat()" class="create">+ AGGIUNGI CHAT</button>
                         </div>
@@ -1341,11 +1439,14 @@
                             <tbody>
                                 <template x-for="c in telegramChats" :key="c.id">
                                     <tr>
-                                        <td @click="openEditChat(c)" style="cursor:pointer; text-decoration:underline;" x-text="c.chatId"></td>
+                                        <td @click="openEditChat(c)" style="cursor:pointer; text-decoration:underline;"
+                                            x-text="c.chatId"></td>
                                         <td x-text="c.label || '-'"></td>
                                         <td>
-                                            <span x-show="c.active" class="status-tag" style="color:green; border-color:green;">ATTIVO</span>
-                                            <span x-show="!c.active" class="status-tag" style="color:red; border-color:red;">INATTIVO</span>
+                                            <span x-show="c.active" class="status-tag"
+                                                style="color:green; border-color:green;">ATTIVO</span>
+                                            <span x-show="!c.active" class="status-tag"
+                                                style="color:red; border-color:red;">INATTIVO</span>
                                         </td>
                                         <td>
                                             <span x-show="c.notifyDigest" class="tab-chip">Digest</span>
@@ -1360,7 +1461,9 @@
                                 </template>
                             </tbody>
                         </table>
-                        <p x-show="telegramChats.length === 0" style="color:#999; font-size:12px;">Nessuna chat configurata. Le chat vengono scoperte automaticamente quando qualcuno scrive al bot, oppure puoi aggiungerle manualmente.</p>
+                        <p x-show="telegramChats.length === 0" style="color:#999; font-size:12px;">Nessuna chat
+                            configurata. Le chat vengono scoperte automaticamente quando qualcuno scrive al bot, oppure
+                            puoi aggiungerle manualmente.</p>
                     </div>
 
                     <!-- Digest Settings -->
@@ -1376,7 +1479,8 @@
                             </div>
                             <div>
                                 <label>Orario</label>
-                                <input type="time" x-model="telegramSettings['telegram.digest.time']" style="width:auto;">
+                                <input type="time" x-model="telegramSettings['telegram.digest.time']"
+                                    style="width:auto;">
                             </div>
                             <div>
                                 <label>Timezone</label>
@@ -1388,7 +1492,8 @@
                                     <option value="UTC">UTC</option>
                                 </select>
                             </div>
-                            <button @click="saveTelegramSettings()" class="btn-blk" style="width:auto; margin:0; padding:8px 20px;">SALVA</button>
+                            <button @click="saveTelegramSettings()" class="btn-blk"
+                                style="width:auto; margin:0; padding:8px 20px;">SALVA</button>
                         </div>
                     </div>
 
@@ -1396,12 +1501,15 @@
                     <div class="card">
                         <h3 style="margin:0 0 15px">Anteprima & Invio Manuale</h3>
                         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <button @click="previewDigest()" style="border:1px solid #000; padding:6px 15px; cursor:pointer;">ANTEPRIMA</button>
-                            <button @click="sendDigestNow()" class="btn-blk" style="width:auto; margin:0; padding:6px 15px;" :disabled="digestSending"
+                            <button @click="previewDigest()"
+                                style="border:1px solid #000; padding:6px 15px; cursor:pointer;">ANTEPRIMA</button>
+                            <button @click="sendDigestNow()" class="btn-blk"
+                                style="width:auto; margin:0; padding:6px 15px;" :disabled="digestSending"
                                 x-text="digestSending ? 'INVIO...' : 'INVIA ORA'"></button>
                         </div>
                         <template x-if="digestPreview">
-                            <div style="background:#f5f5f5; border:1px solid #ddd; padding:15px; white-space:pre-wrap; font-size:13px;" x-html="digestPreview"></div>
+                            <div style="background:#f5f5f5; border:1px solid #ddd; padding:15px; white-space:pre-wrap; font-size:13px;"
+                                x-html="digestPreview"></div>
                         </template>
                     </div>
                 </div>
@@ -1550,6 +1658,7 @@
                         <option value="ex ronco">ex ronco</option>
                         <option value="cameratina">cameratina</option>
                         <option value="secondo piano">secondo piano</option>
+                        <option value="secondo piano">camerata</option>
                     </select>
                     <label>Feedback</label>
                     <textarea x-model="editingBooking.feedback" rows="4" placeholder=""></textarea>
@@ -1565,7 +1674,8 @@
                 <div class="sidebar">
                     <h3 x-text="editingUser.id ? 'MODIFICA UTENTE' : 'NUOVO UTENTE'"></h3>
                     <label>Username</label><input type="text" x-model="editingUser.username">
-                    <label x-text="editingUser.id ? 'Nuova Password (lascia vuoto per non cambiare)' : 'Password'"></label>
+                    <label
+                        x-text="editingUser.id ? 'Nuova Password (lascia vuoto per non cambiare)' : 'Password'"></label>
                     <input type="password" x-model="editingUser.password">
                     <label>Email</label><input type="email" x-model="editingUser.email">
                     <label>Ruolo</label>
@@ -1578,11 +1688,12 @@
                         <div class="sub-box">
                             <label>Tab consentite</label>
                             <div style="margin-top:5px;">
-                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']" :key="tab">
+                                <template
+                                    x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']"
+                                    :key="tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
-                                            :checked="editingUser.allowedTabs.includes(tab)"
-                                            @change="toggleTab(tab)">
+                                            :checked="editingUser.allowedTabs.includes(tab)" @change="toggleTab(tab)">
                                         <span x-text="tab" style="text-transform:capitalize;"></span>
                                     </label>
                                 </template>
@@ -1593,7 +1704,9 @@
                         <div class="sub-box">
                             <label>Permessi Scrittura</label>
                             <div style="margin-top:5px;">
-                                <template x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']" :key="'write-' + tab">
+                                <template
+                                    x-for="tab in ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']"
+                                    :key="'write-' + tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
                                             :checked="editingUser.allowedWriteTabs.includes(tab)"
@@ -1622,9 +1735,11 @@
                         <input type="checkbox" x-model="editingCalendarEvent.allDay" style="width:auto"> Tutto il giorno
                     </label>
                     <label>Inizio</label>
-                    <input :type="editingCalendarEvent.allDay ? 'date' : 'datetime-local'" x-model="editingCalendarEvent.dtstart">
+                    <input :type="editingCalendarEvent.allDay ? 'date' : 'datetime-local'"
+                        x-model="editingCalendarEvent.dtstart">
                     <label>Fine</label>
-                    <input :type="editingCalendarEvent.allDay ? 'date' : 'datetime-local'" x-model="editingCalendarEvent.dtend">
+                    <input :type="editingCalendarEvent.allDay ? 'date' : 'datetime-local'"
+                        x-model="editingCalendarEvent.dtend">
                     <label>Descrizione</label><textarea x-model="editingCalendarEvent.description" rows="3"></textarea>
                     <label>Luogo</label><input type="text" x-model="editingCalendarEvent.location">
                     <button class="btn-blk" @click="saveCalendarEvent()">SALVA</button>
@@ -1690,7 +1805,8 @@
             <template x-if="checkoutModal">
                 <div class="modal-overlay">
                     <div class="modal-box" style="text-align:left; min-width:350px;">
-                        <h3 style="margin:0 0 15px; text-align:center;">CHECKOUT - <span x-text="checkoutModal.guestName"></span></h3>
+                        <h3 style="margin:0 0 15px; text-align:center;">CHECKOUT - <span
+                                x-text="checkoutModal.guestName"></span></h3>
 
                         <div style="font-size:13px;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -1701,18 +1817,19 @@
                                 <span>Vitto:</span>
                                 <b x-text="'€' + (checkoutModal.invoice.foodAmount || 0).toFixed(2)"></b>
                             </div>
-                            <div style="border-top:1px solid #000; margin-top:8px; padding-top:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <div
+                                style="border-top:1px solid #000; margin-top:8px; padding-top:8px; display:flex; justify-content:space-between; align-items:center;">
                                 <strong>TOTALE:</strong>
                                 <div style="display:flex; align-items:center; gap:4px;">
                                     <span>€</span>
-                                    <input type="number" step="0.01" min="0"
-                                        x-model.number="checkoutModal.customAmount"
+                                    <input type="number" step="0.01" min="0" x-model.number="checkoutModal.customAmount"
                                         style="width:90px; font-weight:bold; font-size:14px; text-align:right; border:1px solid #ccc; padding:4px 6px;">
                                 </div>
                             </div>
                             <template x-if="checkoutModal.customAmount != checkoutModal.invoice.totalAmount">
                                 <div style="margin-top:6px; font-size:11px; color:#888; text-align:right;">
-                                    Importo originale: €<span x-text="(checkoutModal.invoice.totalAmount || 0).toFixed(2)"></span>
+                                    Importo originale: €<span
+                                        x-text="(checkoutModal.invoice.totalAmount || 0).toFixed(2)"></span>
                                 </div>
                             </template>
                         </div>
@@ -1729,7 +1846,8 @@
                                 :style="checkoutModal.paymentMethod === 'cash' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">CASH</button>
                         </div>
 
-                        <button class="btn-blk" style="margin-top:15px;" @click="confirmCheckout()">CONFERMA PAGAMENTO</button>
+                        <button class="btn-blk" style="margin-top:15px;" @click="confirmCheckout()">CONFERMA
+                            PAGAMENTO</button>
                         <button @click="checkoutModal = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>
@@ -1761,8 +1879,8 @@
                         <label>Corpo Email</label>
                         <textarea x-model="residencyApproval.emailBody" rows="6"></textarea>
 
-                        <button class="btn-blk" @click="confirmResidency()"
-                            :disabled="!residencyApproval.room">CONFERMA E INVIA</button>
+                        <button class="btn-blk" @click="confirmResidency()" :disabled="!residencyApproval.room">CONFERMA
+                            E INVIA</button>
                         <button @click="residencyApproval = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>
@@ -1772,13 +1890,15 @@
             <!-- MODAL: Proposal Read -->
             <template x-if="proposalModal">
                 <div class="modal-overlay" @click.self="proposalModal = null">
-                    <div class="modal-box" style="text-align:left; min-width:400px; max-width:600px; max-height:80vh; overflow-y:auto;">
+                    <div class="modal-box"
+                        style="text-align:left; min-width:400px; max-width:600px; max-height:80vh; overflow-y:auto;">
                         <h3 style="margin:0 0 5px" x-text="proposalModal.name"></h3>
                         <p style="margin:0 0 15px; font-size:12px; color:#666;">
                             <span x-text="formatDate(proposalModal.fromDate)"></span> &rarr;
                             <span x-text="formatDate(proposalModal.toDate)"></span>
                         </p>
-                        <div style="white-space:pre-wrap; font-size:13px; line-height:1.5;" x-text="proposalModal.proposal"></div>
+                        <div style="white-space:pre-wrap; font-size:13px; line-height:1.5;"
+                            x-text="proposalModal.proposal"></div>
                         <button @click="proposalModal = null"
                             style="width:100%; margin-top:15px; border:1px solid #000; padding:8px 20px; cursor:pointer;">Chiudi</button>
                     </div>
@@ -1791,7 +1911,8 @@
                     <div class="modal-box" style="text-align:left; min-width:400px;">
                         <h3 style="margin:0 0 10px">Conferma Biglietto Festival</h3>
                         <p style="margin:0 0 15px;">
-                            <b x-text="festivalApproval.ticket.name + ' ' + festivalApproval.ticket.surname"></b> &mdash;
+                            <b x-text="festivalApproval.ticket.name + ' ' + festivalApproval.ticket.surname"></b>
+                            &mdash;
                             <span x-text="festivalApproval.ticket.email"></span>
                         </p>
 

@@ -410,7 +410,7 @@ document.addEventListener('alpine:init', () => {
                 if (!res.ok) throw new Error("Errore caricamento invoice");
                 const invoice = await res.json();
                 const booking = this.guestHistory.find(b => b.id === bookingId)
-                             || this.items.find(b => b.id === bookingId);
+                    || this.items.find(b => b.id === bookingId);
                 this.checkoutModal = {
                     booking,
                     invoice,
@@ -639,7 +639,7 @@ document.addEventListener('alpine:init', () => {
                 ]);
                 const allBookings = await resB.json();
                 const { subject: emailSubject, body: emailBody } = await resT.json();
-                const allRooms = ['monolocale', 'ex poni', 'ex ronco', 'cameratina', 'secondo piano'];
+                const allRooms = ['monolocale', 'ex poni', 'ex ronco', 'cameratina', 'secondo piano', 'camerata'];
                 const from = new Date(r.fromDate);
                 const to = new Date(r.toDate);
                 const availableRooms = allRooms.filter(room =>
@@ -1365,37 +1365,37 @@ document.addEventListener('alpine:init', () => {
                 },
                 editable: false,
                 selectable: this.canWrite,
-                events: function(info, successCallback, failureCallback) {
+                events: function (info, successCallback, failureCallback) {
                     const start = info.startStr.split('T')[0];
                     const end = info.endStr.split('T')[0];
                     fetch(`${self.BASE_URL}/calendar/?start=${start}&end=${end}`, {
                         headers: { 'Authorization': `Bearer ${self.token}` }
                     })
-                    .then(res => {
-                        if (!res.ok) throw new Error('Errore caricamento eventi');
-                        return res.json();
-                    })
-                    .then(events => {
-                        successCallback(events.map(ev => ({
-                            id: ev.uid,
-                            title: ev.summary || '',
-                            start: ev.dtstart,
-                            end: ev.dtend,
-                            allDay: ev.dtstart && ev.dtstart.length === 10,
-                            extendedProps: {
-                                description: ev.description || '',
-                                location: ev.location || '',
-                                uid: ev.uid
-                            }
-                        })));
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('Errore caricamento calendario');
-                        failureCallback(err);
-                    });
+                        .then(res => {
+                            if (!res.ok) throw new Error('Errore caricamento eventi');
+                            return res.json();
+                        })
+                        .then(events => {
+                            successCallback(events.map(ev => ({
+                                id: ev.uid,
+                                title: ev.summary || '',
+                                start: ev.dtstart,
+                                end: ev.dtend,
+                                allDay: ev.dtstart && ev.dtstart.length === 10,
+                                extendedProps: {
+                                    description: ev.description || '',
+                                    location: ev.location || '',
+                                    uid: ev.uid
+                                }
+                            })));
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Errore caricamento calendario');
+                            failureCallback(err);
+                        });
                 },
-                select: function(info) {
+                select: function (info) {
                     self.editingCalendarEvent = {
                         summary: '',
                         dtstart: info.startStr.split('T')[0],
@@ -1406,7 +1406,7 @@ document.addEventListener('alpine:init', () => {
                         uid: null
                     };
                 },
-                eventClick: function(info) {
+                eventClick: function (info) {
                     const ev = info.event;
                     const isAllDay = ev.allDay;
                     let dtstart, dtend;
