@@ -77,6 +77,14 @@ document.addEventListener('alpine:init', () => {
         digestPreview: null,
         digestSending: false,
 
+        // Activity log state
+        activityFeed: [],
+        activityTotal: 0,
+        activityPage: 1,
+        activityTotalPages: 1,
+        activityFilters: { userId: '', dateFrom: '', dateTo: '' },
+        activityTab: 'feed',
+
         canWriteTab(tab) {
             if (!this.currentUser) return false;
             if (this.currentUser.role === 'admin') return true;
@@ -93,7 +101,7 @@ document.addEventListener('alpine:init', () => {
         get visibleTabs() {
             if (!this.currentUser) return [];
             const allTabs = ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar'];
-            if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram'];
+            if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram', 'activity'];
             if (this.currentUser.role === 'reader') return allTabs;
             // reader_limited
             return (this.currentUser.allowedTabs || []);
@@ -137,6 +145,29 @@ document.addEventListener('alpine:init', () => {
             return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
         },
 
+        formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleString('it-IT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        },
+
+        formatActivityAction(item) {
+            if (!item) return '-';
+            if (item.type === 'login') {
+                return item.success ? 'Login riuscito' : 'Login fallito';
+            }
+            const action = item.action || 'update';
+            const resource = item.resource ? ` ${item.resource}` : '';
+            const resourceId = item.resourceId ? ` #${item.resourceId}` : '';
+            return `${action}${resource}${resourceId}`;
+        },
+
         async setView(v) {
             if (!this.visibleTabs.includes(v)) {
                 v = this.visibleTabs[0] || 'expenses';
@@ -171,6 +202,12 @@ document.addEventListener('alpine:init', () => {
 
                 if (this.view === 'telegram') {
                     await this.fetchTelegramData();
+                    return;
+                }
+
+                if (this.view === 'activity') {
+                    await this.fetchUsers();
+                    await this.fetchActivity();
                     return;
                 }
 
@@ -1538,6 +1575,63 @@ document.addEventListener('alpine:init', () => {
                 this.editingCalendarEvent = null;
                 if (this.calendarInstance) this.calendarInstance.refetchEvents();
             } catch (e) { alert(e.message); }
+        },
+
+        // ── Activity Log ──
+
+        async fetchActivity() {
+            try {
+                const params = new URLSearchParams();
+                if (this.activityFilters.userId) params.set('userId', this.activityFilters.userId);
+                if (this.activityFilters.dateFrom) params.set('dateFrom', this.activityFilters.dateFrom);
+                if (this.activityFilters.dateTo) params.set('dateTo', this.activityFilters.dateTo);
+                params.set('page', this.activityPage);
+                params.set('limit', 25);
+
+                let endpoint = 'feed';
+                let type = null;
+                if (this.activityTab === 'actions') {
+                    endpoint = 'logs';
+                    type = 'action';
+                } else if (this.activityTab === 'logins') {
+                    endpoint = 'logins';
+                    type = 'login';
+                }
+
+                const res = await fetch(`${this.BASE_URL}/activity/${endpoint}?${params.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.status === 401) return this.logout();
+                if (!res.ok) throw new Error('Errore caricamento attivita\'');
+                const data = await res.json();
+                const items = Array.isArray(data.data) ? data.data : [];
+                this.activityFeed = type ? items.map(item => ({ ...item, type })) : items;
+                this.activityTotal = data.total || 0;
+                this.activityTotalPages = data.totalPages || 1;
+            } catch (e) { alert(e.message); }
+        },
+
+        activitySetPage(page) {
+            if (page < 1 || page > this.activityTotalPages) return;
+            this.activityPage = page;
+            this.fetchActivity();
+        },
+
+        activityApplyFilters() {
+            this.activityPage = 1;
+            this.fetchActivity();
+        },
+
+        activityResetFilters() {
+            this.activityFilters = { userId: '', dateFrom: '', dateTo: '' };
+            this.activityPage = 1;
+            this.fetchActivity();
+        },
+
+        setActivityTab(tab) {
+            this.activityTab = tab;
+            this.activityPage = 1;
+            this.fetchActivity();
         },
 
         // ── User Management ──

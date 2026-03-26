@@ -293,6 +293,87 @@
             color: #fff;
         }
 
+        .activity-sub-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .activity-sub-tabs button {
+            border: 1px solid #000;
+            padding: 6px 10px;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .activity-sub-tabs button.active {
+            background: #000;
+            color: #fff;
+        }
+
+        .activity-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: end;
+        }
+
+        .activity-filter-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .activity-pagination {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .activity-pagination button[disabled] {
+            opacity: 0.4;
+            cursor: default;
+            text-decoration: none;
+        }
+
+        .activity-table {
+            table-layout: fixed;
+        }
+
+        .activity-table td,
+        .activity-table th {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .activity-details {
+            white-space: normal;
+            word-break: break-word;
+            max-width: 260px;
+        }
+
+        .activity-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border: 1px solid #000;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            color: #2f855a;
+            border-color: #2f855a;
+        }
+
+        .badge-error {
+            color: #c53030;
+            border-color: #c53030;
+        }
+
         .day-venue-toggles { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
         .venue-toggle { padding: 4px 10px; border: 1px solid #ccc; border-radius: 12px; font-size: 11px; cursor: pointer; color: #999; }
         .venue-toggle.active { background: #2b6cb0; color: #fff; border-color: #2b6cb0; }
@@ -552,6 +633,8 @@
                     @click="setView('users')">Gestione Utenti</button>
                 <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'"
                     @click="setView('telegram')">Telegram Bot</button>
+                <button x-show="visibleTabs.includes('activity')" :class="view === 'activity' && 'active'"
+                    @click="setView('activity')">Attivita'</button>
                 <span style="margin-left: auto; display: flex; align-items: center;">
                     <span class="user-info" x-show="currentUser" x-text="currentUser?.username"></span>
                     <button @click="logout" style="color: red;">LOGOUT</button>
@@ -570,7 +653,7 @@
                             <button @click="window.open('sheet-associati.html', '_blank')"
                                 style="border:1px solid #000; padding:5px 10px;">APRI FOGLIO CALCOLO</button>
                         </div>
-                        <table>
+                        <table class="activity-table">
                             <thead>
                                 <tr>
                                     <th>Socio</th>
@@ -1384,6 +1467,95 @@
                                 NUOVO EVENTO</button>
                         </div>
                         <div id="fullcalendar"></div>
+                    </div>
+                </div>
+
+                <!-- ACTIVITY -->
+                <div x-show="view === 'activity'">
+                    <div class="card">
+                        <div class="activity-sub-tabs">
+                            <button :class="activityTab === 'feed' && 'active'"
+                                @click="setActivityTab('feed')">Tutto</button>
+                            <button :class="activityTab === 'actions' && 'active'"
+                                @click="setActivityTab('actions')">Azioni</button>
+                            <button :class="activityTab === 'logins' && 'active'"
+                                @click="setActivityTab('logins')">Accessi</button>
+                        </div>
+
+                        <div class="activity-filters">
+                            <div>
+                                <label>Utente</label>
+                                <select x-model="activityFilters.userId">
+                                    <option value="">Tutti</option>
+                                    <template x-for="u in usersList" :key="u.id">
+                                        <option :value="u.id" x-text="u.username"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Dal</label>
+                                <input type="date" x-model="activityFilters.dateFrom">
+                            </div>
+                            <div>
+                                <label>Al</label>
+                                <input type="date" x-model="activityFilters.dateTo">
+                            </div>
+                            <div class="activity-filter-actions">
+                                <button class="btn-blk" @click="activityApplyFilters()">APPLICA</button>
+                                <button class="btn-del" @click="activityResetFilters()">RESET</button>
+                            </div>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Utente</th>
+                                    <th>Tipo</th>
+                                    <th>Azione</th>
+                                    <th>Dettagli</th>
+                                    <th>Esito</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="a in activityFeed" :key="a.type + '-' + a.id">
+                                    <tr>
+                                        <td x-text="formatDateTime(a.createdAt)"></td>
+                                        <td x-text="a.username || '-'"></td>
+                                        <td>
+                                            <span class="activity-badge"
+                                                :class="a.type === 'login' ? (a.success ? 'badge-success' : 'badge-error') : ''"
+                                                x-text="a.type === 'login' ? 'Accesso' : 'Azione'"></span>
+                                        </td>
+                                        <td x-text="formatActivityAction(a)"></td>
+                                        <td class="activity-details">
+                                            <small
+                                                x-text="a.type === 'login' ? (a.userAgent || '-') : ((a.httpMethod || '') + ' ' + (a.path || '')).trim()"></small>
+                                        </td>
+                                        <td>
+                                            <span x-show="a.type === 'login'" class="activity-badge"
+                                                :class="a.success ? 'badge-success' : 'badge-error'"
+                                                x-text="a.success ? 'OK' : 'KO'"></span>
+                                            <span x-show="a.type !== 'login'" class="activity-badge"
+                                                x-text="a.statusCode || '-'"></span>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr x-show="activityFeed.length === 0">
+                                    <td colspan="6" style="color:#888;">Nessuna attivita'</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="activity-pagination">
+                            <span style="margin-right:auto; font-size:11px; color:#666;"
+                                x-text="activityTotal + ' risultati'"></span>
+                            <button @click="activitySetPage(activityPage - 1)"
+                                :disabled="activityPage <= 1">Prev</button>
+                            <span x-text="activityPage + ' / ' + activityTotalPages"></span>
+                            <button @click="activitySetPage(activityPage + 1)"
+                                :disabled="activityPage >= activityTotalPages">Next</button>
+                        </div>
                     </div>
                 </div>
 
