@@ -320,12 +320,6 @@
             align-items: end;
         }
 
-        .activity-filter-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
         .activity-filter-actions .btn-blk,
         .activity-filter-actions .btn-del {
             width: auto;
@@ -356,12 +350,6 @@
         .activity-table th {
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .activity-details {
-            white-space: normal;
-            word-break: break-word;
-            max-width: 260px;
         }
 
         .activity-badge {
@@ -1509,8 +1497,11 @@
                                 <input type="date" x-model="activityFilters.dateTo">
                             </div>
                             <div class="activity-filter-actions">
-                                <button class="btn-blk" @click="activityApplyFilters()">APPLICA</button>
-                                <button class="btn-del" @click="activityResetFilters()">RESET</button>
+                                <label>&nbsp;</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-blk" @click="activityApplyFilters()">APPLICA</button>
+                                    <button class="btn-del" @click="activityResetFilters()">RESET</button>
+                                </div>
                             </div>
                         </div>
 
@@ -1521,7 +1512,6 @@
                                     <th>Utente</th>
                                     <th>Tipo</th>
                                     <th>Azione</th>
-                                    <th>Dettagli</th>
                                     <th>Esito</th>
                                 </tr>
                             </thead>
@@ -1536,10 +1526,6 @@
                                                 x-text="a.type === 'login' ? 'Accesso' : 'Azione'"></span>
                                         </td>
                                         <td x-text="formatActivityAction(a)"></td>
-                                        <td class="activity-details">
-                                            <small
-                                                x-text="a.type === 'login' ? (a.userAgent || '-') : ((a.httpMethod || '') + ' ' + (a.path || '')).trim()"></small>
-                                        </td>
                                         <td>
                                             <span x-show="a.type === 'login'" class="activity-badge"
                                                 :class="a.success ? 'badge-success' : 'badge-error'"
@@ -1550,7 +1536,7 @@
                                     </tr>
                                 </template>
                                 <tr x-show="activityFeed.length === 0">
-                                    <td colspan="6" style="color:#888;">Nessuna attivita'</td>
+                                    <td colspan="5" style="color:#888;">Nessuna attivita'</td>
                                 </tr>
                             </tbody>
                         </table>
