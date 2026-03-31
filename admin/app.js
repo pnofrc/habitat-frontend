@@ -85,6 +85,30 @@ document.addEventListener('alpine:init', () => {
         activityFilters: { userId: '', dateFrom: '', dateTo: '' },
         activityTab: 'feed',
 
+        // Finance state
+        financeItems: [],
+        deletedFinanceItems: [],
+        financeCategories: [],
+        yearlyTargets: [],
+        editingFinance: null,
+        editingCategory: null,
+        editingTarget: null,
+        financeTab: 'overview',
+        filterFinanceType: 'all',
+        filterFinanceCategory: null,
+        filterFinanceDateStart: null,
+        filterFinanceDateEnd: null,
+        flowItems: [],
+        flowCategoryOptions: [
+            { value: 'tessera', label: 'Tessera' },
+            { value: 'evento', label: 'Evento' },
+            { value: 'bando', label: 'Bando' },
+            { value: 'workshop', label: 'Workshop' },
+            { value: 'donazione', label: 'Donazione' },
+            { value: 'bolletta', label: 'Bolletta' },
+            { value: 'acquisto', label: 'Acquisto' },
+        ],
+
         canWriteTab(tab) {
             if (!this.currentUser) return false;
             if (this.currentUser.role === 'admin') return true;
@@ -100,11 +124,43 @@ document.addEventListener('alpine:init', () => {
 
         get visibleTabs() {
             if (!this.currentUser) return [];
-            const allTabs = ['expenses', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar'];
+            const allTabs = ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar'];
             if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram', 'activity'];
             if (this.currentUser.role === 'reader') return allTabs;
             // reader_limited
             return (this.currentUser.allowedTabs || []);
+        },
+
+        get filteredFinanceItems() {
+            if (this.view !== 'finance') return [];
+
+            return this.financeItems.filter(f => {
+                if (this.filterFinanceType !== 'all' && f.type !== this.filterFinanceType) return false;
+                if (this.filterFinanceCategory && f.categoryId !== this.filterFinanceCategory) return false;
+                if (this.filterFinanceDateStart && new Date(f.date) < new Date(this.filterFinanceDateStart)) return false;
+                if (this.filterFinanceDateEnd && new Date(f.date) > new Date(this.filterFinanceDateEnd)) return false;
+                return true;
+            });
+        },
+
+        get financeIncomeTotal() {
+            return this.filteredFinanceItems
+                .filter(f => f.type === 'income' && f.included)
+                .reduce((sum, f) => sum + f.amount, 0);
+        },
+
+        get financeExpenseTotal() {
+            return this.filteredFinanceItems
+                .filter(f => f.type === 'expense' && f.included)
+                .reduce((sum, f) => sum + f.amount, 0);
+        },
+
+        get financeBalance() {
+            return this.financeIncomeTotal - this.financeExpenseTotal;
+        },
+
+        get currentYear() {
+            return new Date().getFullYear();
         },
 
         async init() {
@@ -188,6 +244,9 @@ document.addEventListener('alpine:init', () => {
             this.editingCalendarEvent = null;
             this.editingChat = null;
             this.digestPreview = null;
+            this.editingFinance = null;
+            this.editingCategory = null;
+            this.editingTarget = null;
             this.confirmModal = null;
             await this.fetchData();
         },
@@ -213,6 +272,11 @@ document.addEventListener('alpine:init', () => {
 
                 if (this.view === 'calendar') {
                     this.$nextTick(() => this.initCalendar());
+                    return;
+                }
+
+                if (this.view === 'finance') {
+                    await this.fetchFinanceData();
                     return;
                 }
 
@@ -417,6 +481,274 @@ document.addEventListener('alpine:init', () => {
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { font: { size: 9 } } } } }
             });
         },
+
+        // Finance tab methods
+        async fetchFinanceData() {
+            try {
+                const [itemsRes, categoriesRes, targetsRes, flowRes] = await Promise.all([
+                    fetch(`${this.BASE_URL}/finance/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/finance-category/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/yearly-target/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/expenses/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                ]);
+
+                if (itemsRes.status === 401) return this.logout();
+
+                this.financeItems = await itemsRes.json();
+                this.financeCategories = await categoriesRes.json();
+                this.yearlyTargets = await targetsRes.json();
+                this.flowItems = await flowRes.json();
+
+                // Fetch deleted items
+                const deletedRes = await fetch(`${this.BASE_URL}/finance/bin`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                this.deletedFinanceItems = await deletedRes.json();
+            } catch (e) {
+                console.error('Error fetching finance data:', e);
+                alert('Error loading finance data');
+            }
+        },
+
+        openCreateFinance() {
+            this.editingFinance = {
+                name: '',
+                description: '',
+                amount: 0,
+                type: 'expense',
+                categoryId: null,
+                flowCategory: '',
+                included: true,
+                date: new Date().toISOString().split('T')[0],
+                notes: ''
+            };
+        },
+
+        openEditFinance(item) {
+            this.editingFinance = { ...item, date: item.date ? item.date.split('T')[0] : new Date().toISOString().split('T')[0] };
+        },
+
+        async saveFinance() {
+            try {
+                if (!this.editingFinance.name || !this.editingFinance.amount) {
+                    alert('Name and amount are required');
+                    return;
+                }
+
+                const isUpdate = !!this.editingFinance.id;
+                const res = await fetch(
+                    isUpdate ? `${this.BASE_URL}/finance/${this.editingFinance.id}` : `${this.BASE_URL}/finance/`,
+                    {
+                        method: isUpdate ? 'PATCH' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.token}`
+                        },
+                        body: JSON.stringify(this.editingFinance)
+                    }
+                );
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.message || 'Error saving finance record');
+                    return;
+                }
+
+                this.editingFinance = null;
+                await this.fetchFinanceData();
+            } catch (e) {
+                console.error('Error saving finance:', e);
+                alert('Error saving finance record');
+            }
+        },
+
+        async toggleFinanceIncluded(item) {
+            try {
+                const res = await fetch(`${this.BASE_URL}/finance/${item.id}/toggle`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+
+                if (!res.ok) {
+                    alert('Error toggling included status');
+                    return;
+                }
+
+                await this.fetchFinanceData();
+            } catch (e) {
+                console.error('Error toggling finance:', e);
+                alert('Error toggling included status');
+            }
+        },
+
+        getFlowCategoryLabel(expenseType) {
+            const found = this.flowCategoryOptions.find(c => c.value === expenseType);
+            return found ? found.label : expenseType;
+        },
+
+        getFlowCategoryActual(expenseType, year, goalType) {
+            if (!expenseType || !year) return 0;
+            const wantExit = goalType === 'expense';
+            return this.flowItems
+                .filter(e => {
+                    if (e.expenseType !== expenseType) return false;
+                    if (!e.date || new Date(e.date).getFullYear() !== year) return false;
+                    const isExit = String(e.isExit) === 'true';
+                    return wantExit ? isExit : !isExit;
+                })
+                .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+        },
+
+        getEntryActual(item) {
+            if (!item?.flowCategory) return 0;
+            return this.getFlowCategoryActual(item.flowCategory, this.currentYear, item.type);
+        },
+
+        getEntryProgress(item) {
+            const goal = parseFloat(item?.amount) || 0;
+            if (goal <= 0) return 0;
+            return (this.getEntryActual(item) / goal) * 100;
+        },
+
+        async deleteFinance(id) {
+            if (!await this.showConfirm('Eliminare questa voce? Puoi ripristinarla in seguito.')) return;
+
+            try {
+                const res = await fetch(`${this.BASE_URL}/finance/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+
+                if (!res.ok) {
+                    alert('Error deleting finance record');
+                    return;
+                }
+
+                await this.fetchFinanceData();
+            } catch (e) {
+                console.error('Error deleting finance:', e);
+                alert('Error deleting finance record');
+            }
+        },
+
+        async restoreFinance(item) {
+            try {
+                const res = await fetch(`${this.BASE_URL}/finance/${item.id}/restore`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+
+                if (!res.ok) {
+                    alert('Error restoring finance record');
+                    return;
+                }
+
+                await this.fetchFinanceData();
+            } catch (e) {
+                console.error('Error restoring finance:', e);
+                alert('Error restoring finance record');
+            }
+        },
+
+        openCreateCategory() {
+            this.editingCategory = { name: '', isDefault: false };
+        },
+
+        openEditCategory(cat) {
+            this.editingCategory = { ...cat };
+        },
+
+        async saveCategory() {
+            try {
+                if (!this.editingCategory.name) {
+                    alert('Category name is required');
+                    return;
+                }
+
+                const isUpdate = !!this.editingCategory.id;
+                const res = await fetch(
+                    isUpdate ? `${this.BASE_URL}/finance-category/${this.editingCategory.id}` : `${this.BASE_URL}/finance-category/`,
+                    {
+                        method: isUpdate ? 'PATCH' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.token}`
+                        },
+                        body: JSON.stringify(this.editingCategory)
+                    }
+                );
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.message || 'Error saving category');
+                    return;
+                }
+
+                this.editingCategory = null;
+                await this.fetchFinanceData();
+            } catch (e) {
+                console.error('Error saving category:', e);
+                alert('Error saving category');
+            }
+        },
+
+        async deleteCategory(id) {
+            if (!await this.showConfirm('Delete this category? This cannot be undone.')) return;
+
+            try {
+                const res = await fetch(`${this.BASE_URL}/finance-category/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.message || 'Error deleting category');
+                    return;
+                }
+
+                await this.fetchFinanceData();
+            } catch (e) {
+                console.error('Error deleting category:', e);
+                alert('Error deleting category');
+            }
+        },
+
+        openEditTarget(year) {
+            const existing = this.yearlyTargets.find(t => t.year === year);
+            this.editingTarget = existing ? { ...existing } : {
+                year,
+                targetIncome: 0,
+                targetExpenses: 0,
+                notes: ''
+            };
+        },
+
+        async saveTarget() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/yearly-target/${this.editingTarget.year}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    },
+                    body: JSON.stringify(this.editingTarget)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.message || 'Error saving target');
+                    return;
+                }
+
+                this.editingTarget = null;
+                await this.fetchFinanceData();
+            } catch (e) {
+                console.error('Error saving target:', e);
+                alert('Error saving target');
+            }
+        },
+
 
         async selectGuest(guest) {
             try {

@@ -604,6 +604,8 @@
                     style="height: 28px; margin-right: 10px;">
                 <button x-show="visibleTabs.includes('expenses')" :class="view === 'expenses' && 'active'"
                     @click="setView('expenses')">Flow Cassa</button>
+                <button x-show="visibleTabs.includes('finance')" :class="view === 'finance' && 'active'"
+                    @click="setView('finance')">Finance</button>
                 <button x-show="visibleTabs.includes('guests')" :class="view === 'guests' && 'active'"
                     @click="setView('guests')">Ospitalita'</button>
                 <button x-show="visibleTabs.includes('bookings')" :class="view === 'bookings' && 'active'"
@@ -810,6 +812,280 @@
                                 </template>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- FINANCE -->
+                <div x-show="view === 'finance'">
+                    <!-- Sub-tab navigation -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button :class="financeTab === 'overview' && 'active'" @click="financeTab = 'overview'">Riepilogo</button>
+                        <button x-show="currentUser?.role === 'admin'" :class="financeTab === 'categories' && 'active'" @click="financeTab = 'categories'">Categorie</button>
+                    </div>
+
+                    <!-- Overview Tab -->
+                    <div x-show="financeTab === 'overview'">
+                        <!-- Summary Cards (consistent with Flow Cassa) -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
+                            <div class="card" style="flex:1;">
+                                <small>ENTRATE</small><br>
+                                <b x-text="'€' + financeIncomeTotal.toFixed(2)" style="color: green; font-size: 20px;"></b>
+                            </div>
+                            <div class="card" style="flex:1;">
+                                <small>USCITE</small><br>
+                                <b x-text="'€' + financeExpenseTotal.toFixed(2)" style="color: red; font-size: 20px;"></b>
+                            </div>
+                            <div class="card" style="flex:1;">
+                                <small>SALDO</small><br>
+                                <b x-text="'€' + financeBalance.toFixed(2)" style="font-size: 20px;"></b>
+                            </div>
+                        </div>
+
+                        <!-- Filters (moved from Transactions) -->
+                        <div class="card" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                                <div style="display: flex; gap: 5px; align-items: center;">
+                                    <select x-model="filterFinanceType" style="width: auto; margin: 0;">
+                                        <option value="all">Tutti i Tipi</option>
+                                        <option value="income">Entrate</option>
+                                        <option value="expense">Uscite</option>
+                                    </select>
+
+                                    <select x-model.number="filterFinanceCategory" style="width: auto; margin: 0;">
+                                        <option :value="null">Tutte le Categorie</option>
+                                        <template x-for="cat in financeCategories" :key="cat.id">
+                                            <option :value="cat.id" x-text="cat.name"></option>
+                                        </template>
+                                    </select>
+
+                                    <button @click="filterFinanceType = 'all'; filterFinanceCategory = null;"
+                                            style="padding: 4px 10px; cursor: pointer;">Resetta</button>
+                                </div>
+
+                                <button x-show="canWrite" @click="openCreateFinance()"
+                                    style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+ NUOVA VOCE</button>
+                            </div>
+                        </div>
+
+                        <!-- Income Transactions -->
+                        <div class="card" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0; color: green;">Entrate</h3>
+                            </div>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Categoria</th>
+                                        <th>Flow</th>
+                                        <th>Importo</th>
+                                        <th style="text-align: center;">Includi</th>
+                                    </tr>
+                                </thead>
+                                <template x-for="item in filteredFinanceItems.filter(f => f.type === 'income')" :key="item.id">
+                                    <tbody>
+                                        <tr>
+                                            <td x-text="item.name" @click="canWrite && openEditFinance(item)"
+                                                :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"></td>
+                                            <td x-text="item.category || '-'"></td>
+                                            <td x-text="item.flowCategory ? getFlowCategoryLabel(item.flowCategory) : '-'"></td>
+                                            <td x-text="'€' + item.amount.toFixed(2)" style="color: green;"></td>
+                                            <td style="text-align: center;">
+                                                <input type="checkbox" :checked="item.included"
+                                                       @change="toggleFinanceIncluded(item)"
+                                                       :disabled="!canWrite"
+                                                       style="cursor: pointer;">
+                                            </td>
+                                        </tr>
+                                        <tr style="background:#fafafa;">
+                                            <td colspan="5" style="padding:6px 10px; text-align:left;">
+                                                <template x-if="item.flowCategory">
+                                                    <div style="display:flex; align-items:center; gap:8px; justify-content:flex-start;">
+                                                        <small style="color:#666;">Prog.</small>
+                                                        <div style="width:160px; background:#eee; height:6px; border-radius:999px; overflow:hidden;">
+                                                            <div :style="'height:100%; background:#22c55e; width:' + Math.min(100, getEntryProgress(item)).toFixed(0) + '%'"></div>
+                                                        </div>
+                                                        <small x-text="getEntryProgress(item).toFixed(0) + '%'"></small>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!item.flowCategory">
+                                                    <small style="color:#999;">Nessuna categoria Flow Cassa collegata</small>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </template>
+                            </table>
+                        </div>
+
+                        <!-- Expense Transactions -->
+                        <div class="card">
+                            <h3 style="margin: 0 0 10px 0; color: red;">Uscite</h3>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Categoria</th>
+                                        <th>Flow</th>
+                                        <th>Importo</th>
+                                        <th style="text-align: center;">Includi</th>
+                                    </tr>
+                                </thead>
+                                <template x-for="item in filteredFinanceItems.filter(f => f.type === 'expense')" :key="item.id">
+                                    <tbody>
+                                        <tr>
+                                            <td x-text="item.name" @click="canWrite && openEditFinance(item)"
+                                                :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"></td>
+                                            <td x-text="item.category || '-'"></td>
+                                            <td x-text="item.flowCategory ? getFlowCategoryLabel(item.flowCategory) : '-'"></td>
+                                            <td x-text="'€' + item.amount.toFixed(2)" style="color: red;"></td>
+                                            <td style="text-align: center;">
+                                                <input type="checkbox" :checked="item.included"
+                                                       @change="toggleFinanceIncluded(item)"
+                                                       :disabled="!canWrite"
+                                                       style="cursor: pointer;">
+                                            </td>
+                                        </tr>
+                                        <tr style="background:#fafafa;">
+                                            <td colspan="5" style="padding:6px 10px; text-align:left;">
+                                                <template x-if="item.flowCategory">
+                                                    <div style="display:flex; align-items:center; gap:8px; justify-content:flex-start;">
+                                                        <small style="color:#666;">Prog.</small>
+                                                        <div style="width:160px; background:#eee; height:6px; border-radius:999px; overflow:hidden;">
+                                                            <div :style="'height:100%; background:#22c55e; width:' + Math.min(100, getEntryProgress(item)).toFixed(0) + '%'"></div>
+                                                        </div>
+                                                        <small x-text="getEntryProgress(item).toFixed(0) + '%'"></small>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!item.flowCategory">
+                                                    <small style="color:#999;">Nessuna categoria Flow Cassa collegata</small>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </template>
+                            </table>
+                        </div>
+
+                        <!-- Deleted items bin (moved from Transactions) -->
+                        <div x-show="deletedFinanceItems.length > 0" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;">
+                            <h3 style="margin-bottom: 10px;">Voci Eliminate</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Importo</th>
+                                        <th>Tipo</th>
+                                        <th x-show="canWrite">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="item in deletedFinanceItems" :key="item.id">
+                                        <tr style="opacity: 0.6;">
+                                            <td x-text="item.name"></td>
+                                            <td x-text="'€' + item.amount.toFixed(2)"></td>
+                                            <td x-text="item.type === 'income' ? 'Entrata' : 'Uscita'"></td>
+                                            <td x-show="canWrite">
+                                                <button @click="restoreFinance(item)" style="padding: 2px 8px; background: green; color: white;">Ripristina</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Forecast Tab -->
+                    <div x-show="financeTab === 'forecast'">
+                        <div class="card">
+                            <h2 style="margin-bottom: 10px;">Pianificazione Finanziaria Pluriennale</h2>
+                            <p style="margin-bottom: 20px; color: #666;">Imposta obiettivi annuali di entrate e uscite per pianificare a lungo termine.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Anno</th>
+                                        <th>Entrate Previste</th>
+                                        <th>Uscite Previste</th>
+                                        <th>Saldo Previsto</th>
+                                        <th>Entrate Effettive</th>
+                                        <th>Uscite Effettive</th>
+                                        <th>Saldo Effettivo</th>
+                                        <th x-show="canWrite">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!--
+                                        Previsioni per anni futuri: la tabella usa un elenco fisso di anni
+                                        per mostrare i target, mentre i valori "effettivi" si calcolano
+                                        solo dalle transazioni esistenti in quell'anno (se presenti).
+                                    -->
+                                    <template x-for="year in [2024, 2025, 2026, 2027, 2028]" :key="year">
+                                        <tr x-data="{
+                                            target: yearlyTargets.find(t => t.year === year),
+                                            actualIncome: financeItems.filter(f => f.included && f.type === 'income' && new Date(f.date).getFullYear() === year).reduce((sum, f) => sum + f.amount, 0),
+                                            actualExpenses: financeItems.filter(f => f.included && f.type === 'expense' && new Date(f.date).getFullYear() === year).reduce((sum, f) => sum + f.amount, 0)
+                                        }">
+                                            <td x-text="year" style="font-weight: bold;"></td>
+                                            <td x-text="'€' + ((target?.targetIncome || 0).toFixed(2))"></td>
+                                            <td x-text="'€' + ((target?.targetExpenses || 0).toFixed(2))"></td>
+                                            <td x-text="'€' + (((target?.targetIncome || 0) - (target?.targetExpenses || 0)).toFixed(2))"></td>
+                                            <td x-text="'€' + actualIncome.toFixed(2)" style="color: green;"></td>
+                                            <td x-text="'€' + actualExpenses.toFixed(2)" style="color: red;"></td>
+                                            <td x-text="'€' + (actualIncome - actualExpenses).toFixed(2)"
+                                                :style="(actualIncome - actualExpenses) >= 0 ? 'color: green;' : 'color: red;'"></td>
+                                            <td x-show="canWrite">
+                                                <button @click="openEditTarget(year)" style="padding: 2px 8px;">Modifica Obiettivo</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <!-- Categories Tab -->
+                    <div x-show="financeTab === 'categories' && currentUser?.role === 'admin'">
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h2>Categorie Finanziarie</h2>
+                                <button @click="openCreateCategory()"
+                                    style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+ NUOVA CATEGORIA</button>
+                            </div>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Numero Voci</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="cat in financeCategories" :key="cat.id">
+                                        <tr x-data="{ txCount: financeItems.filter(f => f.categoryId === cat.id).length }">
+                                            <td x-text="cat.name"></td>
+                                            <td>
+                                                <span x-show="cat.isDefault"
+                                                      style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Predefinita</span>
+                                                <span x-show="!cat.isDefault"
+                                                      style="background: #6b7280; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Personalizzata</span>
+                                            </td>
+                                            <td x-text="txCount"></td>
+                                            <td>
+                                                <button x-show="!cat.isDefault" @click="openEditCategory(cat)" style="padding: 2px 8px; margin-right: 5px;">Modifica</button>
+                                                <button x-show="!cat.isDefault && txCount === 0" @click="deleteCategory(cat.id)"
+                                                        style="padding: 2px 8px; background: red; color: white;">Elimina</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -1497,7 +1773,7 @@
                                 <input type="date" x-model="activityFilters.dateTo">
                             </div>
                             <div class="activity-filter-actions">
-                                <label>&nbsp;</label>
+                                <label style="display: block; visibility: hidden;">.</label>
                                 <div style="display: flex; gap: 8px;">
                                     <button class="btn-blk" @click="activityApplyFilters()">APPLICA</button>
                                     <button class="btn-del" @click="activityResetFilters()">RESET</button>
@@ -1979,6 +2255,94 @@
                         style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                 </div>
             </template>
+
+            <!-- SIDEBAR: Edit Finance Entry -->
+            <template x-if="editingFinance">
+                <div class="sidebar">
+                    <h3 x-text="editingFinance.id ? 'Modifica Voce' : 'Nuova Voce'"></h3>
+
+                    <label>Name *</label>
+                    <input type="text" x-model="editingFinance.name" required>
+
+                    <label>Type *</label>
+                    <select x-model="editingFinance.type">
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+
+                    <label>Amount (€) *</label>
+                    <input type="number" step="0.01" x-model.number="editingFinance.amount" required>
+
+                    <label>Category</label>
+                    <select x-model.number="editingFinance.categoryId">
+                        <option :value="null">None</option>
+                        <template x-for="cat in financeCategories" :key="cat.id">
+                            <option :value="cat.id" x-text="cat.name"></option>
+                        </template>
+                    </select>
+
+                    <label>Categoria Flow Cassa</label>
+                    <select x-model="editingFinance.flowCategory">
+                        <option value="">None</option>
+                        <template x-for="cat in flowCategoryOptions" :key="cat.value">
+                            <option :value="cat.value" x-text="cat.label"></option>
+                        </template>
+                    </select>
+
+                    <label>Date *</label>
+                    <input type="date" x-model="editingFinance.date" required>
+
+                    <label>Description</label>
+                    <textarea x-model="editingFinance.description" rows="3"></textarea>
+
+                    <label>Notes</label>
+                    <textarea x-model="editingFinance.notes" rows="2"></textarea>
+
+                    <label style="margin-top:10px;">
+                        <input type="checkbox" x-model="editingFinance.included" style="width:auto">
+                        Include in calculations
+                    </label>
+
+                    <button class="btn-blk" @click="saveFinance()">SAVE</button>
+                    <button @click="editingFinance = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Cancel</button>
+                </div>
+            </template>
+
+            <!-- SIDEBAR: Edit Finance Category -->
+            <template x-if="editingCategory">
+                <div class="sidebar">
+                    <h3 x-text="editingCategory.id ? 'Edit Category' : 'New Category'"></h3>
+
+                    <label>Name *</label>
+                    <input type="text" x-model="editingCategory.name" required>
+
+                    <button class="btn-blk" @click="saveCategory()">SAVE</button>
+                    <button @click="editingCategory = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Cancel</button>
+                </div>
+            </template>
+
+            <!-- SIDEBAR: Edit Yearly Target -->
+            <template x-if="editingTarget">
+                <div class="sidebar">
+                    <h3 x-text="'Set Target for ' + editingTarget.year"></h3>
+
+                    <label>Target Income (€)</label>
+                    <input type="number" step="0.01" x-model.number="editingTarget.targetIncome">
+
+                    <label>Target Expenses (€)</label>
+                    <input type="number" step="0.01" x-model.number="editingTarget.targetExpenses">
+
+                    <label>Notes</label>
+                    <textarea x-model="editingTarget.notes" rows="3"></textarea>
+
+                    <button class="btn-blk" @click="saveTarget()">SAVE</button>
+                    <button @click="editingTarget = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Cancel</button>
+                </div>
+            </template>
+
 
             <!-- MODAL: Confirm -->
             <template x-if="confirmModal">
