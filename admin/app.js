@@ -587,7 +587,8 @@ document.addEventListener('alpine:init', () => {
             const wantExit = goalType === 'expense';
             return this.flowItems
                 .filter(e => {
-                    if (e.expenseType !== expenseType) return false;
+                    if (!e.expenseType || !expenseType) return false;
+                    if (e.expenseType.trim().toLowerCase() !== expenseType.trim().toLowerCase()) return false;
                     if (!e.date || new Date(e.date).getFullYear() !== year) return false;
                     const isExit = String(e.isExit) === 'true';
                     return wantExit ? isExit : !isExit;
