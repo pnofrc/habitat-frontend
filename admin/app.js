@@ -99,15 +99,9 @@ document.addEventListener('alpine:init', () => {
         filterFinanceDateStart: null,
         filterFinanceDateEnd: null,
         flowItems: [],
-        flowCategoryOptions: [
-            { value: 'tessera', label: 'Tessera' },
-            { value: 'evento', label: 'Evento' },
-            { value: 'bando', label: 'Bando' },
-            { value: 'workshop', label: 'Workshop' },
-            { value: 'donazione', label: 'Donazione' },
-            { value: 'bolletta', label: 'Bolletta' },
-            { value: 'acquisto', label: 'Acquisto' },
-        ],
+        flowCassaCategories: [],  // Loaded from API
+        editingFlowCassaCategory: null,
+        showFlowCassaCategoryManager: false,
 
         canWriteTab(tab) {
             if (!this.currentUser) return false;
@@ -277,6 +271,7 @@ document.addEventListener('alpine:init', () => {
 
                 if (this.view === 'finance') {
                     await this.fetchFinanceData();
+                    await this.loadFlowCassaCategories();
                     return;
                 }
 
@@ -334,6 +329,7 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 if (this.view === 'expenses') {
+                    await this.loadFlowCassaCategories();
                     this.updateStats();
                     this.$nextTick(() => this.renderChart());
                 }
@@ -582,8 +578,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         getFlowCategoryLabel(expenseType) {
-            const found = this.flowCategoryOptions.find(c => c.value === expenseType);
-            return found ? found.label : expenseType;
+            if (!expenseType) return '';
+            return expenseType.charAt(0).toUpperCase() + expenseType.slice(1);
         },
 
         getFlowCategoryActual(expenseType, year, goalType) {
@@ -749,6 +745,104 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        // Flow Cassa Category Management
+        async loadFlowCassaCategories() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/flow-cassa-category/`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+
+                if (!res.ok) {
+                    console.error('Error fetching flow cassa categories');
+                    return;
+                }
+
+                this.flowCassaCategories = await res.json();
+            } catch (e) {
+                console.error('Error loading flow cassa categories:', e);
+            }
+        },
+
+        openFlowCassaCategoryManager() {
+            this.showFlowCassaCategoryManager = true;
+        },
+
+        closeFlowCassaCategoryManager() {
+            this.showFlowCassaCategoryManager = false;
+            this.editingFlowCassaCategory = null;
+        },
+
+        openCreateFlowCassaCategory() {
+            this.editingFlowCassaCategory = { name: '' };
+        },
+
+        openEditFlowCassaCategory(cat) {
+            this.editingFlowCassaCategory = { ...cat };
+        },
+
+        async saveFlowCassaCategory() {
+            try {
+                if (!this.editingFlowCassaCategory.name || !this.editingFlowCassaCategory.name.trim()) {
+                    alert('Il nome della categoria è obbligatorio');
+                    return;
+                }
+
+                const isUpdate = !!this.editingFlowCassaCategory.id;
+                const res = await fetch(
+                    isUpdate ? `${this.BASE_URL}/flow-cassa-category/${this.editingFlowCassaCategory.id}` : `${this.BASE_URL}/flow-cassa-category/`,
+                    {
+                        method: isUpdate ? 'PATCH' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.token}`
+                        },
+                        body: JSON.stringify({ name: this.editingFlowCassaCategory.name.trim() })
+                    }
+                );
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.message || 'Errore nel salvataggio della categoria');
+                    return;
+                }
+
+                this.editingFlowCassaCategory = null;
+                await this.loadFlowCassaCategories();
+                await this.fetchData(); // Refresh expenses/finance data
+            } catch (e) {
+                console.error('Error saving flow cassa category:', e);
+                alert('Errore nel salvataggio della categoria');
+            }
+        },
+
+        async deleteFlowCassaCategory(id) {
+            if (!await this.showConfirm('Eliminare questa categoria? Questa azione non può essere annullata.')) return;
+
+            try {
+                const res = await fetch(`${this.BASE_URL}/flow-cassa-category/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.message || 'Errore nell\'eliminazione della categoria');
+                    return;
+                }
+
+                await this.loadFlowCassaCategories();
+                await this.fetchData(); // Refresh expenses/finance data
+            } catch (e) {
+                console.error('Error deleting flow cassa category:', e);
+                alert('Errore nell\'eliminazione della categoria');
+            }
+        },
+
+        getFlowCassaCategoryUsageCount(categoryName) {
+            const expenseCount = this.items.filter(e => e.expenseType === categoryName).length;
+            const financeCount = this.flowItems.filter(f => f.flowCategory === categoryName).length;
+            return expenseCount + financeCount;
+        },
 
         async selectGuest(guest) {
             try {

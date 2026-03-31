@@ -761,18 +761,17 @@
                                 </div>
                                 <select x-model="typeFilter" style="width: auto; margin:0">
                                     <option value="all">Tutti i tipi</option>
-                                    <option value="tessera">Tessera</option>
-                                    <option value="evento">Evento</option>
-                                    <option value="bando">Bando</option>
-                                    <option value="workshop">Workshop</option>
-                                    <option value="donazione">Donazione</option>
-                                    <option value="bolletta">Bolletta</option>
-                                    <option value="acquisto">Acquisto</option>
+                                    <template x-for="cat in flowCassaCategories" :key="cat.id">
+                                        <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
+                                    </template>
                                 </select>
                             </div>
                             <button x-show="canWrite" @click="openCreate()"
                                 style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+
                                 NUOVA VOCE</button>
+                            <button x-show="canWrite && currentUser?.role === 'admin'" @click="openFlowCassaCategoryManager()"
+                                style="padding: 4px 10px; cursor: pointer; background: #666; color:#fff; border:none; margin-left: 8px;">
+                                Gestisci Categorie</button>
                         </div>
 
                         <table>
@@ -2001,13 +2000,9 @@
                     <label>Categoria</label>
                     <select x-model="editingItem.expenseType">
                         <option value="">Nessuna</option>
-                        <option value="tessera">Tessera</option>
-                        <option value="evento">Evento</option>
-                        <option value="bando">Bando</option>
-                        <option value="workshop">Workshop</option>
-                        <option value="donazione">Donazione</option>
-                        <option value="bolletta">Bolletta</option>
-                        <option value="acquisto">Acquisto</option>
+                        <template x-for="cat in flowCassaCategories" :key="cat.id">
+                            <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
+                        </template>
                     </select>
                     <template x-if="String(editingItem.isExit) === 'true'">
                         <div class="sub-box">
@@ -2284,8 +2279,8 @@
                     <label>Categoria Flow Cassa</label>
                     <select x-model="editingFinance.flowCategory">
                         <option value="">None</option>
-                        <template x-for="cat in flowCategoryOptions" :key="cat.value">
-                            <option :value="cat.value" x-text="cat.label"></option>
+                        <template x-for="cat in flowCassaCategories" :key="cat.id">
+                            <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
                         </template>
                     </select>
 
@@ -2304,6 +2299,8 @@
                     </label>
 
                     <button class="btn-blk" @click="saveFinance()">SAVE</button>
+                    <button x-show="editingFinance.id" @click="deleteFinance(editingFinance.id)"
+                        style="width:100%; margin-top:8px; border:1px solid #000; background:none; cursor:pointer;">ELIMINA</button>
                     <button @click="editingFinance = null"
                         style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Cancel</button>
                 </div>
@@ -2343,6 +2340,84 @@
                 </div>
             </template>
 
+            <!-- MODAL: Flow Cassa Category Manager -->
+            <template x-if="showFlowCassaCategoryManager">
+                <div class="modal-overlay" @click.self="closeFlowCassaCategoryManager()">
+                    <div class="modal-box" style="text-align:left; min-width:600px; max-width:800px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h3 style="margin:0;">Gestione Categorie Flow Cassa</h3>
+                            <button @click="openCreateFlowCassaCategory()"
+                                style="padding: 6px 12px; cursor: pointer; background: #000; color:#fff; border:none;">
+                                + Nuova Categoria
+                            </button>
+                        </div>
+
+                        <table style="width:100%; border-collapse: collapse; font-size:13px;">
+                            <thead>
+                                <tr style="background:#f5f5f5; border-bottom:2px solid #ddd;">
+                                    <th style="padding:8px; text-align:left;">Nome</th>
+                                    <th style="padding:8px; text-align:left;">Tipo</th>
+                                    <th style="padding:8px; text-align:center;">In Uso</th>
+                                    <th style="padding:8px; text-align:right;">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="cat in flowCassaCategories" :key="cat.id">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:8px;" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></td>
+                                        <td style="padding:8px;">
+                                            <span x-show="cat.isDefault"
+                                                style="background:#e0e0e0; padding:2px 8px; border-radius:3px; font-size:11px;">
+                                                Predefinita
+                                            </span>
+                                            <span x-show="!cat.isDefault"
+                                                style="background:#c8e6c9; padding:2px 8px; border-radius:3px; font-size:11px;">
+                                                Personalizzata
+                                            </span>
+                                        </td>
+                                        <td style="padding:8px; text-align:center;" x-text="getFlowCassaCategoryUsageCount(cat.name)"></td>
+                                        <td style="padding:8px; text-align:right;">
+                                            <template x-if="!cat.isDefault">
+                                                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                                                    <button @click="openEditFlowCassaCategory(cat)"
+                                                        style="padding:4px 8px; cursor:pointer; background:#666; color:#fff; border:none; font-size:11px;">
+                                                        Modifica
+                                                    </button>
+                                                    <button @click="deleteFlowCassaCategory(cat.id)"
+                                                        :disabled="getFlowCassaCategoryUsageCount(cat.name) > 0"
+                                                        style="padding:4px 8px; cursor:pointer; background:#d32f2f; color:#fff; border:none; font-size:11px;"
+                                                        :style="getFlowCassaCategoryUsageCount(cat.name) > 0 ? 'opacity:0.4; cursor:not-allowed;' : ''">
+                                                        Elimina
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <button @click="closeFlowCassaCategoryManager()"
+                            style="width:100%; margin-top:20px; padding:8px; border:1px solid #000; background:none; cursor:pointer;">
+                            Chiudi
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- SIDEBAR: Edit Flow Cassa Category -->
+            <template x-if="editingFlowCassaCategory">
+                <div class="sidebar">
+                    <h3 x-text="editingFlowCassaCategory.id ? 'Modifica Categoria' : 'Nuova Categoria'"></h3>
+
+                    <label>Nome *</label>
+                    <input type="text" x-model="editingFlowCassaCategory.name" required>
+
+                    <button class="btn-blk" @click="saveFlowCassaCategory()">SALVA</button>
+                    <button @click="editingFlowCassaCategory = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
 
             <!-- MODAL: Confirm -->
             <template x-if="confirmModal">
