@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habitat Formulario - Manuale Utente</title>
+    <link rel="icon" href="https://habitattt.it/images/h.favicon.png" type="image/png">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #f4f4f4;
+            color: #000;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #fff;
+            border-bottom: 2px solid #000;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .lang-toggle {
+            display: flex;
+            border: 2px solid #000;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .lang-toggle button {
+            padding: 6px 12px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: inherit;
+            text-transform: uppercase;
+        }
+
+        .lang-toggle button.active {
+            background: #000;
+            color: #fff;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 30px;
+            padding: 30px 20px;
+        }
+
+        .sidebar-nav {
+            width: 280px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .nav-card {
+            background: #fff;
+            border: 2px solid #000;
+            box-shadow: 8px 8px 0px #000;
+            padding: 20px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #000;
+            font-family: inherit;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
+        .nav-section {
+            margin-bottom: 15px;
+        }
+
+        .nav-title {
+            font-weight: bold;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #000;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 5px 0;
+            color: #000;
+            text-decoration: none;
+            font-size: 0.8em;
+            transition: padding-left 0.2s;
+        }
+
+        .nav-link:hover {
+            text-decoration: underline;
+            padding-left: 5px;
+        }
+
+        .nav-link.active {
+            font-weight: bold;
+        }
+
+        .nav-sublink {
+            padding-left: 15px;
+            font-size: 0.75em;
+            color: #666;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .section {
+            background: #fff;
+            border: 2px solid #000;
+            box-shadow: 10px 10px 0px #000;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            background: #000;
+            color: #fff;
+            padding: 15px 20px;
+            margin: -40px -40px 30px -40px;
+            text-transform: uppercase;
+            font-size: 1.3em;
+            letter-spacing: 2px;
+        }
+
+        .subsection-header {
+            background: #000;
+            color: #fff;
+            padding: 10px 15px;
+            margin: 30px 0 20px 0;
+            text-transform: uppercase;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            font-size: 1em;
+            text-transform: uppercase;
+            margin: 25px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #000;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .step-box {
+            border: 2px solid #000;
+            padding: 25px 25px 25px 80px;
+            margin: 20px 0;
+            position: relative;
+            background: #fff;
+        }
+
+        .step-number {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: #000;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .step-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .step-body {
+            font-size: 0.95em;
+        }
+
+        .info-box {
+            padding: 15px 15px 15px 20px;
+            margin: 20px 0;
+            border-left: 8px solid #666;
+            background: #f9f9f9;
+        }
+
+        .info-box.tip {
+            border-left-color: #2b6cb0;
+            background: #e6f2ff;
+        }
+
+        .info-box.warning {
+            border-left-color: #c53030;
+            background: #fee;
+        }
+
+        .info-box.note {
+            border-left-color: #b7791f;
+            background: #fff5e6;
+        }
+
+        .info-box-icon {
+            font-weight: bold;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .screenshot {
+            border: 3px solid #000;
+            padding: 15px;
+            margin: 20px 0;
+            background: #f0f0f0;
+            text-align: center;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.15);
+        }
+
+        .screenshot-placeholder {
+            padding: 60px 20px;
+            background: #e0e0e0;
+            color: #666;
+            font-style: italic;
+        }
+
+        .screenshot-caption {
+            margin-top: 10px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .role-badge {
+            display: inline-block;
+            font-size: 0.75em;
+            padding: 3px 8px;
+            border: 2px solid currentColor;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin: 0 3px;
+        }
+
+        .role-badge.admin {
+            color: #c53030;
+            background: #fee;
+        }
+
+        .role-badge.reader {
+            color: #2b6cb0;
+            background: #e6f2ff;
+        }
+
+        .role-badge.reader_limited {
+            color: #b7791f;
+            background: #fff5e6;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 20px;
+            border: 2px solid #000;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .flow-step {
+            padding: 10px 20px;
+            border: 2px solid #000;
+            background: #fff;
+            font-weight: bold;
+            font-size: 0.85em;
+            text-transform: uppercase;
+        }
+
+        .flow-arrow {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border: 1px solid #ccc;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #000;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+
+        .accordion {
+            margin: 20px 0;
+        }
+
+        details {
+            border: 2px solid #000;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #f9f9f9;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        summary:hover {
+            background: #f0f0f0;
+        }
+
+        details[open] summary {
+            background: #000;
+            color: #fff;
+        }
+
+        .details-content {
+            padding: 20px;
+        }
+
+        footer {
+            background: #000;
+            color: #fff;
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar-nav {
+                width: 100%;
+                position: static;
+                max-height: none;
+            }
+
+            .section {
+                padding: 25px;
+            }
+
+            .section-header {
+                margin: -25px -25px 20px -25px;
+                padding: 12px 15px;
+                font-size: 1.1em;
+            }
+
+            .step-box {
+                padding: 70px 20px 20px 20px;
+            }
+
+            .step-number {
+                left: 50%;
+                top: 15px;
+                transform: translateX(-50%);
+            }
+        }
+
+        @media print {
+            .sidebar-nav, .lang-toggle {
+                display: none;
+            }
+
+            .section {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+
+            details {
+                border: 1px solid #000;
+            }
+
+            details summary {
+                display: none;
+            }
+
+            details .details-content {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body x-data="manualApp" x-cloak>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <img class="header-logo" src="https://habitattt.it/images/h.logo.png" alt="Habitat logo">
+                <h1 x-text="t.title"></h1>
+            </div>
+            <div class="lang-toggle">
+                <button @click="lang = 'it'" :class="lang === 'it' && 'active'">IT</button>
+                <button @click="lang = 'en'" :class="lang === 'en' && 'active'">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar-nav">
+            <div class="nav-card">
+                <input
+                    type="text"
+                    class="search-box"
+                    x-model="searchQuery"
+                    :placeholder="lang === 'it' ? 'Cerca...' : 'Search...'"
+                >
+
+                <template x-for="section in filteredNav" :key="section.id">
+                    <div class="nav-section">
+                        <div class="nav-title" x-text="section.title"></div>
+                        <template x-for="sub in section.subs" :key="sub.id">
+                            <a :href="'#' + sub.id" class="nav-link nav-sublink" x-text="sub.title"></a>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- INTRODUZIONE -->
+            <section id="intro" class="section">
+                <h2 class="section-header" x-text="t.intro.title"></h2>
+
+                <div x-html="t.intro.what"></div>
+
+                <div class="info-box tip">
+                    <div class="info-box-icon" x-text="lang === 'it' ? 'ℹ SUGGERIMENTO' : 'ℹ TIP'"></div>
+                    <div x-html="t.intro.tip"></div>
+                </div>
+
+                <h3 x-text="t.intro.navigationTitle"></h3>
+                <div x-html="t.intro.navigation"></div>
+            </section>
+
+            <!-- PER AMMINISTRATORI -->
+            <section id="admin-intro" class="section">
+                <h2 class="section-header" x-text="t.adminIntro.title"></h2>
+
+                <div x-html="t.adminIntro.intro"></div>
+
+                <h3 x-text="t.adminIntro.rolesTitle"></h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th x-text="lang === 'it' ? 'Ruolo' : 'Role'"></th>
+                            <th x-text="lang === 'it' ? 'Permessi' : 'Permissions'"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="role-badge admin">ADMIN</span></td>
+                            <td x-text="lang === 'it' ? 'Accesso completo a tutte le funzionalità' : 'Full access to all features'"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="role-badge reader">READER</span></td>
+                            <td x-text="lang === 'it' ? 'Può visualizzare e modificare tutti i dati' : 'Can view and edit all data'"></td>
+                        </tr>
+                        <tr>
+                            <td><span class="role-badge reader_limited">READER LIMITED</span></td>
+                            <td x-text="lang === 'it' ? 'Accesso limitato alle schede configurate' : 'Limited access to configured tabs'"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <div class="step-title" x-text="t.adminIntro.loginTitle"></div>
+                    <div class="step-body" x-html="t.adminIntro.loginBody"></div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <div class="step-title" x-text="t.adminIntro.navTitle"></div>
+                    <div class="step-body" x-html="t.adminIntro.navBody"></div>
+                </div>
+            </section>
+
+            <section id="admin-expenses" class="section">
+                <h2 class="section-header" x-text="t.expenses.title"></h2>
+
+                <div x-html="t.expenses.intro"></div>
+
+                <h3 x-text="t.expenses.statsTitle"></h3>
+                <div x-html="t.expenses.statsBody"></div>
+
+                <h3 x-text="t.expenses.addTitle"></h3>
+                <div x-html="t.expenses.addBody"></div>
+
+                <h3 x-text="t.expenses.filterTitle"></h3>
+                <div x-html="t.expenses.filterBody"></div>
+            </section>
+
+            <section id="admin-finance" class="section">
+                <h2 class="section-header" x-text="t.finance.title"></h2>
+
+                <div x-html="t.finance.intro"></div>
+
+                <div class="info-box note">
+                    <div class="info-box-icon" x-text="lang === 'it' ? 'ℹ DIFFERENZA' : 'ℹ DIFFERENCE'"></div>
+                    <div x-html="t.finance.difference"></div>
+                </div>
+
+                <h2 class="subsection-header" x-text="t.finance.overview.title"></h2>
+                <div x-html="t.finance.overview.body"></div>
+
+                <h3 x-text="t.finance.overview.cardsTitle"></h3>
+                <div x-html="t.finance.overview.cardsBody"></div>
+
+                <h3 x-text="t.finance.overview.progressTitle"></h3>
+                <div x-html="t.finance.overview.progressBody"></div>
+
+                <h2 class="subsection-header" x-text="t.finance.transactions.title"></h2>
+                <div x-html="t.finance.transactions.body"></div>
+
+                <h3 x-text="t.finance.transactions.includeTitle"></h3>
+                <div x-html="t.finance.transactions.includeBody"></div>
+
+                <div class="info-box tip">
+                    <div class="info-box-icon" x-text="lang === 'it' ? 'ℹ SUGGERIMENTO' : 'ℹ TIP'"></div>
+                    <div x-html="t.finance.transactions.tip"></div>
+                </div>
+
+                <h2 class="subsection-header" x-text="t.finance.categories.title"></h2>
+                <div x-html="t.finance.categories.body"></div>
+
+                <h2 class="subsection-header" x-text="t.finance.bin.title"></h2>
+                <div x-html="t.finance.bin.body"></div>
+
+                <h3 x-text="t.finance.bin.restoreTitle"></h3>
+                <div x-html="t.finance.bin.restoreBody"></div>
+
+                <h2 class="subsection-header" x-text="t.finance.forecast.title"></h2>
+                <div x-html="t.finance.forecast.body"></div>
+
+                <h3 x-text="t.finance.forecast.yearlyTitle"></h3>
+                <div x-html="t.finance.forecast.yearlyBody"></div>
+
+                <h3 x-text="t.finance.forecast.targetsTitle"></h3>
+                <div x-html="t.finance.forecast.targetsBody"></div>
+            </section>
+
+            <section id="admin-guests" class="section">
+                <h2 class="section-header" x-text="t.guests.title"></h2>
+
+                <div x-html="t.guests.intro"></div>
+
+                <div class="flow-diagram">
+                    <div class="flow-step" x-text="lang === 'it' ? 'Crea Ospite' : 'Create Guest'"></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" x-text="lang === 'it' ? 'Prenotazione' : 'Booking'"></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Check-in</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Check-out</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" x-text="lang === 'it' ? 'Fattura' : 'Invoice'"></div>
+                </div>
+
+                <h3 x-text="t.guests.createTitle"></h3>
+                <div x-html="t.guests.createBody"></div>
+
+                <h3 x-text="t.guests.bookingTitle"></h3>
+                <div x-html="t.guests.bookingBody"></div>
+
+                <h3 x-text="t.guests.checkinTitle"></h3>
+                <div x-html="t.guests.checkinBody"></div>
+
+                <h3 x-text="t.guests.checkoutTitle"></h3>
+                <div x-html="t.guests.checkoutBody"></div>
+            </section>
+
+            <section id="admin-applications" class="section">
+                <h2 class="section-header" x-text="t.applications.title"></h2>
+
+                <div x-html="t.applications.intro"></div>
+
+                <h3 x-text="t.applications.residencyTitle"></h3>
+                <div x-html="t.applications.residencyBody"></div>
+
+                <h3 x-text="t.applications.membershipTitle"></h3>
+                <div x-html="t.applications.membershipBody"></div>
+
+                <h3 x-text="t.applications.festivalTitle"></h3>
+                <div x-html="t.applications.festivalBody"></div>
+            </section>
+
+            <section id="admin-festival-planner" class="section">
+                <h2 class="section-header" x-text="t.festivalPlanner.title"></h2>
+
+                <div x-html="t.festivalPlanner.intro"></div>
+
+                <h2 class="subsection-header" x-text="t.festivalPlanner.gridTitle"></h2>
+                <div x-html="t.festivalPlanner.gridBody"></div>
+
+                <h3 x-text="t.festivalPlanner.colorsTitle"></h3>
+                <div x-html="t.festivalPlanner.colorsBody"></div>
+
+                <h2 class="subsection-header" x-text="t.festivalPlanner.venuesTitle"></h2>
+                <div x-html="t.festivalPlanner.venuesBody"></div>
+
+                <h2 class="subsection-header" x-text="t.festivalPlanner.unscheduledTitle"></h2>
+                <div x-html="t.festivalPlanner.unscheduledBody"></div>
+
+                <h3 x-text="t.festivalPlanner.budgetTitle"></h3>
+                <div x-html="t.festivalPlanner.budgetBody"></div>
+            </section>
+
+            <section id="admin-festival-volunteers" class="section">
+                <h2 class="section-header" x-text="t.festivalVolunteers.title"></h2>
+
+                <div x-html="t.festivalVolunteers.intro"></div>
+
+                <h3 x-text="t.festivalVolunteers.createTitle"></h3>
+                <div x-html="t.festivalVolunteers.createBody"></div>
+
+                <h3 x-text="t.festivalVolunteers.tableTitle"></h3>
+                <div x-html="t.festivalVolunteers.tableBody"></div>
+            </section>
+
+            <section id="admin-festival-timeline" class="section">
+                <h2 class="section-header" x-text="t.festivalTimeline.title"></h2>
+
+                <div x-html="t.festivalTimeline.intro"></div>
+
+                <h3 x-text="t.festivalTimeline.createTitle"></h3>
+                <div x-html="t.festivalTimeline.createBody"></div>
+
+                <h3 x-text="t.festivalTimeline.vizTitle"></h3>
+                <div x-html="t.festivalTimeline.vizBody"></div>
+
+                <div class="info-box tip">
+                    <div class="info-box-icon" x-text="lang === 'it' ? 'ℹ SUGGERIMENTO' : 'ℹ TIP'"></div>
+                    <div x-html="t.festivalTimeline.tip"></div>
+                </div>
+            </section>
+
+            <section id="admin-calendar" class="section">
+                <h2 class="section-header" x-text="t.calendar.title"></h2>
+
+                <div x-html="t.calendar.intro"></div>
+
+                <h3 x-text="t.calendar.createTitle"></h3>
+                <div x-html="t.calendar.createBody"></div>
+
+                <div class="info-box tip">
+                    <div class="info-box-icon" x-text="lang === 'it' ? 'ℹ SUGGERIMENTO' : 'ℹ TIP'"></div>
+                    <div x-html="t.calendar.tip"></div>
+                </div>
+            </section>
+
+            <section id="admin-spreadsheets" class="section">
+                <h2 class="section-header" x-text="t.spreadsheets.title"></h2>
+
+                <div x-html="t.spreadsheets.intro"></div>
+
+                <h3 x-text="t.spreadsheets.flowTitle"></h3>
+                <div x-html="t.spreadsheets.flowBody"></div>
+
+                <h3 x-text="t.spreadsheets.associatiTitle"></h3>
+                <div x-html="t.spreadsheets.associatiBody"></div>
+
+                <div class="info-box tip">
+                    <div class="info-box-icon" x-text="lang === 'it' ? 'ℹ SUGGERIMENTO' : 'ℹ TIP'"></div>
+                    <div x-html="t.spreadsheets.tip"></div>
+                </div>
+            </section>
+
+            <section id="admin-users" class="section">
+                <h2 class="section-header">
+                    <span x-text="t.users.title"></span>
+                    <span class="role-badge admin" style="margin-left: 15px;">ADMIN ONLY</span>
+                </h2>
+
+                <div x-html="t.users.intro"></div>
+
+                <div class="info-box warning">
+                    <div class="info-box-icon" x-text="lang === 'it' ? '🔒 SOLO ADMIN' : '🔒 ADMIN ONLY'"></div>
+                    <div x-html="t.users.adminOnly"></div>
+                </div>
+
+                <h3 x-text="t.users.rolesTitle"></h3>
+                <div x-html="t.users.rolesBody"></div>
+
+                <h3 x-text="t.users.createTitle"></h3>
+                <div x-html="t.users.createBody"></div>
+
+                <h3 x-text="t.users.permissionsTitle"></h3>
+                <div x-html="t.users.permissionsBody"></div>
+
+                <h3 x-text="t.users.statusTitle"></h3>
+                <div x-html="t.users.statusBody"></div>
+            </section>
+
+            <section id="admin-telegram" class="section">
+                <h2 class="section-header">
+                    <span x-text="t.telegram.title"></span>
+                    <span class="role-badge admin" style="margin-left: 15px;">ADMIN ONLY</span>
+                </h2>
+
+                <div x-html="t.telegram.intro"></div>
+
+                <h3 x-text="t.telegram.chatsTitle"></h3>
+                <div x-html="t.telegram.chatsBody"></div>
+
+                <h3 x-text="t.telegram.notificationsTitle"></h3>
+                <div x-html="t.telegram.notificationsBody"></div>
+
+                <h3 x-text="t.telegram.digestTitle"></h3>
+                <div x-html="t.telegram.digestBody"></div>
+
+                <h3 x-text="t.telegram.testTitle"></h3>
+                <div x-html="t.telegram.testBody"></div>
+            </section>
+
+            <section id="admin-activity" class="section">
+                <h2 class="section-header">
+                    <span x-text="t.activity.title"></span>
+                    <span class="role-badge admin" style="margin-left: 15px;">ADMIN ONLY</span>
+                </h2>
+
+                <div x-html="t.activity.intro"></div>
+
+                <h3 x-text="t.activity.subtabsTitle"></h3>
+                <div x-html="t.activity.subtabsBody"></div>
+
+                <h3 x-text="t.activity.filterTitle"></h3>
+                <div x-html="t.activity.filterBody"></div>
+
+                <h3 x-text="t.activity.statusTitle"></h3>
+                <div x-html="t.activity.statusBody"></div>
+
+                <h3 x-text="t.activity.usecasesTitle"></h3>
+                <div x-html="t.activity.usecasesBody"></div>
+            </section>
+
+            <!-- APPENDICE -->
+            <section id="troubleshooting" class="section">
+                <h2 class="section-header" x-text="t.troubleshooting.title"></h2>
+
+                <div class="accordion">
+                    <template x-for="(faq, index) in t.troubleshooting.faqs" :key="index">
+                        <details>
+                            <summary x-text="faq.q"></summary>
+                            <div class="details-content" x-html="faq.a"></div>
+                        </details>
+                    </template>
+                </div>
+            </section>
+
+            <section id="contact" class="section">
+                <h2 class="section-header" x-text="t.contact.title"></h2>
+
+                <div x-html="t.contact.body"></div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>Habitat - Cà de Monti, Tredozio</p>
+        <p style="margin-top: 10px;">
+            <a href="https://habitattt.it" style="color: #fff;">habitattt.it</a> |
+            <a href="mailto:info@habitattt.it" style="color: #fff;">info@habitattt.it</a>
+        </p>
+    </footer>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('manualApp', () => ({
+                lang: localStorage.getItem('habitat-manual-lang') || 'it',
+                searchQuery: '',
+
+                init() {
+                    this.$watch('lang', value => {
+                        localStorage.setItem('habitat-manual-lang', value);
+                    });
+                },
+
+                get t() {
+                    return this.content[this.lang];
+                },
+
+                get filteredNav() {
+                    const query = this.searchQuery.toLowerCase();
+                    if (!query) return this.navigation[this.lang];
+
+                    return this.navigation[this.lang].map(section => {
+                        const matchingSubs = section.subs.filter(sub =>
+                            sub.title.toLowerCase().includes(query)
+                        );
+                        return matchingSubs.length > 0 ? { ...section, subs: matchingSubs } : null;
+                    }).filter(Boolean);
+                },
+
+                navigation: {
+                    it: [
+                        {
+                            id: 'intro',
+                            title: 'Introduzione',
+                            subs: [{ id: 'intro', title: 'Cos\'è Habitat Formulario' }]
+                        },
+                        {
+                            id: 'admins',
+                            title: 'Per Amministratori',
+                            subs: [
+                                { id: 'admin-intro', title: 'Introduzione Admin' },
+                                { id: 'admin-expenses', title: 'Gestione Cassa' },
+                                { id: 'admin-finance', title: 'Gestione Finanza' },
+                                { id: 'admin-guests', title: 'Ospiti e Prenotazioni' },
+                                { id: 'admin-applications', title: 'Richieste' },
+                                { id: 'admin-festival-planner', title: 'Festival Planner' },
+                                { id: 'admin-festival-volunteers', title: 'Volontari Festival' },
+                                { id: 'admin-festival-timeline', title: 'Timeline Festival' },
+                                { id: 'admin-calendar', title: 'Calendario' },
+                                { id: 'admin-spreadsheets', title: 'Fogli di Calcolo' },
+                                { id: 'admin-users', title: 'Utenti (Admin)' },
+                                { id: 'admin-telegram', title: 'Telegram (Admin)' },
+                                { id: 'admin-activity', title: 'Attività (Admin)' }
+                            ]
+                        },
+                        {
+                            id: 'appendix',
+                            title: 'Appendice',
+                            subs: [
+                                { id: 'troubleshooting', title: 'Risoluzione Problemi' },
+                                { id: 'contact', title: 'Contatti' }
+                            ]
+                        }
+                    ],
+                    en: [
+                        {
+                            id: 'intro',
+                            title: 'Introduction',
+                            subs: [{ id: 'intro', title: 'What is Habitat Formulario' }]
+                        },
+                        {
+                            id: 'admins',
+                            title: 'For Administrators',
+                            subs: [
+                                { id: 'admin-intro', title: 'Admin Introduction' },
+                                { id: 'admin-expenses', title: 'Cash Flow Management' },
+                                { id: 'admin-finance', title: 'Finance Management' },
+                                { id: 'admin-guests', title: 'Guests & Bookings' },
+                                { id: 'admin-applications', title: 'Applications' },
+                                { id: 'admin-festival-planner', title: 'Festival Planner' },
+                                { id: 'admin-festival-volunteers', title: 'Festival Volunteers' },
+                                { id: 'admin-festival-timeline', title: 'Festival Timeline' },
+                                { id: 'admin-calendar', title: 'Calendar' },
+                                { id: 'admin-spreadsheets', title: 'Spreadsheets' },
+                                { id: 'admin-users', title: 'Users (Admin)' },
+                                { id: 'admin-telegram', title: 'Telegram (Admin)' },
+                                { id: 'admin-activity', title: 'Activity (Admin)' }
+                            ]
+                        },
+                        {
+                            id: 'appendix',
+                            title: 'Appendix',
+                            subs: [
+                                { id: 'troubleshooting', title: 'Troubleshooting' },
+                                { id: 'contact', title: 'Contact' }
+                            ]
+                        }
+                    ]
+                },
+
+                content: {
+                    it: {
+                        title: 'Habitat Formulario - Manuale Utente',
+
+                        intro: {
+                            title: 'Introduzione',
+                            what: `
+                                <p><strong>Habitat Formulario</strong> è il sistema di gestione per il centro culturale Habitat di Tredozio.</p>
+                                <p>Questo manuale è riservato agli <strong>utenti autenticati</strong> e documenta tutte le funzionalità del pannello di amministrazione disponibile su <code>habitattt.it/admin</code>.</p>
+                                <p>I moduli pubblici (iscrizione soci, residenze, festival) sono intuitivi e non richiedono documentazione dedicata.</p>
+                            `,
+                            tip: `<p>Usa la barra di ricerca nella barra laterale per trovare rapidamente le informazioni che ti servono.</p>`,
+                            navigationTitle: 'Come usare questo manuale',
+                            navigation: `
+                                <ul>
+                                    <li><strong>Barra laterale:</strong> Clicca sulle sezioni per navigare rapidamente</li>
+                                    <li><strong>Ricerca:</strong> Digita parole chiave per filtrare i contenuti</li>
+                                    <li><strong>Lingua:</strong> Cambia IT/EN in qualsiasi momento</li>
+                                    <li><strong>Icone:</strong> ℹ = info, ⚠ = importante, 🔒 = solo admin</li>
+                                </ul>
+                            `
+                        },
+
+                        adminIntro: {
+                            title: 'Introduzione per Amministratori',
+                            intro: `
+                                <p>Il pannello di amministrazione ti permette di gestire tutte le attività di Habitat.</p>
+                                <p>L'accesso è protetto da autenticazione JWT con token valido per 24 ore.</p>
+                            `,
+                            rolesTitle: 'Ruoli e permessi',
+                            loginTitle: 'Accesso al pannello',
+                            loginBody: `
+                                <p>Vai su: <code>habitattt.it/admin</code></p>
+                                <p>Inserisci username e password forniti dall'amministratore principale.</p>
+                                <p>Il token di autenticazione scade dopo 24 ore, dovrai effettuare nuovamente il login.</p>
+                            `,
+                            navTitle: 'Navigazione',
+                            navBody: `
+                                <p>Il pannello è organizzato in <strong>12 schede principali</strong>:</p>
+                                <ol>
+                                    <li><strong>Cassa:</strong> Entrate e uscite immediate</li>
+                                    <li><strong>Finanza:</strong> Pianificazione finanziaria e previsioni</li>
+                                    <li><strong>Ospiti:</strong> Anagrafica ospiti</li>
+                                    <li><strong>Prenotazioni:</strong> Gestione soggiorni</li>
+                                    <li><strong>Residenze:</strong> Richieste artisti</li>
+                                    <li><strong>Soci:</strong> Richieste tesseramento</li>
+                                    <li><strong>Festival:</strong> Biglietti, planner, volontari, timeline</li>
+                                    <li><strong>Calendario:</strong> Eventi</li>
+                                    <li><strong>Fogli di Calcolo:</strong> Viste esterne dettagliate</li>
+                                    <li><strong>Utenti:</strong> Gestione admin (🔒 solo admin)</li>
+                                    <li><strong>Telegram:</strong> Bot notifiche (🔒 solo admin)</li>
+                                    <li><strong>Attività:</strong> Log azioni (🔒 solo admin)</li>
+                                </ol>
+                            `
+                        },
+
+                        expenses: {
+                            title: 'Gestione Cassa',
+                            intro: `<p>La scheda <strong>Cassa</strong> permette di tracciare tutte le entrate e uscite di denaro.</p>`,
+                            statsTitle: 'Statistiche',
+                            statsBody: `
+                                <p>Nella parte superiore vedrai:</p>
+                                <ul>
+                                    <li><strong>Totale Entrate:</strong> somma di tutte le entrate</li>
+                                    <li><strong>Totale Uscite:</strong> somma di tutte le uscite</li>
+                                    <li><strong>Saldo:</strong> differenza tra entrate e uscite</li>
+                                    <li><strong>Grafico:</strong> visualizzazione mensile</li>
+                                </ul>
+                            `,
+                            addTitle: 'Aggiungere una voce',
+                            addBody: `
+                                <p>Clicca su <strong>"Nuova Voce"</strong> e compila:</p>
+                                <ul>
+                                    <li><strong>Tipo:</strong> Entrata o Uscita</li>
+                                    <li><strong>Importo:</strong> cifra in euro</li>
+                                    <li><strong>Categoria:</strong> tipo di spesa/entrata</li>
+                                    <li><strong>Habitante:</strong> persona responsabile (opzionale)</li>
+                                    <li><strong>Descrizione:</strong> note aggiuntive</li>
+                                    <li><strong>Data:</strong> quando è avvenuta la transazione</li>
+                                </ul>
+                            `,
+                            filterTitle: 'Filtrare i dati',
+                            filterBody: `
+                                <p>Usa i filtri per vedere solo le voci che ti interessano:</p>
+                                <ul>
+                                    <li>Filtra per tipo (entrata/uscita)</li>
+                                    <li>Filtra per habitante</li>
+                                    <li>Filtra per categoria</li>
+                                    <li>Filtra per intervallo di date</li>
+                                </ul>
+                            `
+                        },
+
+                        finance: {
+                            title: 'Gestione Finanza',
+                            intro: `<p>La scheda <strong>Finanza</strong> è il modulo completo per gestire la pianificazione finanziaria di Habitat, con previsioni pluriennali e monitoraggio obiettivi.</p>`,
+                            difference: `
+                                <p><strong>Cassa</strong> traccia transazioni quotidiane (entrate/uscite immediate).</p>
+                                <p><strong>Finanza</strong> gestisce pianificazione strategica, budget annuali e obiettivi a lungo termine.</p>
+                            `,
+                            overview: {
+                                title: 'Panoramica',
+                                body: `<p>La scheda Panoramica mostra una visione d'insieme dello stato finanziario attuale.</p>`,
+                                cardsTitle: 'Card Riepilogative',
+                                cardsBody: `
+                                    <p>Tre card nella parte superiore mostrano:</p>
+                                    <ul>
+                                        <li><strong>ENTRATE:</strong> totale entrate finanziarie</li>
+                                        <li><strong>USCITE:</strong> totale uscite finanziarie</li>
+                                        <li><strong>SALDO:</strong> differenza tra entrate e uscite (verde se positivo, rosso se negativo)</li>
+                                    </ul>
+                                `,
+                                progressTitle: 'Barre di Progresso',
+                                progressBody: `
+                                    <p>Sotto le card, le barre di progresso visualizzano l'avanzamento verso gli obiettivi finanziari annuali:</p>
+                                    <ul>
+                                        <li>Verde: obiettivo raggiunto o superato</li>
+                                        <li>Giallo: progresso parziale</li>
+                                        <li>Rosso: lontano dall'obiettivo</li>
+                                    </ul>
+                                `
+                            },
+                            transactions: {
+                                title: 'Transazioni',
+                                body: `<p>La scheda Transazioni mostra due tabelle separate per entrate e uscite finanziarie.</p>`,
+                                includeTitle: 'Checkbox "Includi"',
+                                includeBody: `
+                                    <p>Ogni riga ha una checkbox <strong>"Includi"</strong> che permette di:</p>
+                                    <ul>
+                                        <li>Includere o escludere la transazione dai calcoli totali</li>
+                                        <li>Utile per voci straordinarie o ipotetiche</li>
+                                        <li>Solo le voci con checkbox selezionata contribuiscono al saldo</li>
+                                    </ul>
+                                `,
+                                tip: `<p>Usa la funzione <strong>"APRI FOGLIO CALCOLO"</strong> per visualizzare i dati in formato spreadsheet dettagliato con filtri avanzati.</p>`
+                            },
+                            categories: {
+                                title: 'Categorie (Admin)',
+                                body: `
+                                    <p>Gestisci le categorie finanziarie per organizzare entrate e uscite:</p>
+                                    <ul>
+                                        <li>Crea nuove categorie con <strong>"+ NUOVA CATEGORIA"</strong></li>
+                                        <li>Nome categoria e descrizione</li>
+                                        <li>Modifica o elimina categorie esistenti</li>
+                                        <li>Le categorie sono utilizzate in tutte le transazioni finanziarie</li>
+                                    </ul>
+                                `
+                            },
+                            bin: {
+                                title: 'Cestino',
+                                body: `<p>Il cestino contiene tutte le transazioni finanziarie eliminate (soft delete).</p>`,
+                                restoreTitle: 'Ripristino',
+                                restoreBody: `
+                                    <ul>
+                                        <li>Visualizza tutte le transazioni eliminate</li>
+                                        <li>Clicca <strong>"Ripristina"</strong> per recuperare una transazione</li>
+                                        <li>Elimina definitivamente con <strong>"Elimina Forever"</strong> (irreversibile)</li>
+                                        <li>Solo utenti ADMIN possono eliminare definitivamente</li>
+                                    </ul>
+                                `
+                            },
+                            forecast: {
+                                title: 'Previsioni',
+                                body: `<p>La scheda Previsioni gestisce la pianificazione finanziaria pluriennale di Habitat.</p>`,
+                                yearlyTitle: 'Pianificazione Annuale',
+                                yearlyBody: `
+                                    <p>Visualizza una tabella con colonne per ogni anno (2024, 2025, 2026...):</p>
+                                    <ul>
+                                        <li>Ogni riga rappresenta una categoria finanziaria</li>
+                                        <li>Inserisci previsioni di entrate/uscite per anno</li>
+                                        <li>Compara dati previsti vs reali</li>
+                                        <li>Esporta in CSV per analisi esterne</li>
+                                    </ul>
+                                `,
+                                targetsTitle: 'Obiettivi Annuali',
+                                targetsBody: `
+                                    <p>Imposta obiettivi finanziari specifici per anno:</p>
+                                    <ul>
+                                        <li>Definisci target di entrate totali</li>
+                                        <li>Definisci soglie massime per uscite</li>
+                                        <li>Monitora il progresso nella scheda Panoramica</li>
+                                        <li>Ricevi notifiche quando gli obiettivi sono raggiunti</li>
+                                    </ul>
+                                `
+                            }
+                        },
+
+                        guests: {
+                            title: 'Ospiti e Prenotazioni',
+                            intro: `<p>Gestisci l'anagrafica degli ospiti e le loro prenotazioni presso Cà de Monti.</p>`,
+                            createTitle: 'Creare un ospite',
+                            createBody: `
+                                <p>Prima di creare una prenotazione, devi creare l'ospite:</p>
+                                <ul>
+                                    <li><strong>Nome e Cognome</strong></li>
+                                    <li><strong>Email</strong></li>
+                                    <li><strong>Telefono</strong></li>
+                                    <li><strong>Note:</strong> informazioni aggiuntive</li>
+                                </ul>
+                            `,
+                            bookingTitle: 'Creare una prenotazione',
+                            bookingBody: `
+                                <p>Dalla scheda <strong>Prenotazioni</strong>:</p>
+                                <ul>
+                                    <li>Seleziona l'ospite dal menu a tendina</li>
+                                    <li>Scegli le date di check-in e check-out</li>
+                                    <li>Seleziona la camera</li>
+                                    <li>Imposta il prezzo</li>
+                                    <li>Scegli lo stato: Pending, Confermata, In Casa, Completata, Cancellata</li>
+                                </ul>
+                            `,
+                            checkinTitle: 'Check-in',
+                            checkinBody: `
+                                <p>Quando l'ospite arriva, clicca sul pulsante <strong>"Check-in"</strong>.</p>
+                                <p>Lo stato della prenotazione passerà a <strong>"In Casa"</strong> (evidenziato in verde).</p>
+                            `,
+                            checkoutTitle: 'Check-out e fattura',
+                            checkoutBody: `
+                                <p>Al momento della partenza:</p>
+                                <ol>
+                                    <li>Clicca sul pulsante <strong>"Check-out"</strong></li>
+                                    <li>Inserisci i costi aggiuntivi (pernottamenti, pasti)</li>
+                                    <li>Scegli il metodo di pagamento</li>
+                                    <li>Il sistema genererà automaticamente una fattura in PDF</li>
+                                    <li>Puoi scaricare o inviare via email la fattura</li>
+                                </ol>
+                            `
+                        },
+
+                        applications: {
+                            title: 'Gestione Richieste',
+                            intro: `<p>Questa sezione gestisce tutte le richieste in arrivo: residenze, tesseramenti e biglietti festival.</p>`,
+                            residencyTitle: 'Richieste Residenze',
+                            residencyBody: `
+                                <p>Visualizza tutte le proposte di residenza artistica:</p>
+                                <ul>
+                                    <li>Leggi la proposta completa</li>
+                                    <li>Vedi le date richieste</li>
+                                    <li>Approva o rifiuta con un click</li>
+                                    <li>Il sistema invia automaticamente un'email all'artista (IT o EN)</li>
+                                    <li>Le residenze approvate vengono collegate alle prenotazioni</li>
+                                </ul>
+                            `,
+                            membershipTitle: 'Richieste Tesseramento',
+                            membershipBody: `
+                                <p>Gestisci le domande di iscrizione:</p>
+                                <ul>
+                                    <li>Visualizza tutti i dati anagrafici</li>
+                                    <li>Vedi il metodo di pagamento scelto</li>
+                                    <li>Conferma i soci una volta ricevuto il pagamento</li>
+                                    <li>Esporta la lista soci in CSV</li>
+                                </ul>
+                            `,
+                            festivalTitle: 'Biglietti Festival',
+                            festivalBody: `
+                                <p>Gestisci le prenotazioni per il festival:</p>
+                                <ul>
+                                    <li>Vedi nome, email, metodo di pagamento</li>
+                                    <li>Conferma i biglietti dopo verifica pagamento</li>
+                                    <li>Invia notifiche di conferma</li>
+                                </ul>
+                            `
+                        },
+
+                        festivalPlanner: {
+                            title: 'Festival Planner',
+                            intro: `
+                                <p>Il <strong>Festival Planner</strong> è una vista a griglia per organizzare la programmazione giorno per giorno.</p>
+                                <p>Ogni slot rappresenta un orario in una venue specifica, con drag-and-drop per riposizionare le attività.</p>
+                            `,
+                            gridTitle: 'Griglia Drag & Drop',
+                            gridBody: `
+                                <ul>
+                                    <li>Trascina gli atti tra gli slot per cambiare orario o location</li>
+                                    <li>Allinea le attività per evitare sovrapposizioni</li>
+                                    <li>Usa la vista per controllare tempi di soundcheck e pause</li>
+                                </ul>
+                            `,
+                            colorsTitle: 'Sistema Colori',
+                            colorsBody: `
+                                <ul>
+                                    <li><strong>Verde:</strong> confermato</li>
+                                    <li><strong>Grigio:</strong> bozza</li>
+                                    <li><strong>Rosso:</strong> rifiutato</li>
+                                    <li><strong>Giallo:</strong> tentativo / proposta in valutazione</li>
+                                </ul>
+                            `,
+                            venuesTitle: 'Gestisci Venues',
+                            venuesBody: `
+                                <p>Usa <strong>"GESTISCI VENUES"</strong> per aggiungere, modificare o riordinare gli spazi.</p>
+                                <p>Ogni venue ha nome, capienza e note logistiche (backline, accessi, orari limite).</p>
+                            `,
+                            unscheduledTitle: 'Atti Non Programmati',
+                            unscheduledBody: `
+                                <p>Gli atti senza slot compaiono nella colonna <strong>Unscheduled</strong>:</p>
+                                <ul>
+                                    <li>Trascinali in griglia quando trovi uno spazio</li>
+                                    <li>Usa le note per capire priorità e vincoli</li>
+                                </ul>
+                            `,
+                            budgetTitle: 'Budget Confermato',
+                            budgetBody: `
+                                <p>Il box <strong>BUDGET CONFERMATO</strong> mostra il totale degli ingaggi confermati.</p>
+                                <p>Serve per monitorare rapidamente se il budget del festival è rispettato.</p>
+                            `
+                        },
+
+                        festivalVolunteers: {
+                            title: 'Volontari Festival',
+                            intro: `
+                                <p>Gestisci le persone che supportano il festival: ruoli, turni, compiti e note operative.</p>
+                            `,
+                            createTitle: 'Creare un volontario',
+                            createBody: `
+                                <p>Clicca <strong>"+ NUOVO VOLONTARIO"</strong> e compila i campi base:</p>
+                                <ul>
+                                    <li><strong>Nome</strong> e <strong>Email</strong></li>
+                                    <li><strong>Ruolo:</strong> accoglienza, supporto tecnico, bar, logistica, ecc.</li>
+                                    <li><strong>Disponibilità:</strong> giorni e fasce orarie</li>
+                                    <li><strong>Note:</strong> preferenze o vincoli</li>
+                                </ul>
+                            `,
+                            tableTitle: 'Tabella Operativa',
+                            tableBody: `
+                                <p>La tabella permette di:</p>
+                                <ul>
+                                    <li>Modificare rapidamente ruolo e disponibilità</li>
+                                    <li>Assegnare compiti specifici</li>
+                                    <li>Eliminare o archiviare un volontario</li>
+                                </ul>
+                            `
+                        },
+
+                        festivalTimeline: {
+                            title: 'Timeline Festival',
+                            intro: `
+                                <p>La timeline aiuta a pianificare scadenze e attività critiche prima del festival.</p>
+                            `,
+                            createTitle: 'Nuove Scadenze',
+                            createBody: `
+                                <p>Usa <strong>"+ NUOVA SCADENZA"</strong> per inserire:</p>
+                                <ul>
+                                    <li>Nome attività</li>
+                                    <li>Data limite</li>
+                                    <li>Responsabile</li>
+                                    <li>Priorità e note</li>
+                                </ul>
+                            `,
+                            vizTitle: 'Visualizzazione Interattiva',
+                            vizBody: `
+                                <p>La linea temporale mostra:</p>
+                                <ul>
+                                    <li>Un indicatore <strong>"Oggi"</strong> per la data corrente</li>
+                                    <li>Pallini colorati per stato (in corso, completato, in ritardo)</li>
+                                    <li>Una tabella sottostante per gestire tutte le scadenze</li>
+                                </ul>
+                            `,
+                            tip: `<p>Usa colori coerenti per differenziare scadenze logistiche, artistiche e comunicazione.</p>`
+                        },
+
+                        spreadsheets: {
+                            title: 'Fogli di Calcolo',
+                            intro: `
+                                <p>Alcune sezioni hanno una vista spreadsheet esterna per analisi avanzate e filtri rapidi.</p>
+                            `,
+                            flowTitle: 'Cassa - Foglio Analitico',
+                            flowBody: `
+                                <p>Nella scheda Cassa trovi il bottone <strong>"APRI FOGLIO CALCOLO"</strong>.</p>
+                                <p>Apri la vista dettagliata su <code>sheet-flow.html</code> per filtrare per date, categorie e persone.</p>
+                            `,
+                            associatiTitle: 'Soci - Foglio Associati',
+                            associatiBody: `
+                                <p>Le richieste tesseramento hanno una vista dedicata su <code>sheet-associati.html</code>.</p>
+                                <p>Utile per esportare e filtrare rapidamente l'elenco soci.</p>
+                            `,
+                            tip: `<p>Questi fogli sono letture avanzate: non sostituiscono la gestione delle approvazioni nel pannello.</p>`
+                        },
+
+                        calendar: {
+                            title: 'Calendario Eventi',
+                            intro: `<p>Il calendario usa <strong>FullCalendar</strong> per visualizzare tutti gli eventi di Habitat.</p>`,
+                            createTitle: 'Creare un evento',
+                            createBody: `
+                                <ul>
+                                    <li>Clicca su una data nel calendario</li>
+                                    <li>Compila: titolo, data inizio, data fine, tipo evento</li>
+                                    <li>Gli eventi appaiono colorati nel calendario</li>
+                                    <li>Clicca su un evento per modificarlo o eliminarlo</li>
+                                </ul>
+                            `,
+                            tip: `<p>Puoi trascinare gli eventi per modificare le date rapidamente.</p>`
+                        },
+
+                        users: {
+                            title: 'Gestione Utenti',
+                            intro: `<p>Crea e gestisci gli account degli amministratori del pannello.</p>`,
+                            adminOnly: `<p>Questa funzione è disponibile <strong>solo per utenti con ruolo ADMIN</strong>.</p>`,
+                            rolesTitle: 'Descrizione dei ruoli',
+                            rolesBody: `
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Ruolo</th>
+                                            <th>Accesso</th>
+                                            <th>Casi d'uso</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="role-badge admin">ADMIN</span></td>
+                                            <td>Accesso completo: tutti i dati, gestione utenti, configurazione sistema</td>
+                                            <td>Responsabili del progetto</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="role-badge reader">READER</span></td>
+                                            <td>Lettura e scrittura su tutti i dati; nessun accesso a utenti/sistema</td>
+                                            <td>Staff operativo di Habitat</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="role-badge reader_limited">READER LIMITED</span></td>
+                                            <td>Accesso configurabile scheda per scheda</td>
+                                            <td>Collaboratori esterni, volontari festival</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `,
+                            createTitle: 'Creare un utente',
+                            createBody: `
+                                <p>Clicca su <strong>"+ NUOVO UTENTE"</strong> e compila:</p>
+                                <ul>
+                                    <li><strong>Username:</strong> identificativo univoco nel sistema</li>
+                                    <li><strong>Password:</strong> password sicura (minimo 8 caratteri)</li>
+                                    <li><strong>Ruolo:</strong> Admin, Reader o Reader Limited</li>
+                                    <li><strong>Stato:</strong> Attivo o Disattivato</li>
+                                </ul>
+                            `,
+                            permissionsTitle: 'Permessi a livello di scheda (Reader Limited)',
+                            permissionsBody: `
+                                <p>Per utenti <span class="role-badge reader_limited">READER LIMITED</span>, puoi scegliere esattamente a quali schede possono accedere:</p>
+                                <div class="step-box">
+                                    <div class="step-number">1</div>
+                                    <div class="step-title">Seleziona il ruolo Reader Limited</div>
+                                    <div class="step-body">Quando crei o modifichi un utente, scegli <strong>Reader Limited</strong> dal menu ruolo.</div>
+                                </div>
+                                <div class="step-box">
+                                    <div class="step-number">2</div>
+                                    <div class="step-title">Configura le schede abilitate</div>
+                                    <div class="step-body">Apparirà una lista di checkbox con tutte le schede disponibili. Seleziona quelle a cui l'utente deve avere accesso.</div>
+                                </div>
+                                <div class="step-box">
+                                    <div class="step-number">3</div>
+                                    <div class="step-title">Salva la configurazione</div>
+                                    <div class="step-body">L'utente vedrà nel pannello solo le schede selezionate. Puoi modificare i permessi in qualsiasi momento.</div>
+                                </div>
+                                <div class="info-box note">
+                                    <div class="info-box-icon">ℹ CASI D'USO</div>
+                                    <p>Esempi pratici: dare accesso solo alla scheda Festival a un collaboratore del festival; dare accesso solo a Soci e Residenze a chi gestisce le iscrizioni.</p>
+                                </div>
+                            `,
+                            statusTitle: 'Gestione stato utente',
+                            statusBody: `
+                                <ul>
+                                    <li><strong>Attivo:</strong> l'utente può accedere al pannello normalmente</li>
+                                    <li><strong>Disattivato:</strong> l'utente non può accedere ma il suo account rimane nel sistema</li>
+                                    <li><strong>Auto-eliminazione bloccata:</strong> un utente non può eliminare il proprio account</li>
+                                    <li>Usa lo stato Disattivato invece di eliminare per mantenere l'audit trail nel log attività</li>
+                                </ul>
+                            `
+                        },
+
+                        telegram: {
+                            title: 'Integrazione Telegram',
+                            intro: `<p>Habitat usa un bot Telegram per inviare notifiche automatiche sulle nuove richieste e attività quotidiane.</p>`,
+                            chatsTitle: 'Gestione Chat',
+                            chatsBody: `
+                                <p>La scheda Telegram mostra tutte le chat configurate:</p>
+                                <ul>
+                                    <li>Clicca <strong>"+ NUOVA CHAT"</strong> per aggiungere una chat o gruppo Telegram</li>
+                                    <li>Inserisci il <strong>Chat ID</strong> del gruppo o canale (es. <code>-100123456789</code>)</li>
+                                    <li>Puoi configurare più chat per ricevere notifiche in destinatari diversi</li>
+                                    <li>Modifica o elimina le chat esistenti dalla tabella</li>
+                                </ul>
+                                <div class="info-box tip">
+                                    <div class="info-box-icon">ℹ COME TROVARE IL CHAT ID</div>
+                                    <p>Aggiungi il bot al gruppo e usa <code>@userinfobot</code> o il bot <code>@getidsbot</code> per ottenere l'ID della chat.</p>
+                                </div>
+                            `,
+                            notificationsTitle: 'Configurazione Notifiche',
+                            notificationsBody: `
+                                <p>Per ogni chat puoi abilitare/disabilitare singolarmente i tipi di notifica:</p>
+                                <table>
+                                    <thead>
+                                        <tr><th>Tipo</th><th>Quando si attiva</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Digest</strong></td>
+                                            <td>Riepilogo giornaliero automatico alle 08:00</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Residenze</strong></td>
+                                            <td>Immediatamente quando arriva una nuova proposta di residenza</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Tessere</strong></td>
+                                            <td>Immediatamente quando arriva una nuova richiesta di tesseramento</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Festival</strong></td>
+                                            <td>Immediatamente quando arriva una nuova prenotazione biglietto</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `,
+                            digestTitle: 'Digest giornaliero',
+                            digestBody: `
+                                <p>Ogni giorno alle <strong>08:00</strong> (Europe/Rome), il sistema invia automaticamente un riepilogo contenente:</p>
+                                <ul>
+                                    <li>Nuove richieste di residenza ricevute</li>
+                                    <li>Nuovi tesseramenti ricevuti</li>
+                                    <li>Nuovi biglietti festival prenotati</li>
+                                    <li>Check-in e check-out previsti per il giorno</li>
+                                </ul>
+                            `,
+                            testTitle: 'Test e invio manuale',
+                            testBody: `
+                                <ul>
+                                    <li>Usa <strong>"INVIA DIGEST ORA"</strong> per inviare immediatamente un digest di test</li>
+                                    <li>Usa <strong>"INVIA MESSAGGIO TEST"</strong> per verificare che la chat ID sia corretta e il bot funzioni</li>
+                                </ul>
+                            `
+                        },
+
+                        activity: {
+                            title: 'Log Attività',
+                            intro: `<p>Visualizza tutte le azioni compiute dagli utenti nel sistema, con filtri avanzati e livelli di dettaglio.</p>`,
+                            subtabsTitle: 'Sotto-schede',
+                            subtabsBody: `
+                                <ul>
+                                    <li><strong>Tutto:</strong> cronologia completa</li>
+                                    <li><strong>Azioni:</strong> modifiche ai dati (create, update, delete, approve, reject)</li>
+                                    <li><strong>Accessi:</strong> tentativi di login e autenticazione</li>
+                                </ul>
+                            `,
+                            filterTitle: 'Filtri Avanzati',
+                            filterBody: `
+                                <ul>
+                                    <li><strong>Per utente:</strong> vedi cosa ha fatto un amministratore specifico</li>
+                                    <li><strong>Intervallo date:</strong> seleziona periodo preciso</li>
+                                    <li><strong>Risorsa:</strong> Booking, Guest, Membership, ecc.</li>
+                                    <li><strong>Paginazione:</strong> controlla il numero di risultati</li>
+                                </ul>
+                            `,
+                            statusTitle: 'Stato e Dettagli',
+                            statusBody: `
+                                <ul>
+                                    <li><strong>Badge OK/KO:</strong> per accessi riusciti o falliti</li>
+                                    <li><strong>HTTP status:</strong> dettaglio tecnico delle azioni</li>
+                                    <li><strong>Timestamp:</strong> data e ora precise per ogni evento</li>
+                                </ul>
+                            `,
+                            usecasesTitle: 'Casi d\'uso',
+                            usecasesBody: `
+                                <ul>
+                                    <li>Audit trail per modifiche ai dati</li>
+                                    <li>Monitoraggio sicurezza (login falliti)</li>
+                                    <li>Tracciamento attività utenti nel tempo</li>
+                                </ul>
+                            `
+                        },
+
+                        troubleshooting: {
+                            title: 'Risoluzione Problemi',
+                            faqs: [
+                                {
+                                    q: 'Non riesco ad accedere al pannello admin',
+                                    a: `
+                                        <p>Verifica che:</p>
+                                        <ul>
+                                            <li>Username e password siano corretti</li>
+                                            <li>Il tuo account sia attivo</li>
+                                            <li>Il token non sia scaduto (24 ore)</li>
+                                        </ul>
+                                        <p>Se il problema persiste, contatta un amministratore.</p>
+                                    `
+                                },
+                                {
+                                    q: 'Non vedo alcune schede nel pannello',
+                                    a: `
+                                        <p>Se hai ruolo <span class="role-badge reader_limited">READER LIMITED</span>, puoi accedere solo alle schede configurate dall'amministratore.</p>
+                                        <p>Contatta un utente ADMIN per richiedere l'accesso ad altre schede.</p>
+                                    `
+                                },
+                                {
+                                    q: 'Ho inviato una richiesta ma non ho ricevuto email',
+                                    a: `
+                                        <p>Controlla la cartella spam. Le email vengono inviate da <code>info@habitattt.it</code>.</p>
+                                        <p>Le email di conferma sono inviate solo <strong>dopo l'approvazione</strong> da parte degli amministratori.</p>
+                                    `
+                                },
+                                {
+                                    q: 'Come modifico una prenotazione già creata?',
+                                    a: `
+                                        <p>Clicca sulla riga della prenotazione nella tabella. Si aprirà la sidebar di modifica a destra.</p>
+                                        <p>Modifica i campi desiderati e clicca <strong>"Salva"</strong>.</p>
+                                    `
+                                },
+                                {
+                                    q: 'Posso eliminare definitivamente un ospite o una prenotazione?',
+                                    a: `
+                                        <p>La maggior parte dei dati usa il <strong>soft delete</strong> (eliminazione logica):</p>
+                                        <ul>
+                                            <li>I dati vengono nascosti ma non cancellati dal database</li>
+                                            <li>Puoi recuperarli dalla sezione "Cestino"</li>
+                                            <li>Solo gli admin possono eliminare definitivamente</li>
+                                        </ul>
+                                    `
+                                }
+                            ]
+                        },
+
+                        contact: {
+                            title: 'Contatti e Supporto',
+                            body: `
+                                <p>Per assistenza o segnalazioni, contatta:</p>
+                                <p style="font-size: 1.1em; margin: 20px 0;">
+                                    <strong>Email:</strong> <a href="mailto:info@habitattt.it">info@habitattt.it</a>
+                                </p>
+                                <p style="font-size: 1.1em; margin: 20px 0;">
+                                    <strong>Sito web:</strong> <a href="https://habitattt.it" target="_blank">habitattt.it</a>
+                                </p>
+                                <p style="font-size: 1.1em; margin: 20px 0;">
+                                    <strong>Indirizzo:</strong> Cà de Monti, Tredozio (FC)
+                                </p>
+                            `
+                        }
+                    },
+
+                    en: {
+                        title: 'Habitat Formulario - User Manual',
+
+                        intro: {
+                            title: 'Introduction',
+                            what: `
+                                <p><strong>Habitat Formulario</strong> is the management system for the Habitat cultural center in Tredozio.</p>
+                                <p>This manual is for <strong>authenticated users</strong> and documents all features of the admin panel available at <code>habitattt.it/admin</code>.</p>
+                                <p>Public forms (membership, residencies, festival) are self-explanatory and do not require dedicated documentation.</p>
+                            `,
+                            tip: `<p>Use the search bar in the sidebar to quickly find the information you need.</p>`,
+                            navigationTitle: 'How to use this manual',
+                            navigation: `
+                                <ul>
+                                    <li><strong>Sidebar:</strong> Click on sections to navigate quickly</li>
+                                    <li><strong>Search:</strong> Type keywords to filter content</li>
+                                    <li><strong>Language:</strong> Switch IT/EN at any time</li>
+                                    <li><strong>Icons:</strong> ℹ = info, ⚠ = important, 🔒 = admin only</li>
+                                </ul>
+                            `
+                        },
+
+                        adminIntro: {
+                            title: 'Administrator Introduction',
+                            intro: `
+                                <p>The admin panel allows you to manage all Habitat activities.</p>
+                                <p>Access is protected by JWT authentication with a 24-hour valid token.</p>
+                            `,
+                            rolesTitle: 'Roles and permissions',
+                            loginTitle: 'Panel access',
+                            loginBody: `
+                                <p>Go to: <code>habitattt.it/admin</code></p>
+                                <p>Enter username and password provided by the main administrator.</p>
+                                <p>The authentication token expires after 24 hours, you will need to login again.</p>
+                            `,
+                            navTitle: 'Navigation',
+                            navBody: `
+                                <p>The panel is organized into <strong>12 main tabs</strong>:</p>
+                                <ol>
+                                    <li><strong>Cash:</strong> Immediate income and expenses</li>
+                                    <li><strong>Finance:</strong> Financial planning and forecasts</li>
+                                    <li><strong>Guests:</strong> Guest registry</li>
+                                    <li><strong>Bookings:</strong> Stay management</li>
+                                    <li><strong>Residencies:</strong> Artist applications</li>
+                                    <li><strong>Members:</strong> Membership requests</li>
+                                    <li><strong>Festival:</strong> Tickets, planner, volunteers, timeline</li>
+                                    <li><strong>Calendar:</strong> Events</li>
+                                    <li><strong>Spreadsheets:</strong> External detailed views</li>
+                                    <li><strong>Users:</strong> Admin management (🔒 admin only)</li>
+                                    <li><strong>Telegram:</strong> Notification bot (🔒 admin only)</li>
+                                    <li><strong>Activity:</strong> Action logs (🔒 admin only)</li>
+                                </ol>
+                            `
+                        },
+
+                        expenses: {
+                            title: 'Cash Flow Management',
+                            intro: `<p>The <strong>Cash</strong> tab allows you to track all money income and expenses.</p>`,
+                            statsTitle: 'Statistics',
+                            statsBody: `
+                                <p>At the top you will see:</p>
+                                <ul>
+                                    <li><strong>Total Income:</strong> sum of all income</li>
+                                    <li><strong>Total Expenses:</strong> sum of all expenses</li>
+                                    <li><strong>Balance:</strong> difference between income and expenses</li>
+                                    <li><strong>Chart:</strong> monthly visualization</li>
+                                </ul>
+                            `,
+                            addTitle: 'Adding an entry',
+                            addBody: `
+                                <p>Click <strong>"New Entry"</strong> and fill out:</p>
+                                <ul>
+                                    <li><strong>Type:</strong> Income or Expense</li>
+                                    <li><strong>Amount:</strong> figure in euros</li>
+                                    <li><strong>Category:</strong> type of expense/income</li>
+                                    <li><strong>Habitante:</strong> responsible person (optional)</li>
+                                    <li><strong>Description:</strong> additional notes</li>
+                                    <li><strong>Date:</strong> when the transaction occurred</li>
+                                </ul>
+                            `,
+                            filterTitle: 'Filtering data',
+                            filterBody: `
+                                <p>Use filters to see only the entries you're interested in:</p>
+                                <ul>
+                                    <li>Filter by type (income/expense)</li>
+                                    <li>Filter by habitante</li>
+                                    <li>Filter by category</li>
+                                    <li>Filter by date range</li>
+                                </ul>
+                            `
+                        },
+
+                        finance: {
+                            title: 'Finance Management',
+                            intro: `<p>The <strong>Finance</strong> tab is the full module for financial planning, multi-year forecasts, and goal tracking.</p>`,
+                            difference: `
+                                <p><strong>Cash</strong> tracks daily transactions (immediate income/expense).</p>
+                                <p><strong>Finance</strong> handles strategic planning, annual budgets, and long-term targets.</p>
+                            `,
+                            overview: {
+                                title: 'Overview',
+                                body: `<p>The Overview tab provides a snapshot of the current financial status.</p>`,
+                                cardsTitle: 'Summary Cards',
+                                cardsBody: `
+                                    <p>Three cards at the top show:</p>
+                                    <ul>
+                                        <li><strong>INCOME:</strong> total financial income</li>
+                                        <li><strong>EXPENSES:</strong> total financial expenses</li>
+                                        <li><strong>BALANCE:</strong> income minus expenses (green if positive, red if negative)</li>
+                                    </ul>
+                                `,
+                                progressTitle: 'Progress Bars',
+                                progressBody: `
+                                    <p>Below the cards, progress bars show progress toward yearly targets:</p>
+                                    <ul>
+                                        <li>Green: target reached or exceeded</li>
+                                        <li>Yellow: partial progress</li>
+                                        <li>Red: far from target</li>
+                                    </ul>
+                                `
+                            },
+                            transactions: {
+                                title: 'Transactions',
+                                body: `<p>The Transactions tab shows separate tables for financial income and expenses.</p>`,
+                                includeTitle: '"Include" Checkbox',
+                                includeBody: `
+                                    <p>Each row has an <strong>"Include"</strong> checkbox that lets you:</p>
+                                    <ul>
+                                        <li>Include or exclude transactions from totals</li>
+                                        <li>Useful for extraordinary or hypothetical items</li>
+                                        <li>Only checked rows contribute to the balance</li>
+                                    </ul>
+                                `,
+                                tip: `<p>Use <strong>"OPEN SPREADSHEET"</strong> to view data in a detailed spreadsheet with advanced filters.</p>`
+                            },
+                            categories: {
+                                title: 'Categories (Admin)',
+                                body: `
+                                    <p>Manage financial categories to organize income and expenses:</p>
+                                    <ul>
+                                        <li>Create new categories with <strong>"+ NEW CATEGORY"</strong></li>
+                                        <li>Category name and description</li>
+                                        <li>Edit or delete existing categories</li>
+                                        <li>Categories are used across all financial transactions</li>
+                                    </ul>
+                                `
+                            },
+                            bin: {
+                                title: 'Bin',
+                                body: `<p>The bin contains all deleted financial transactions (soft delete).</p>`,
+                                restoreTitle: 'Restore',
+                                restoreBody: `
+                                    <ul>
+                                        <li>View all deleted transactions</li>
+                                        <li>Click <strong>"Restore"</strong> to recover a transaction</li>
+                                        <li>Delete forever with <strong>"Delete Forever"</strong> (irreversible)</li>
+                                        <li>Only ADMIN users can delete permanently</li>
+                                    </ul>
+                                `
+                            },
+                            forecast: {
+                                title: 'Forecast',
+                                body: `<p>The Forecast tab handles multi-year financial planning.</p>`,
+                                yearlyTitle: 'Yearly Planning',
+                                yearlyBody: `
+                                    <p>View a table with one column per year (2024, 2025, 2026...):</p>
+                                    <ul>
+                                        <li>Each row represents a financial category</li>
+                                        <li>Enter forecast income/expense per year</li>
+                                        <li>Compare forecast vs actual</li>
+                                        <li>Export to CSV for external analysis</li>
+                                    </ul>
+                                `,
+                                targetsTitle: 'Annual Targets',
+                                targetsBody: `
+                                    <p>Set specific financial targets for each year:</p>
+                                    <ul>
+                                        <li>Define total income targets</li>
+                                        <li>Define maximum expense thresholds</li>
+                                        <li>Track progress in the Overview tab</li>
+                                        <li>Receive notifications when targets are reached</li>
+                                    </ul>
+                                `
+                            }
+                        },
+
+                        guests: {
+                            title: 'Guests & Bookings',
+                            intro: `<p>Manage the guest registry and their bookings at Cà de Monti.</p>`,
+                            createTitle: 'Creating a guest',
+                            createBody: `
+                                <p>Before creating a booking, you must create the guest:</p>
+                                <ul>
+                                    <li><strong>Name and Surname</strong></li>
+                                    <li><strong>Email</strong></li>
+                                    <li><strong>Phone</strong></li>
+                                    <li><strong>Notes:</strong> additional information</li>
+                                </ul>
+                            `,
+                            bookingTitle: 'Creating a booking',
+                            bookingBody: `
+                                <p>From the <strong>Bookings</strong> tab:</p>
+                                <ul>
+                                    <li>Select the guest from dropdown menu</li>
+                                    <li>Choose check-in and check-out dates</li>
+                                    <li>Select the room</li>
+                                    <li>Set the price</li>
+                                    <li>Choose status: Pending, Confirmed, In Casa, Completed, Cancelled</li>
+                                </ul>
+                            `,
+                            checkinTitle: 'Check-in',
+                            checkinBody: `
+                                <p>When the guest arrives, click the <strong>"Check-in"</strong> button.</p>
+                                <p>The booking status will change to <strong>"In Casa"</strong> (highlighted in green).</p>
+                            `,
+                            checkoutTitle: 'Check-out and invoice',
+                            checkoutBody: `
+                                <p>At departure time:</p>
+                                <ol>
+                                    <li>Click the <strong>"Check-out"</strong> button</li>
+                                    <li>Enter additional costs (accommodations, meals)</li>
+                                    <li>Choose payment method</li>
+                                    <li>The system will automatically generate a PDF invoice</li>
+                                    <li>You can download or email the invoice</li>
+                                </ol>
+                            `
+                        },
+
+                        applications: {
+                            title: 'Application Management',
+                            intro: `<p>This section manages all incoming applications: residencies, memberships and festival tickets.</p>`,
+                            residencyTitle: 'Residency Applications',
+                            residencyBody: `
+                                <p>View all artist residency proposals:</p>
+                                <ul>
+                                    <li>Read the complete proposal</li>
+                                    <li>See requested dates</li>
+                                    <li>Approve or reject with one click</li>
+                                    <li>The system automatically sends an email to the artist (IT or EN)</li>
+                                    <li>Approved residencies are linked to bookings</li>
+                                </ul>
+                            `,
+                            membershipTitle: 'Membership Requests',
+                            membershipBody: `
+                                <p>Manage membership applications:</p>
+                                <ul>
+                                    <li>View all personal data</li>
+                                    <li>See chosen payment method</li>
+                                    <li>Confirm members once payment is received</li>
+                                    <li>Export member list to CSV</li>
+                                </ul>
+                            `,
+                            festivalTitle: 'Festival Tickets',
+                            festivalBody: `
+                                <p>Manage festival bookings:</p>
+                                <ul>
+                                    <li>See name, email, payment method</li>
+                                    <li>Confirm tickets after payment verification</li>
+                                    <li>Send confirmation notifications</li>
+                                </ul>
+                            `
+                        },
+
+                        festivalPlanner: {
+                            title: 'Festival Planner',
+                            intro: `
+                                <p>The <strong>Festival Planner</strong> is a grid view for organizing the lineup day by day.</p>
+                                <p>Each slot represents a time at a specific venue, with drag-and-drop to reposition acts.</p>
+                            `,
+                            gridTitle: 'Drag & Drop Grid',
+                            gridBody: `
+                                <ul>
+                                    <li>Drag acts between slots to change time or location</li>
+                                    <li>Align activities to avoid overlaps</li>
+                                    <li>Use the view to check soundcheck and break times</li>
+                                </ul>
+                            `,
+                            colorsTitle: 'Color System',
+                            colorsBody: `
+                                <ul>
+                                    <li><strong>Green:</strong> confirmed</li>
+                                    <li><strong>Gray:</strong> draft</li>
+                                    <li><strong>Red:</strong> rejected</li>
+                                    <li><strong>Yellow:</strong> attempt / proposal under review</li>
+                                </ul>
+                            `,
+                            venuesTitle: 'Manage Venues',
+                            venuesBody: `
+                                <p>Use <strong>"MANAGE VENUES"</strong> to add, edit or reorder spaces.</p>
+                                <p>Each venue has name, capacity, and logistics notes (backline, access, curfews).</p>
+                            `,
+                            unscheduledTitle: 'Unscheduled Acts',
+                            unscheduledBody: `
+                                <p>Acts without a slot appear in the <strong>Unscheduled</strong> column:</p>
+                                <ul>
+                                    <li>Drag them into the grid when you find a slot</li>
+                                    <li>Use notes to understand priority and constraints</li>
+                                </ul>
+                            `,
+                            budgetTitle: 'Confirmed Budget',
+                            budgetBody: `
+                                <p>The <strong>CONFIRMED BUDGET</strong> box shows the total of confirmed fees.</p>
+                                <p>This helps you quickly monitor whether the festival budget is on track.</p>
+                            `
+                        },
+
+                        festivalVolunteers: {
+                            title: 'Festival Volunteers',
+                            intro: `
+                                <p>Manage the people supporting the festival: roles, shifts, tasks, and notes.</p>
+                            `,
+                            createTitle: 'Create a Volunteer',
+                            createBody: `
+                                <p>Click <strong>"+ NEW VOLUNTEER"</strong> and fill in the basics:</p>
+                                <ul>
+                                    <li><strong>Name</strong> and <strong>Email</strong></li>
+                                    <li><strong>Role:</strong> welcome, tech support, bar, logistics, etc.</li>
+                                    <li><strong>Availability:</strong> days and time slots</li>
+                                    <li><strong>Notes:</strong> preferences or constraints</li>
+                                </ul>
+                            `,
+                            tableTitle: 'Operational Table',
+                            tableBody: `
+                                <p>The table lets you:</p>
+                                <ul>
+                                    <li>Edit role and availability quickly</li>
+                                    <li>Assign specific tasks</li>
+                                    <li>Delete or archive a volunteer</li>
+                                </ul>
+                            `
+                        },
+
+                        festivalTimeline: {
+                            title: 'Festival Timeline',
+                            intro: `
+                                <p>The timeline helps you plan deadlines and critical tasks ahead of the festival.</p>
+                            `,
+                            createTitle: 'New Deadlines',
+                            createBody: `
+                                <p>Use <strong>"+ NEW DEADLINE"</strong> to add:</p>
+                                <ul>
+                                    <li>Task name</li>
+                                    <li>Due date</li>
+                                    <li>Owner</li>
+                                    <li>Priority and notes</li>
+                                </ul>
+                            `,
+                            vizTitle: 'Interactive View',
+                            vizBody: `
+                                <p>The timeline shows:</p>
+                                <ul>
+                                    <li>An <strong>"Today"</strong> marker for the current date</li>
+                                    <li>Colored dots for status (in progress, completed, late)</li>
+                                    <li>A table below to manage all deadlines</li>
+                                </ul>
+                            `,
+                            tip: `<p>Use consistent colors to separate logistics, artistic, and communication milestones.</p>`
+                        },
+
+                        calendar: {
+                            title: 'Event Calendar',
+                            intro: `<p>The calendar uses <strong>FullCalendar</strong> to display all Habitat events.</p>`,
+                            createTitle: 'Creating an event',
+                            createBody: `
+                                <ul>
+                                    <li>Click on a date in the calendar</li>
+                                    <li>Fill out: title, start date, end date, event type</li>
+                                    <li>Events appear colored in the calendar</li>
+                                    <li>Click on an event to edit or delete it</li>
+                                </ul>
+                            `,
+                            tip: `<p>You can drag events to quickly modify dates.</p>`
+                        },
+
+                        spreadsheets: {
+                            title: 'Spreadsheets',
+                            intro: `
+                                <p>Some sections provide an external spreadsheet view for advanced filtering and analysis.</p>
+                            `,
+                            flowTitle: 'Cash - Analytical Sheet',
+                            flowBody: `
+                                <p>In the Cash tab you will find the <strong>"OPEN SPREADSHEET"</strong> button.</p>
+                                <p>Open the detailed view at <code>sheet-flow.html</code> to filter by dates, categories, and people.</p>
+                            `,
+                            associatiTitle: 'Members - Member Sheet',
+                            associatiBody: `
+                                <p>Membership requests have a dedicated view at <code>sheet-associati.html</code>.</p>
+                                <p>Useful for quick export and filtering of the member list.</p>
+                            `,
+                            tip: `<p>These sheets are advanced read views and do not replace approvals inside the admin panel.</p>`
+                        },
+
+                        users: {
+                            title: 'User Management',
+                            intro: `<p>Create and manage administrator accounts.</p>`,
+                            adminOnly: `<p>This feature is available <strong>only for users with ADMIN role</strong>.</p>`,
+                            rolesTitle: 'Role descriptions',
+                            rolesBody: `
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Role</th>
+                                            <th>Access</th>
+                                            <th>Use cases</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="role-badge admin">ADMIN</span></td>
+                                            <td>Full access: all data, user management, system configuration</td>
+                                            <td>Project owners</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="role-badge reader">READER</span></td>
+                                            <td>Read/write on all data; no access to users/system</td>
+                                            <td>Habitat operational staff</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="role-badge reader_limited">READER LIMITED</span></td>
+                                            <td>Configurable tab-by-tab access</td>
+                                            <td>External collaborators, festival volunteers</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `,
+                            createTitle: 'Creating a user',
+                            createBody: `
+                                <p>Click <strong>"+ NEW USER"</strong> and fill in:</p>
+                                <ul>
+                                    <li><strong>Username:</strong> unique system identifier</li>
+                                    <li><strong>Password:</strong> secure password (min 8 characters)</li>
+                                    <li><strong>Role:</strong> Admin, Reader or Reader Limited</li>
+                                    <li><strong>Status:</strong> Active or Disabled</li>
+                                </ul>
+                            `,
+                            permissionsTitle: 'Tab-level permissions (Reader Limited)',
+                            permissionsBody: `
+                                <p>For <span class="role-badge reader_limited">READER LIMITED</span> users, choose exactly which tabs they can access:</p>
+                                <div class="step-box">
+                                    <div class="step-number">1</div>
+                                    <div class="step-title">Select Reader Limited role</div>
+                                    <div class="step-body">When creating or editing a user, choose <strong>Reader Limited</strong> from the role menu.</div>
+                                </div>
+                                <div class="step-box">
+                                    <div class="step-number">2</div>
+                                    <div class="step-title">Configure allowed tabs</div>
+                                    <div class="step-body">A list of checkboxes appears with all tabs. Select the ones the user should access.</div>
+                                </div>
+                                <div class="step-box">
+                                    <div class="step-number">3</div>
+                                    <div class="step-title">Save configuration</div>
+                                    <div class="step-body">The user will only see selected tabs. You can update permissions at any time.</div>
+                                </div>
+                                <div class="info-box note">
+                                    <div class="info-box-icon">ℹ USE CASES</div>
+                                    <p>Examples: grant only Festival access to a collaborator; grant only Members and Residencies to the team handling applications.</p>
+                                </div>
+                            `,
+                            statusTitle: 'User status management',
+                            statusBody: `
+                                <ul>
+                                    <li><strong>Active:</strong> the user can log in normally</li>
+                                    <li><strong>Disabled:</strong> the user cannot log in but remains in the system</li>
+                                    <li><strong>Self-deletion blocked:</strong> users cannot delete their own account</li>
+                                    <li>Use Disabled instead of delete to preserve the audit trail in the activity log</li>
+                                </ul>
+                            `
+                        },
+
+                        telegram: {
+                            title: 'Telegram Integration',
+                            intro: `<p>Habitat uses a Telegram bot to send automatic notifications about new requests and daily activity.</p>`,
+                            chatsTitle: 'Chat Management',
+                            chatsBody: `
+                                <p>The Telegram tab shows all configured chats:</p>
+                                <ul>
+                                    <li>Click <strong>"+ NEW CHAT"</strong> to add a Telegram chat or group</li>
+                                    <li>Enter the <strong>Chat ID</strong> (e.g. <code>-100123456789</code>)</li>
+                                    <li>You can configure multiple chats for different recipients</li>
+                                    <li>Edit or delete existing chats from the table</li>
+                                </ul>
+                                <div class="info-box tip">
+                                    <div class="info-box-icon">ℹ HOW TO FIND THE CHAT ID</div>
+                                    <p>Add the bot to the group and use <code>@userinfobot</code> or <code>@getidsbot</code> to retrieve the ID.</p>
+                                </div>
+                            `,
+                            notificationsTitle: 'Notification Configuration',
+                            notificationsBody: `
+                                <p>For each chat you can enable/disable each notification type:</p>
+                                <table>
+                                    <thead>
+                                        <tr><th>Type</th><th>When it triggers</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Digest</strong></td>
+                                            <td>Daily automatic summary at 08:00</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Residencies</strong></td>
+                                            <td>Immediately when a new residency application arrives</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Memberships</strong></td>
+                                            <td>Immediately when a new membership request arrives</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Festival</strong></td>
+                                            <td>Immediately when a new festival ticket booking arrives</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `,
+                            digestTitle: 'Daily digest',
+                            digestBody: `
+                                <p>Every day at <strong>08:00</strong>, the system automatically sends a summary:</p>
+                                <ul>
+                                    <li>New residency applications</li>
+                                    <li>New memberships</li>
+                                    <li>New festival tickets</li>
+                                    <li>Check-ins and check-outs of the day</li>
+                                </ul>
+                            `,
+                            testTitle: 'Testing and manual send',
+                            testBody: `
+                                <ul>
+                                    <li>Use <strong>"SEND DIGEST NOW"</strong> to send an immediate test digest</li>
+                                    <li>Use <strong>"SEND TEST MESSAGE"</strong> to verify the chat ID and bot</li>
+                                </ul>
+                            `
+                        },
+
+                        activity: {
+                            title: 'Activity Log',
+                            intro: `<p>View all actions performed by users, with advanced filters and detail levels.</p>`,
+                            subtabsTitle: 'Sub-tabs',
+                            subtabsBody: `
+                                <ul>
+                                    <li><strong>All:</strong> complete activity history</li>
+                                    <li><strong>Actions:</strong> data changes only</li>
+                                    <li><strong>Logins:</strong> authentication attempts</li>
+                                </ul>
+                            `,
+                            filterTitle: 'Advanced Filters',
+                            filterBody: `
+                                <ul>
+                                    <li><strong>By user:</strong> track a specific administrator</li>
+                                    <li><strong>Date range:</strong> select a precise period</li>
+                                    <li><strong>Resource type:</strong> Booking, Guest, Membership, etc.</li>
+                                    <li><strong>Pagination:</strong> control result volume</li>
+                                </ul>
+                            `,
+                            statusTitle: 'Status and Detail',
+                            statusBody: `
+                                <ul>
+                                    <li><strong>OK/KO badges:</strong> successful vs failed logins</li>
+                                    <li><strong>HTTP status:</strong> technical details for actions</li>
+                                    <li><strong>Timestamp:</strong> exact date and time per event</li>
+                                </ul>
+                            `,
+                            usecasesTitle: 'Use cases',
+                            usecasesBody: `
+                                <ul>
+                                    <li>Audit trail for data changes</li>
+                                    <li>Security monitoring (failed logins)</li>
+                                    <li>User activity tracking over time</li>
+                                </ul>
+                            `
+                        },
+
+                        troubleshooting: {
+                            title: 'Troubleshooting',
+                            faqs: [
+                                {
+                                    q: 'I cannot access the admin panel',
+                                    a: `
+                                        <p>Verify that:</p>
+                                        <ul>
+                                            <li>Username and password are correct</li>
+                                            <li>Your account is active</li>
+                                            <li>The token has not expired (24 hours)</li>
+                                        </ul>
+                                        <p>If the problem persists, contact an administrator.</p>
+                                    `
+                                },
+                                {
+                                    q: 'I don\'t see some tabs in the panel',
+                                    a: `
+                                        <p>If you have <span class="role-badge reader_limited">READER LIMITED</span> role, you can only access tabs configured by the administrator.</p>
+                                        <p>Contact an ADMIN user to request access to other tabs.</p>
+                                    `
+                                },
+                                {
+                                    q: 'I submitted an application but didn\'t receive an email',
+                                    a: `
+                                        <p>Check your spam folder. Emails are sent from <code>info@habitattt.it</code>.</p>
+                                        <p>Confirmation emails are sent only <strong>after approval</strong> by administrators.</p>
+                                    `
+                                },
+                                {
+                                    q: 'How do I edit an already created booking?',
+                                    a: `
+                                        <p>Click on the booking row in the table. The edit sidebar will open on the right.</p>
+                                        <p>Modify the desired fields and click <strong>"Save"</strong>.</p>
+                                    `
+                                },
+                                {
+                                    q: 'Can I permanently delete a guest or booking?',
+                                    a: `
+                                        <p>Most data uses <strong>soft delete</strong> (logical deletion):</p>
+                                        <ul>
+                                            <li>Data is hidden but not deleted from database</li>
+                                            <li>You can recover it from the "Bin" section</li>
+                                            <li>Only admins can permanently delete</li>
+                                        </ul>
+                                    `
+                                }
+                            ]
+                        },
+
+                        contact: {
+                            title: 'Contact & Support',
+                            body: `
+                                <p>For assistance or reports, contact:</p>
+                                <p style="font-size: 1.1em; margin: 20px 0;">
+                                    <strong>Email:</strong> <a href="mailto:info@habitattt.it">info@habitattt.it</a>
+                                </p>
+                                <p style="font-size: 1.1em; margin: 20px 0;">
+                                    <strong>Website:</strong> <a href="https://habitattt.it" target="_blank">habitattt.it</a>
+                                </p>
+                                <p style="font-size: 1.1em; margin: 20px 0;">
+                                    <strong>Address:</strong> Cà de Monti, Tredozio (FC)
+                                </p>
+                            `
+                        }
+                    }
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

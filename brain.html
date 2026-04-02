@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain - Habitat / Distretto A</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #f4f4f4;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border: 2px solid #000;
+            box-shadow: 10px 10px 0px #000;
+            max-width: 750px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-width: 50px;
+            width: 100%;
+            height: auto;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border: 1px solid #000;
+            background: white;
+            text-decoration: none;
+            color: #000;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .link-item:hover {
+            background: #000;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .link-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .link-label {
+            font-weight: bold;
+            font-size: 1.1em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .link-url {
+            font-size: 0.85em;
+            color: #666;
+            display: block;
+        }
+
+        .link-item:hover .link-url {
+            color: #ccc;
+        }
+
+        .link-note {
+            font-size: 0.75em;
+            color: #999;
+            font-style: italic;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .link-item:hover .link-note {
+            color: #aaa;
+        }
+
+        .copy-btn {
+            background: none;
+            border: 1px solid #000;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.2s ease;
+            margin-left: 15px;
+            flex-shrink: 0;
+            border-radius: 3px;
+            color: #000;
+        }
+
+        .copy-btn:hover {
+            background: #000;
+            transform: scale(1.1);
+            color: #fff;
+        }
+
+        .link-item:hover .copy-btn {
+            background: #fff;
+            color: #000;
+        }
+
+        .link-item:hover .copy-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .copy-btn.copied {
+            background: #000;
+            color: #fff;
+        }
+
+        .copy-btn.copied::after {
+            content: ' ✓';
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                padding: 25px;
+                margin: 10px 0;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .link-item {
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="logo">
+            <img src="https://habitattt.it/images/h.logo.png" alt="Habitat Logo">
+        </div>
+
+        <h1>Brain</h1>
+        <div class="subtitle">Quick access to Habitat tools & services</div>
+
+        <div class="links-container">
+            <a href="https://habitattt.it/admin/" class="link-item" target="_blank" data-copy-url="https://habitattt.it/admin/">
+                <span class="link-content">
+                    <span class="link-label">Formulario</span>
+                    <span class="link-url">habitattt.it/admin/</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="http://kan.habitattt.it" class="link-item" target="_blank" data-copy-url="http://kan.habitattt.it">
+                <span class="link-content">
+                    <span class="link-label">Kaneldario</span>
+                    <span class="link-url">kan.habitattt.it</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="https://habitattt.it/nextcloud" class="link-item" target="_blank" data-copy-url="https://habitattt.it/nextcloud">
+                <span class="link-content">
+                    <span class="link-label">Nextcloud</span>
+                    <span class="link-url">habitattt.it/nextcloud</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="https://habitattt.it/nextcloud/apps/cospend/" class="link-item" target="_blank"
+                data-copy-url="https://habitattt.it/nextcloud/apps/cospend/">
+                <span class="link-content">
+                    <span class="link-label">Cospend</span>
+                    <span class="link-url">habitattt.it/nextcloud/apps/cospend/</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="https://meet.jit.si/habitatgang" class="link-item" target="_blank"
+                data-copy-url="https://meet.jit.si/habitatgang">
+                <span class="link-content">
+                    <span class="link-label">Videocall</span>
+                    <span class="link-url">meet.jit.si/habitatgang</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="http://habitattt.it/pad/p/paddeipad" class="link-item" target="_blank"
+                data-copy-url="http://habitattt.it/pad/p/paddeipad">
+                <span class="link-content">
+                    <span class="link-label">Pad dei pad</span>
+                    <span class="link-url">habitattt.it/pad/p/paddeipad</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="http://habitattt.it/pad/p/debiticrediti" class="link-item" target="_blank"
+                data-copy-url="http://habitattt.it/pad/p/debiticrediti">
+                <span class="link-content">
+                    <span class="link-label">Debiti/Crediti</span>
+                    <span class="link-url">habitattt.it/pad/p/debiticrediti</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="https://mail.ovh.net/" class="link-item" target="_blank" data-copy-url="https://mail.ovh.net/">
+                <span class="link-content">
+                    <span class="link-label">Mail Web</span>
+                    <span class="link-url">mail.ovh.net</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="https://habitattt.it/join/?interest=habitat" class="link-item" target="_blank"
+                data-copy-url="https://habitattt.it/join/?interest=habitat">
+                <span class="link-content">
+                    <span class="link-label">Modulo Tessere</span>
+                    <span class="link-url">habitattt.it/join/?interest=habitat</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+
+            <a href="https://habitattt.it/residency/" class="link-item" target="_blank"
+                data-copy-url="https://habitattt.it/residency/">
+                <span class="link-content">
+                    <span class="link-label">Modulo Residenza</span>
+                    <span class="link-url">habitattt.it/residency/</span>
+                </span>
+                <button class="copy-btn" type="button" onclick="copyToClipboard(event, this)" aria-label="Copy link">
+                    📋
+                </button>
+            </a>
+        </div>
+    </div>
+    <script>
+        function copyToClipboard(event, button) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const link = button.closest('.link-item');
+            const url = link ? link.getAttribute('data-copy-url') : '';
+
+            if (!url) {
+                return;
+            }
+
+            const setCopiedState = () => {
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                }, 2000);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    setCopiedState();
+                }).catch(() => {
+                    fallbackCopy(url, setCopiedState);
+                });
+            } else {
+                fallbackCopy(url, setCopiedState);
+            }
+        }
+
+        function fallbackCopy(url, onSuccess) {
+            const textarea = document.createElement('textarea');
+            textarea.value = url;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    onSuccess();
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+            }
+
+            document.body.removeChild(textarea);
+        }
+    </script>
+</body>
+
+</html>
