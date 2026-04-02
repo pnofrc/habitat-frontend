@@ -197,7 +197,7 @@
                         <td contenteditable="true" @blur="save(m.id, 'phoneNumber', $event.target.innerText)"
                             x-text="m.phoneNumber"></td>
                         <td
-                            x-text="[m.interestHabitat && 'Habitat', m.interestDawe && 'DAWE', m.interestQuazar && 'Quazar', m.interestWorkshops && 'Workshops'].filter(Boolean).join(', ')">
+                            x-text="[m.interestHabitat && 'Habitat', m.interestDistrettoA && 'Distretto A', m.interestQuazar && 'Quazar'].filter(Boolean).join(', ')">
                         </td>
                         <td contenteditable="true" @blur="save(m.id, 'paymentMethod', $event.target.innerText)"
                             x-text="m.paymentMethod"></td>

@@ -40,6 +40,14 @@
             align-items: flex-start;
         }
 
+        .logos-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            padding-left: 2%;
+            filter: brightness(0.5);
+        }
+
         .lang-toggle {
             display: flex;
             border: 2px solid #000;
@@ -167,8 +175,33 @@
             body {
                 padding: 20px 10px;
             }
+
             .card {
                 padding: 20px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .logos-container {
+                padding-left: 0;
+                gap: 15px;
+            }
+
+            .logos-container img {
+                height: 6vh;
+            }
+
+            h1 {
+                font-size: 1.3em;
+                text-align: center;
+            }
+
+            .lang-toggle {
+                margin-left: 0;
             }
         }
     </style>
@@ -180,8 +213,12 @@
         <template x-if="!submitted">
             <div>
                 <div class="card-header">
-                    <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
-                        style="height:10vh;flex-shrink:0;padding-left: 2%;">
+                    <div class="logos-container">
+                        <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
+                            style="height:10vh;flex-shrink:0;">
+                        <img src="https://www.distrettoa.it/wp-content/uploads/2018/09/cropped-Distretto-A_logo-300px-290x290.png"
+                            alt="Distretto A" style="height:10vh;flex-shrink:0;">
+                    </div>
                     <h1 x-text="lang === 'it' ? 'DOMANDA DI ISCRIZIONE' : 'MEMBERSHIP APPLICATION'"></h1>
                     <div class="lang-toggle">
                         <button @click="lang = 'it'" :class="lang === 'it' && 'active'">IT</button>
@@ -259,7 +296,8 @@
                 <label x-text="lang === 'it' ? 'Sono interessato/a a... *' : 'I\'m interested in... *'"></label>
                 <template x-for="opt in interessiOpts">
                     <label class="checkbox-group">
-                        <input type="checkbox" :value="opt" x-model="form.interessi"> <span x-text="opt"></span>
+                        <input type="radio" name="interesse" :value="opt" x-model="form.interesse"> <span
+                            x-text="opt"></span>
                     </label>
                 </template>
 
@@ -267,22 +305,22 @@
                 <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
                 <select x-model="form.metodoPagamento">
                     <option value="" x-text="lang === 'it' ? 'Scegli...' : 'Choose...'"></option>
-                    <template x-if="form.interessi.includes('Habitat - Cà De Monti')">
+                    <template x-if="form.interesse === 'Habitat - Cà De Monti'">
                         <option value="CashHabitat">HABITAT >> CONTANTI / CASH</option>
                     </template>
-                    <template x-if="form.interessi.includes('Habitat - Cà De Monti')">
+                    <template x-if="form.interesse === 'Habitat - Cà De Monti'">
                         <option value="HabitatPaypal">HABITAT >> PAYPAL / APPLE PAY / CARD</option>
                     </template>
-                    <template x-if="form.interessi.includes('Habitat - Cà De Monti')">
+                    <template x-if="form.interesse === 'Habitat - Cà De Monti'">
                         <option value="HabitatIban">HABITAT >> IBAN</option>
                     </template>
-                    <template x-if="form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i))">
+                    <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
                         <option value="CashDistrettoA">DISTRETTO A >> CONTANTI / CASH</option>
                     </template>
-                    <template x-if="form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i))">
-                        <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL / APPLE PAY / CARD</option>
+                    <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
+                        <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
                     </template>
-                    <template x-if="form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i))">
+                    <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
                         <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
                     </template>
                 </select>
@@ -291,6 +329,9 @@
                         <div>
                             <p>IBAN: IT88Q0623023704000030225469</p>
                             <p x-text="lang === 'it'
+                                ? 'Beneficiario: Distretto A APS'
+                                : 'Beneficiary: Distretto A APS'"></p>
+                            <p x-text="lang === 'it'
                                 ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
                                 : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
                         </div>
@@ -298,6 +339,9 @@
                     <template x-if="form.metodoPagamento === 'DistrettoIban'">
                         <div>
                             <p>IBAN: IT80B0303223701010000636901</p>
+                            <p x-text="lang === 'it'
+                                ? 'Beneficiario: Distretto A APS'
+                                : 'Beneficiary: Distretto A APS'"></p>
                             <p x-text="lang === 'it'
                                 ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
                                 : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
@@ -321,7 +365,7 @@
                             <p x-text="lang === 'it'
                                 ? 'Invia il pagamento tramite PayPal a Distretto A'
                                 : 'Send payment via PayPal to Distretto A'"></p>
-                            <a href="https://www.paypal.com/ncp/payment/5E4P5CFASVLMA" target="_blank"
+                            <a href="https://paypal.me/distrettoa" target="_blank"
                                 style="display:inline-block; margin-top:8px; background:#000; color:#fff; padding:10px 20px; text-decoration:none; font-weight:bold;"
                                 x-text="lang === 'it' ? 'PAGA CON PAYPAL' : 'PAY WITH PAYPAL'"></a>
                             <p style="font-size:0.8em; color:#666; margin-top:8px;" x-text="lang === 'it'
@@ -378,23 +422,41 @@
                 submitted: false,
                 errorMessage: '',
                 lang: 'it',
-                interessiOpts: ['Habitat - Cà De Monti', 'Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'],
+                interessiOpts: ['Habitat - Cà De Monti', 'Distretto A', 'Quazar - Coworking'],
                 form: {
                     email: '', cognome: '', nome: '', dataNascita: '', luogoNascita: '', provNascita: '', paeseNascita: '', codiceFiscale: '',
                     indirizzo: '', cap: '', cittaResidenza: '', provResidenza: '', paeseResidenza: '', telefono: '',
-                    interessi: [], metodoPagamento: '', privacy: false, adesione: false
+                    interesse: '', metodoPagamento: '', privacy: false, adesione: false
                 },
                 init() {
-                    this.$watch('form.interessi', () => {
-                        const hasHabitat = this.form.interessi.includes('Habitat - Cà De Monti');
-                        const hasDistretto = this.form.interessi.some(i => ['Distretto A', 'Dawe - Cena Itinerante', 'Quazar - Coworking'].includes(i));
+                    // Parse query parameters for pre-selection
+                    const params = new URLSearchParams(window.location.search);
+                    const interestParam = params.get('interest');
+
+                    // Map query param values to display names
+                    const interestMap = {
+                        'habitat': 'Habitat - Cà De Monti',
+                        'distretto': 'Distretto A',
+                        'quazar': 'Quazar - Coworking'
+                    };
+
+                    // Pre-select if valid param provided
+                    if (interestParam && interestMap[interestParam.toLowerCase()]) {
+                        this.form.interesse = interestMap[interestParam.toLowerCase()];
+                    }
+
+                    // Watch for interest changes and clear incompatible payment methods
+                    this.$watch('form.interesse', () => {
                         const habitatMethods = ['CashHabitat', 'HabitatPaypal', 'HabitatIban'];
                         const distrettoMethods = ['CashDistrettoA', 'DistrettoPaypal', 'DistrettoIban'];
                         const current = this.form.metodoPagamento;
                         if (!current) return;
-                        const isHabitatMethod = habitatMethods.includes(current);
-                        const isDistrettoMethod = distrettoMethods.includes(current);
-                        if ((isHabitatMethod && !hasHabitat) || (isDistrettoMethod && !hasDistretto)) {
+
+                        const isHabitat = this.form.interesse === 'Habitat - Cà De Monti';
+                        const isDistrettoOrQuazar = ['Distretto A', 'Quazar - Coworking'].includes(this.form.interesse);
+
+                        if ((habitatMethods.includes(current) && !isHabitat) ||
+                            (distrettoMethods.includes(current) && !isDistrettoOrQuazar)) {
                             this.form.metodoPagamento = '';
                         }
                     });
@@ -411,6 +473,12 @@
                             : "Please fill in all required fields";
                         return;
                     }
+                    if (!this.form.interesse) {
+                        this.errorMessage = this.lang === 'it'
+                            ? "Seleziona un interesse"
+                            : "Please select an interest";
+                        return;
+                    }
                     if (!this.form.privacy || !this.form.adesione) {
                         this.errorMessage = this.lang === 'it'
                             ? "Accetta le condizioni obbligatorie"
@@ -421,17 +489,23 @@
                     this.loading = true;
                     this.errorMessage = '';
 
-                    const interestiMap = {
+                    const interestMap = {
                         'Habitat - Cà De Monti': 'habitat',
                         'Distretto A': 'distrettoA',
-                        'Dawe - Cena Itinerante': 'dawe',
                         'Quazar - Coworking': 'quazar'
                     };
-                    const interests = {};
-                    this.form.interessi.forEach(i => {
-                        const key = interestiMap[i];
-                        if (key) interests[key] = true;
-                    });
+
+                    const interests = {
+                        habitat: false,
+                        dawe: false,  // Always false - deprecated
+                        quazar: false,
+                        distrettoA: false
+                    };
+
+                    const selectedKey = interestMap[this.form.interesse];
+                    if (selectedKey) {
+                        interests[selectedKey] = true;
+                    }
 
                     const payload = {
                         email: this.form.email,
