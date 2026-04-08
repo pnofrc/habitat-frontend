@@ -230,6 +230,10 @@
                     <b>&euro; 10,00</b>
                 </p>
 
+                <p>
+                    <a href="./statuto_2021.pdf" target="_blank" x-text="lang === 'it' ? 'Leggi lo statuto' : 'Read the articles of association (italian)'"></a>
+                </p>
+
                 <template x-if="errorMessage">
                     <div class="error-banner" x-text="errorMessage"></div>
                 </template>
@@ -303,6 +307,8 @@
 
                 <h2 x-text="lang === 'it' ? '4. PAGAMENTO' : '4. PAYMENT'"></h2>
                 <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
+                <u><label x-text="lang === 'it' ? 'Assicurati che il pagamento selezionato corrisponda a quello effettivamente utilizzato, grazie!' : 'Please make sure the payment method you selected matches the one you actually used. Thank you!'"></label></u>
+
                 <select x-model="form.metodoPagamento">
                     <option value="" x-text="lang === 'it' ? 'Scegli...' : 'Choose...'"></option>
                     <template x-if="form.interesse === 'Habitat - Cà De Monti'">
@@ -380,13 +386,18 @@
                             ? 'Pagamento in contanti presso la sede'
                             : 'Cash payment at the venue'"></p>
                     </template>
+
+
                 </div>
+
+                <label x-text="lang === 'it' ? `(Prima procedi al pagamento, poi clicca su 'INVIA DOMANDA')` : `(First, complete the payment, then click 'SUBMIT')`"></label>
+
 
                 <h2 x-text="lang === 'it' ? 'CONDIZIONI' : 'CONDITIONS'"></h2>
                 <label class="checkbox-group">
                     <input type="checkbox" x-model="form.privacy">
                     <span
-                        x-text="lang === 'it' ? 'Acconsento al trattamento dati (obbligatorio)' : 'I consent to data processing (required)'"></span>
+                        x-text="lang === 'it' ? 'Acconsento al trattamento dati (obbligatorio) [NB: trattamento esclusivamente interno dei dati]' : 'I consent to data processing (required) [Please Note: exclusively internal data processing]'"></span>
                 </label>
                 <label class="checkbox-group">
                     <input type="checkbox" x-model="form.adesione">
@@ -396,7 +407,7 @@
 
                 <button class="btn-send" @click="submit()" :disabled="loading" x-text="loading
                         ? (lang === 'it' ? 'INVIO...' : 'SUBMITTING...')
-                        : (lang === 'it' ? 'INVIA DOMANDA' : 'SUBMIT APPLICATION')"></button>
+                        : (lang === 'it' ? 'INVIA DOMANDA' : 'SUBMIT')"></button>
             </div>
         </template>
 
