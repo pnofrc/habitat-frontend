@@ -131,6 +131,49 @@
             margin-bottom: 20px;
             font-size: 0.9em;
         }
+
+        .intro-content {
+            margin: 25px 0;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .intro-content h3 {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .intro-content p {
+            margin: 10px 0;
+        }
+
+        .intro-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .intro-content ul li {
+            margin: 5px 0;
+        }
+
+        .intro-content strong {
+            font-weight: bold;
+        }
+
+        .intro-content a {
+            color: #000;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .intro-content a:hover {
+            background: #fffdf0;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding: 20px 10px;
@@ -145,7 +188,8 @@
         <template x-if="!submitted">
             <div>
                 <div class="card-header">
-                    <img src="https://habitattt.it/images/h.logo.png" alt="Habitat" style="height:10vh;flex-shrink:0;padding-left: 2%;">
+                    <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
+                        style="height:10vh;flex-shrink:0;padding-left: 2%;">
                     <h2 x-text="lang === 'it' ? 'Modulo Residenze Habitat' : 'Habitat Residencies Form'"></h2>
                     <div class="lang-toggle">
                         <button @click="lang = 'it'" :class="lang === 'it' && 'active'">IT</button>
@@ -156,6 +200,285 @@
                 <template x-if="errorMessage">
                     <div class="error-banner" x-text="errorMessage"></div>
                 </template>
+
+                <div class="intro-content">
+                    <!-- Italian content -->
+                    <div x-show="lang === 'it'">
+                        <p>Habitat è un insediamento cult(r)urale e laboratorio collettivo nell'abitato di Cà de Monti,
+                            a 5
+                            km da Tredozio (FC), nel cuore degli Appennini tra Romagna e Toscana, ai margini del Parco
+                            delle
+                            Foreste Casentinesi.</p>
+
+                        <p>Dal 2021, con l'arrivo di un primo gruppo di persone, Habitat è diventato casa: un
+                            esperimento
+                            dell'abitare e una pratica quotidiana di fermentazione culturale.
+                            Durante l'anno, gruppi sempre diversi di residenti permanenti e temporanei, amici e
+                            viandanti si
+                            incontrano qui per vivere, condividere, immaginare e costruire nuove forme di collettività,
+                            attraversando linguaggi e pratiche differenti.</p>
+
+                        <p>Habitat è uno spazio di scambio e contaminazione, dove identità, conoscenze e approcci
+                            diversi si
+                            incontrano, si intrecciano e si trasformano.
+                            Gli abitanti - umani, pennuti bipedi e morbidi quadrupedi - contribuiscono alla vita del
+                            luogo
+                            costruendo narrazioni, momenti, relazioni, e prendendosi cura insieme degli spazi, degli
+                            strumenti e dei processi.</p>
+
+                        <h3>Nuovi abitanti?</h3>
+
+                        <p>Dopo un lungo periodo di lavoro e ristrutturazione, abbiamo riaperto nuovi spazi a Cà de
+                            Monti e
+                            siamo felici di accogliere nuovi cicli di ospitalità e residenze.</p>
+
+                        <p>Da aprile 2026 apriamo le porte a chi vuole abitare e vivere (a) Cà de Monti per periodi
+                            medio-lunghi (fino a 3 mesi), contribuendo al mantenimento, all'evoluzione e alla
+                            ramificazione
+                            di questo microcosmo.</p>
+
+                        <p>Accogliamo pratiche e percorsi diversi: ricerche ibride, progetti in divenire, curiosità
+                            ostinate, momenti di studio o di produzione. Spazio anche a corse dietro le galline e
+                            coccole ai
+                            gatti.</p>
+
+                        <h3>Cà de Monti</h3>
+
+                        <p>Cà de Monti è un luogo di accoglienza, convivialità, ricerca e produzione a contatto con il
+                            territorio.
+                            È composto da due edifici e una piccola chiesa sconsacrata, su un'altura con vista aperta
+                            sul
+                            confine tra Romagna e Toscana.</p>
+
+                        <p>Nasce da un'antica struttura di ristoro e oggi è immerso in circa 250 ettari di pinete,
+                            castagneti e boschi secolari, in un contesto ricco di vita animale e vegetale.</p>
+
+                        <h3>Cosa trovi qui</h3>
+
+                        <p>Durante la permanenza potrai usare diversi spazi di lavoro e di vita quotidiana:</p>
+
+                        <ul>
+                            <li>spazi condivisi con scrivanie e internet (circa 100 Mb/s download, 25 Mb/s upload)</li>
+                            <li>falegnameria / maker space</li>
+                            <li>camera oscura (sviluppo e stampa b/n)</li>
+                            <li>stampa digitale e serigrafia base</li>
+                            <li>sartoria</li>
+                            <li>sala musica</li>
+                            <li>salone del movimento</li>
+                            <li>cucina industriale e forno a legna</li>
+                            <li>tech corner (server ed elettronica base)</li>
+                            <li>una valle quasi tutta per noi</li>
+                        </ul>
+
+                        <p>Mettiamo in comune anche le nostre competenze: dalla trasformazione del cibo all'editoria,
+                            dalla
+                            musica al disegno, dal tessile al lavoro con la terra, dalla scrittura al codice. Uno slalom
+                            continuo tra linguaggi.</p>
+
+                        <p>Se vuoi sviluppare un progetto o imparare una pratica, possiamo costruire insieme un percorso
+                            e,
+                            se serve, coinvolgere qualcuno che ti accompagni.</p>
+
+                        <p>Se hai bisogno di strumenti o materiali specifici, possiamo organizzarli in anticipo. Alcuni
+                            materiali o grandi quantità potrebbero richiedere un contributo aggiuntivo.</p>
+
+                        <h3>Chi siamo</h3>
+
+                        <p>A Cà de Monti troverai quasi sempre Chiara, Marco, Federico e Giuseppe, insieme a Jacopo ed
+                            Enrico: il nucleo del collettivo permanente di Habitat.</p>
+
+                        <h3>Come funziona</h3>
+
+                        <p>Habitat è parte di Distretto A, un'associazione culturale di promozione sociale no profit.
+                            Si sostiene grazie al contributo dei soci e degli abitanti: umano, culturale ed economico.
+                        </p>
+
+                        <p>Durante la permanenza sarai coinvolto nelle attività quotidiane e nella cura degli spazi
+                            condivisi. La vita qui è flessibile e in continuo adattamento: ci si organizza giorno per
+                            giorno, insieme.</p>
+
+                        <h3>Residenze</h3>
+
+                        <p>Apprezziamo candidature abbinate a progetti abbozzatti, come iniziati e lasciati a metà.
+                            Abbracciamo nuovi progetti ma non disdegnamo l'incertezza. Anzi, crediamo nella sorpresa,
+                            nella
+                            scoperta e nei processi ancor più che gli intenti iniziali. Mescoliamo musica, scrittura,
+                            arti
+                            visive, performance, design, gastronomia e tutto quello che sta in mezzo o ai margini.</p>
+
+                        <p>Ogni residenza prende la sua forma e può trasformarsi nelle più svariate forme di
+                            restituzione.
+                        </p>
+
+                        <p>Invitiamo e prediligiamo permanenze di almeno due settimane, soprattutto se è la prima volta:
+                            è
+                            il tempo minimo per orientarsi, conoscere il luogo e attivare davvero una relazione con il
+                            contesto.
+                            Siamo comunque aperti a valutare durate diverse in base ai progetti.</p>
+
+                        <p>Per periodi più lunghi (1–3 mesi), organizziamo una chiamata conoscitiva prima della
+                            conferma.
+                        </p>
+
+                        <h3>Contributo di ospitalità</h3>
+
+                        <p>Il contributo copre posto letto, cibo e accesso agli spazi e agli strumenti comuni:</p>
+
+                        <ul>
+                            <li>150€ a settimana</li>
+                            <li>550€ al mese</li>
+                        </ul>
+
+                        <p>Non include la quota associativa annuale (10€).</p>
+
+                        <p>La dispensa condivisa varia in base alla disponibilità, ma include generalmente:
+                            verdure (anche dall'orto), pane fatto in casa, cereali, legumi, uova, latticini, miele,
+                            conserve, olio, farine, caffè, tisane, e il necessario per la cura quotidiana della casa.
+                        </p>
+
+                        <p>Se hai esigenze alimentari specifiche, è importante comunicarlo in anticipo.</p>
+
+                        <h3>Prima di candidarti</h3>
+
+                        <p>Ti invitiamo a leggere i nostri <a
+                                :href="lang === 'it' ? 'https://habitattt.it/wiki/index.php?title=Commons' : 'https://habitattt.it/wiki/index.php?title=Commons-en'"
+                                target="_blank">Commons</a>: una raccolta (non esaustiva) di pratiche, abitudini e
+                            considerazioni utili per capire meglio il contesto in cui entrerai.</p>
+
+                        <p>In fondo alla pagina trovi il form: ti chiederemo chi sei, cosa fai, e un'idea di quello che
+                            vorresti sviluppare qui - insieme agli spazi e strumenti di cui potresti aver bisogno.</p>
+                    </div>
+
+                    <!-- English content -->
+                    <div x-show="lang === 'en'">
+                        <p>Habitat is a cult(r)ural settlement and collective laboratory located in the village of Cà de
+                            Monti, 5 km from Tredozio (FC), in the heart of the Apennines between Romagna and Tuscany,
+                            on the edge of the Casentinesi Forest National Park.</p>
+
+                        <p>Since 2021, with the arrival of a first group of people, Habitat has become home: an
+                            experiment in living and a daily practice of cultural fermentation. Throughout the year,
+                            ever-changing groups of permanent and temporary residents, friends, and wanderers meet here
+                            to live, share, imagine, and build new forms of collectivity, moving across different
+                            languages and practices.</p>
+
+                        <p>Habitat is a space of exchange and cross-pollination, where different identities, forms of
+                            knowledge, and approaches meet, intertwine, and transform one another. Its inhabitants —
+                            humans, feathered bipeds, and soft quadrupeds — contribute to the life of the place by
+                            building narratives, moments, and relationships, and by collectively caring for the spaces,
+                            tools, and processes.</p>
+
+                        <h3>New inhabitants?</h3>
+
+                        <p>After a long period of work and renovation, we have reopened new spaces in Cà de Monti and
+                            are happy to welcome new cycles of hospitality and residencies.</p>
+
+                        <p>From April 2026, we are opening our doors to those who wish to live in and experience Cà de
+                            Monti for medium to long periods (up to 3 months), contributing to the maintenance,
+                            evolution, and branching out of this microcosm.</p>
+
+                        <p>We welcome a variety of practices and paths: hybrid research, works in progress, stubborn
+                            curiosities, moments of study or production. There is also room for chasing chickens and
+                            cuddling cats.</p>
+
+                        <h3>Cà de Monti</h3>
+
+                        <p>Cà de Monti is a place of hospitality, conviviality, research, and production in close
+                            contact with the surrounding territory. It consists of two buildings and a small
+                            deconsecrated church, set on a hilltop with an open view over the border between Romagna and
+                            Tuscany.</p>
+
+                        <p>It grew out of an old roadside inn and is now immersed in around 250 hectares of pinewoods,
+                            chestnut groves, and ancient forests, in an environment rich in animal and plant life.</p>
+
+                        <h3>What you will find here</h3>
+
+                        <p>During your stay, you will be able to use various spaces for work and daily life:</p>
+
+                        <ul>
+                            <li>shared spaces with desks and internet access (around 100 Mb/s download, 25 Mb/s upload)
+                            </li>
+                            <li>woodshop / maker space</li>
+                            <li>darkroom (black-and-white developing and printing)</li>
+                            <li>digital printing and basic screen printing</li>
+                            <li>sewing studio</li>
+                            <li>music room</li>
+                            <li>movement hall</li>
+                            <li>industrial kitchen and wood-fired oven</li>
+                            <li>tech corner (server and basic electronics)</li>
+                            <li>an almost entirely private valley</li>
+                        </ul>
+
+                        <p>We also share our skills: from food processing to publishing, from music to drawing, from
+                            textiles to working with the land, from writing to coding. A continuous slalom across
+                            languages.</p>
+
+                        <p>If you want to develop a project or learn a practice, we can build a path together and, if
+                            needed, involve someone who can guide you.</p>
+
+                        <p>If you need specific tools or materials, we can arrange them in advance. Some materials or
+                            large quantities may require an additional contribution.</p>
+
+                        <h3>Who we are</h3>
+
+                        <p>At Cà de Monti you will almost always find Chiara, Marco, Federico, and Giuseppe, together
+                            with Jacopo and Enrico: the core of Habitat's permanent collective.</p>
+
+                        <h3>How it works</h3>
+
+                        <p>Habitat is part of Distretto A, a non-profit cultural and social promotion association. It is
+                            sustained through the contribution of its members and inhabitants: human, cultural, and
+                            economic.</p>
+
+                        <p>During your stay, you will be involved in daily activities and in the care of shared spaces.
+                            Life here is flexible and constantly adapting: we organize things together, day by day.</p>
+
+                        <h3>Residencies</h3>
+
+                        <p>We appreciate applications paired with sketched-out projects, as well as projects that have
+                            been started and left halfway. We embrace new projects, but we do not shy away from
+                            uncertainty. On the contrary, we believe in surprise, discovery, and processes even more
+                            than in initial intentions. We mix music, writing, visual arts, performance, design,
+                            gastronomy, and everything that lies in between or at the margins.</p>
+
+                        <p>Each residency takes its own shape and can evolve into a wide variety of forms of
+                            restitution.</p>
+
+                        <p>We invite and prefer stays of at least two weeks, especially if it is your first time: this
+                            is the minimum time needed to get oriented, get to know the place, and truly activate a
+                            relationship with the context. We are nonetheless open to considering different durations
+                            depending on the projects.</p>
+
+                        <p>For longer periods (1–3 months), we arrange an introductory call before confirmation.</p>
+
+                        <h3>Hospitality contribution</h3>
+
+                        <p>The contribution covers accommodation, food, and access to shared spaces and tools:</p>
+
+                        <ul>
+                            <li>€150 per week</li>
+                            <li>€550 per month</li>
+                        </ul>
+
+                        <p>It does not include the annual membership fee (€10).</p>
+
+                        <p>The shared pantry varies depending on availability, but generally includes: vegetables (also
+                            from the garden), homemade bread, grains, legumes, eggs, dairy products, honey, preserves,
+                            oil, flours, coffee, herbal teas, and everything needed for the daily care of the house.</p>
+
+                        <p>If you have specific dietary needs, it is important to let us know in advance.</p>
+
+                        <h3>Before applying</h3>
+
+                        <p>We invite you to read our <a
+                                :href="lang === 'it' ? 'https://habitattt.it/wiki/index.php?title=Commons' : 'https://habitattt.it/wiki/index.php?title=Commons-en'"
+                                target="_blank">Commons</a>: a collection (not exhaustive) of practices, habits, and
+                            considerations that may help you better understand the context you are about to enter.</p>
+
+                        <p>At the bottom of the page you will find the form: we will ask who you are, what you do, and
+                            for an idea of what you would like to develop here — together with the spaces and tools you
+                            might need.</p>
+                    </div>
+                </div>
 
                 <label x-text="lang === 'it' ? 'Ciao' : 'Hello'"></label>
                 <input type="text" x-model="form.guestName"
@@ -191,7 +514,8 @@
                 <h1 style="font-size: 3em;">:)</h1>
                 <p>
                     <strong x-text="lang === 'it' ? 'Grazie!' : 'Thanks!'"></strong>
-                    <span x-text="lang === 'it' ? 'La richiesta è stata inviata.' : 'Your request has been sent.'"></span>
+                    <span
+                        x-text="lang === 'it' ? 'La richiesta è stata inviata.' : 'Your request has been sent.'"></span>
                 </p>
                 <p style="font-size: 0.9em; color: #444;"
                     x-text="lang === 'it' ? 'Ti risponderemo al più presto via email.' : 'We\'ll get back to you by email shortly.'">
