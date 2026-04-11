@@ -1,532 +1,223 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Habitat Festival 2026</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #f4f4f4;
-      color: #000;
-      font-family: 'Courier New', Courier, monospace;
-      padding: 20px;
-    }
-
-    .card {
-      position: relative;
-      background: #fff;
-      padding: 40px;
-      border: 2px solid #000;
-      box-shadow: 8px 8px 0px #000;
-      max-width: 680px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .logo {
-      margin-bottom: 20px;
-    }
-
-    .logo img {
-      height: 10vh;
-    }
-
-    h1 {
-      border-bottom: 4px solid #000;
-      padding-bottom: 10px;
-      margin-bottom: 30px;
-      text-transform: uppercase;
-      font-size: 1.5em;
-      letter-spacing: 2px;
-    }
-
-    .countdown {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #eee;
-    }
-
-    .countdown-unit {
-      text-align: center;
-    }
-
-    .countdown-unit .value {
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      line-height: 1;
-    }
-
-    .countdown-unit .label {
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: #666;
-      margin-top: 4px;
-    }
-
-    .intro {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.95rem;
-      color: #333;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .word-list {
-      margin-bottom: 30px;
-      font-size: 1.05rem;
-      line-height: 1.9;
-      letter-spacing: 1px;
-      color: #333;
-    }
-
-    .word-list span {
-      text-transform: lowercase;
-    }
-
-    .word-list span::after {
-      content: ' \00B7 ';
-      color: #999;
-    }
-
-    .word-list span:last-child::after {
-      content: '';
-    }
-
-    .booking-form {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .booking-form label {
-      display: block;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 4px;
-      margin-top: 14px;
-      color: #666;
-    }
-
-    .booking-form label:first-child {
-      margin-top: 0;
-    }
-
-    .booking-form input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 2px solid #000;
-      font-family: inherit;
-      font-size: 0.9rem;
-      background: #fff;
-      outline: none;
-    }
-
-    .booking-form input:focus {
-      background: #f9f9f9;
-    }
-
-    .book-btn {
-      background: #000;
-      color: #fff;
-      border: none;
-      padding: 15px 30px;
-      font-weight: bold;
-      font-size: 1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-family: inherit;
-      width: 100%;
-      letter-spacing: 2px;
-      margin-top: 20px;
-    }
-
-    .book-btn:hover {
-      background: #333;
-    }
-
-    .book-btn:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-
-    .calendar-menu {
-      position: relative;
-      width: 100%;
-    }
-
-    .save-btn {
-      background: #fff;
-      color: #000;
-      border: 2px solid #000;
-      padding: 15px 30px;
-      font-weight: bold;
-      font-size: 1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-family: inherit;
-      width: 100%;
-      letter-spacing: 2px;
-    }
-
-    .save-btn:hover {
-      background: #e0e0e0;
-    }
-
-    .calendar-options {
-      display: none;
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 0;
-      right: 0;
-      background: #fff;
-      border: 2px solid #000;
-      overflow: hidden;
-    }
-
-    .calendar-options.active {
-      display: block;
-    }
-
-    .calendar-options a {
-      display: block;
-      padding: 12px 20px;
-      color: #000;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: background 0.15s;
-    }
-
-    .calendar-options a:hover {
-      background: #f4f4f4;
-    }
-
-    .lang-toggle {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      display: flex;
-      gap: 8px;
-    }
-
-    .lang-btn {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      background: transparent;
-      border: 2px solid #000;
-      padding: 4px 12px;
-      cursor: pointer;
-    }
-
-    .lang-btn.active {
-      background: #000;
-      color: #fff;
-    }
-
-    .booking-form select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 2px solid #000;
-      font-family: inherit;
-      font-size: 0.9rem;
-      background: #fff;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .booking-form select:focus {
-      background: #f9f9f9;
-    }
-
-    .payment-box {
-      background: #f9f9f9;
-      border: 1px dashed #000;
-      padding: 15px;
-      margin-top: 10px;
-      font-size: 0.85em;
-    }
-
-    .payment-box a {
-      display: inline-block;
-      background: #000;
-      color: #fff;
-      padding: 10px 20px;
-      text-decoration: none;
-      font-weight: bold;
-      margin-top: 8px;
-    }
-
-    .payment-box a:hover {
-      background: #333;
-    }
-
-    .payment-box .note {
-      font-size: 0.8em;
-      color: #666;
-      margin-top: 8px;
-    }
-
-    .success-msg {
-      padding: 30px 0;
-      font-size: 1.1rem;
-      line-height: 1.6;
-    }
-
-    .error-msg {
-      color: red;
-      font-size: 0.85rem;
-      margin-top: 10px;
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        padding: 20px;
-      }
-      .countdown { gap: 10px; }
-      .countdown-unit .value { font-size: 1.3rem; }
-      .word-list { font-size: 0.95rem; }
-    }
-  </style>
+  <title>H5Y</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="card">
-    <div class="lang-toggle">
-      <button class="lang-btn active" data-lang="en">EN</button>
-      <button class="lang-btn" data-lang="it">IT</button>
-    </div>
-    <div class="logo">
-      <img src="logo.png" alt="Habitat">
-    </div>
-
-    <h1>Habitat Festival 2026</h1>
-
-    <div class="countdown" id="countdown">
-      <div class="countdown-unit"><div class="value" id="days">--</div><div class="label">Days</div></div>
-      <div class="countdown-unit"><div class="value" id="hours">--</div><div class="label">Hours</div></div>
-      <div class="countdown-unit"><div class="value" id="minutes">--</div><div class="label">Min</div></div>
-      <div class="countdown-unit"><div class="value" id="seconds">--</div><div class="label">Sec</div></div>
-    </div>
-
-    <p class="intro">This summer in C&agrave; de Monti, Tredozio &mdash; join us to celebrate Habitat's fifth birthday together.</p>
-
-    <div class="word-list">
-      <span>music</span>
-      <span>workshops</span>
-      <span>food</span>
-      <span>performances</span>
-      <span>bakery</span>
-      <span>hiking</span>
-      <span>friendship</span>
-      <span>love</span>
-      <span>nature</span>
-      <span>bonfires</span>
-      <span>stargazing</span>
-      <span>yoga</span>
-      <span>art</span>
-      <span>dancing</span>
-      <span>stories</span>
-      <span>crafts</span>
-      <span>sunrise</span>
-      <span>community</span>
-      <span>laughter</span>
-      <span>discovery</span>
-    </div>
-
-    <form class="booking-form" id="bookingForm">
-      <label for="firstName" data-en="Name" data-it="Nome">Name</label>
-      <input type="text" id="firstName" name="firstName" required>
-
-      <label for="lastName" data-en="Surname" data-it="Cognome">Surname</label>
-      <input type="text" id="lastName" name="lastName" required>
-
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required>
-
-      <p class="note" style="margin-top:14px; margin-bottom:2px;"
-         data-en="The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at check-in."
-         data-it="Il festival è riservato ai soci di Habitat / Distretto A. La quota di €10 per la tessera associativa verrà raccolta al check-in.">
-        The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at check-in.
-      </p>
-
-      <label for="paymentMethod" data-en="Payment method" data-it="Metodo di pagamento">Payment method</label>
-      <select id="paymentMethod" name="paymentMethod" required>
-        <option value="" data-en="Choose..." data-it="Scegli...">Choose...</option>
-        <option value="paypal">PAYPAL / APPLE PAY / CARD</option>
-        <option value="iban" data-en="Bank transfer (IBAN)" data-it="Bonifico (IBAN)">Bank transfer (IBAN)</option>
-      </select>
-
-      <div class="payment-box" id="paymentBox" style="display:none;">
-        <div id="paypalInfo" style="display:none;">
-          <p data-en="Click the button below to pay via PayPal." data-it="Clicca il pulsante qui sotto per pagare tramite PayPal.">Click the button below to pay via PayPal.</p>
-          <a href="https://www.paypal.com/ncp/payment/5E4P5CFASVLMA" target="_blank" rel="noopener">PayPal</a>
-          <p class="note" data-en="Apple Pay and Card payments are also supported via PayPal." data-it="Anche Apple Pay e pagamenti con carta sono supportati tramite PayPal.">Apple Pay and Card payments are also supported via PayPal.</p>
-        </div>
-        <div id="ibanInfo" style="display:none;">
-          <p><strong>IBAN:</strong> IT88Q0623023704000030225469</p>
-          <p style="margin-top:8px;" data-en="Reference: Membership fee [Your Name]" data-it="Causale: Quota associativa [Tuo Nome]">Reference: Membership fee [Your Name]</p>
-        </div>
-        <p class="note" style="margin-top:12px;" data-en="You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours." data-it="Riceverai una conferma una volta verificato il pagamento. Potrebbero essere necessarie fino a 24–48 ore.">You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
-      </div>
-
-      <button type="submit" class="book-btn" id="submitBtn" data-en="Book Your Ticket" data-it="Prenota il Biglietto">Book Your Ticket</button>
-      <div class="error-msg" id="errorMsg" style="display:none;"></div>
-    </form>
-
-    <div class="success-msg" id="successMsg" style="display:none;">
-      <p data-en="Thank you! Your booking has been received." data-it="Grazie! La tua prenotazione &egrave; stata ricevuta.">Thank you! Your booking has been received.</p>
-      <p style="margin-top:10px; font-size:0.85rem; color:#666;" data-en="We'll be in touch soon with more details." data-it="Ti contatteremo presto con maggiori dettagli.">We'll be in touch soon with more details.</p>
-    </div>
-
-    <div class="calendar-menu">
-      <div class="calendar-options" id="calendarOptions">
-        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Habitat%20Festival%202026&dates=20260717T110000/20260719T235900&ctz=Europe/Rome&details=Habitat%20Festival%202026" target="_blank" rel="noopener" data-goatcounter-click="save-date-google">Google Calendar</a>
-        <a href="habitat-festival-2026.ics" download="habitat-festival-2026.ics" data-goatcounter-click="save-date-apple">Apple Calendar</a>
-        <a href="habitat-festival-2026.ics" download="habitat-festival-2026.ics" data-goatcounter-click="save-date-download">Download .ics</a>
-      </div>
-      <button class="save-btn" id="saveDate" data-en="Save the Date" data-it="Salva la Data">Save the Date</button>
-    </div>
+<div id="stage">
+  <div id="wrap">
+    <svg id="S" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
 
-  <script src="../config.js"></script>
-  <script>
-    // Countdown
-    const target = new Date('2026-07-17T11:00:00').getTime();
+  <div id="ui">
 
-    function update() {
-      const now = Date.now();
-      const diff = Math.max(0, target - now);
+    <div id="top-row">
+      <div id="countdown">
+        <div id="countdown-label">until habitat 5 years festival</div>
+        <div id="countdown-units">
+          <div class="c-unit"><div class="c-num" id="cd-d">--</div><div class="c-lab" data-key="days">days</div></div>
+          <div class="c-sep">:</div>
+          <div class="c-unit"><div class="c-num" id="cd-h">--</div><div class="c-lab" data-key="hours">hours</div></div>
+          <div class="c-sep">:</div>
+          <div class="c-unit"><div class="c-num" id="cd-m">--</div><div class="c-lab" data-key="mins">min</div></div>
+          <div class="c-sep">:</div>
+          <div class="c-unit"><div class="c-num" id="cd-s">--</div><div class="c-lab" data-key="secs">sec</div></div>
+        </div>
+      </div>
+      <div id="lang">
+        <span class="active" data-l="en">EN</span>
+        <span data-l="it">IT</span>
+      </div>
+    </div>
 
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
+    <div></div>
 
-      document.getElementById('days').textContent = String(d).padStart(2, '0');
-      document.getElementById('hours').textContent = String(h).padStart(2, '0');
-      document.getElementById('minutes').textContent = String(m).padStart(2, '0');
-      document.getElementById('seconds').textContent = String(s).padStart(2, '0');
+    <div id="buttons">
+      <a class="btn-h5" href="#" onclick="downloadIcs();return false;" data-key="cal">save to calendar</a>
+      <a class="btn-h5" href="ticket/" data-key="tickets">tickets</a>
+      <a class="btn-h5" href="program/" data-key="program">program</a>
+    </div>
 
-      if (diff === 0) clearInterval(timer);
-    }
+  </div>
+</div>
 
-    update();
-    const timer = setInterval(update, 1000);
+<script src="obj_svg.js"></script>
+<script>
+  const SEEN_KEY = 'habitat_h5_seen';
+  const alreadySeen = localStorage.getItem(SEEN_KEY) === '1';
 
-    // Save the Date dropdown
-    const options = document.getElementById('calendarOptions');
+  /* i18n */
+  const i18n = {
+    en: { 'countdown-label': 'until habitat 5 years festival', days: 'days', hours: 'hours', mins: 'min', secs: 'sec', cal: 'save to calendar', tickets: 'tickets', program: 'program' },
+    it:  { 'countdown-label': 'ai 5 anni di habitat',   days: 'giorni', hours: 'ore', mins: 'min', secs: 'sec', cal: 'salva in calendario', tickets: 'biglietti', program: 'programma' }
+  };
+  let lang = 'en';
+  function setLang(l) {
+    lang = l;
+    document.querySelectorAll('#lang span').forEach(s => s.classList.toggle('active', s.dataset.l === l));
+    const t = i18n[l];
+    document.getElementById('countdown-label').textContent = t['countdown-label'];
+    document.querySelectorAll('[data-key]').forEach(el => { if (t[el.dataset.key]) el.textContent = t[el.dataset.key]; });
+  }
+  document.querySelectorAll('#lang span').forEach(s => s.addEventListener('click', () => setLang(s.dataset.l)));
 
-    document.getElementById('saveDate').addEventListener('click', function () {
-      options.classList.toggle('active');
+  /* countdown */
+  const target = new Date('2026-07-17T11:00:00+02:00').getTime();
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function tickCountdown() {
+    const diff = Math.max(0, target - Date.now());
+    document.getElementById('cd-d').textContent = Math.floor(diff / 86400000);
+    document.getElementById('cd-h').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+    document.getElementById('cd-m').textContent = pad(Math.floor((diff % 3600000) / 60000));
+    document.getElementById('cd-s').textContent = pad(Math.floor((diff % 60000) / 1000));
+  }
+  function startUI() {
+    document.getElementById('ui').classList.add('visible');
+    tickCountdown();
+    setInterval(tickCountdown, 1000);
+    localStorage.setItem(SEEN_KEY, '1');
+  }
+
+
+  function downloadIcs() {
+    const ics = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Habitat//Festival 2026//EN',
+      'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+      'DTSTART;TZID=Europe/Rome:20260717T110000',
+      'DTEND;TZID=Europe/Rome:20260719T235900',
+      'SUMMARY:Habitat Festival 2026',
+      'DESCRIPTION:Habitat Festival 2026 — Cà de Monti\\, Tredozio',
+      'LOCATION:Cà de Monti\\, Tredozio (FC)\\, Italy',
+      'URL:https://habitattt.it/festival/',
+      'END:VEVENT','END:VCALENDAR'
+    ].join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+    a.download = 'habitat-festival-2026.ics';
+    a.click();
+  }
+
+  /* SVG */
+  const NS = 'http://www.w3.org/2000/svg';
+  const S = document.getElementById('S');
+
+  const tmp = document.createElementNS(NS, 'svg');
+  tmp.setAttribute('viewBox', '0 0 1080 1080');
+  tmp.style.cssText = 'position:fixed;visibility:hidden;top:-9999px;width:1080px;height:1080px';
+  document.body.appendChild(tmp);
+  const all = [...HP.map(d => ({ d, g: '5' })), ...FP.map(d => ({ d, g: 'H' }))].map(it => {
+    const p = document.createElementNS(NS, 'path'); p.setAttribute('d', it.d);
+    tmp.appendChild(p); const bb = p.getBBox(); tmp.removeChild(p);
+    return { ...it, bb };
+  });
+  document.body.removeChild(tmp);
+
+  const nodes = all.map(it => {
+    const g = document.createElementNS(NS, 'g');
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', it.d); p.setAttribute('class', 'dp');
+    g.appendChild(p); S.appendChild(g);
+    return { g, it, tx: 0, ty: 0 };
+  });
+
+  function borderPos(i, total) {
+    const side = i % 4, t = (Math.floor(i / 4)) / Math.ceil(total / 4), s = 900, m = 60;
+    if (side === 0) return { x: m + Math.random() * 160 - 80, y: m + t * s };
+    if (side === 1) return { x: 920 + Math.random() * 80, y: m + t * s };
+    if (side === 2) return { x: m + t * s, y: m + Math.random() * 120 };
+    return { x: m + t * s, y: 920 + Math.random() * 80 };
+  }
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  function assembleGroup(group, done) {
+    const mine = nodes.filter(n => n.it.g === group);
+    const other = shuffle(nodes.filter(n => n.it.g !== group).slice());
+    other.forEach(({ g }, i) => {
+      const pos = borderPos(i, other.length), bx = pos.x - 540, by = pos.y - 540;
+      const ni = nodes.findIndex(x => x.g === g);
+      nodes[ni].tx = bx; nodes[ni].ty = by;
+      g.style.transition = 'transform .32s cubic-bezier(.4,0,.2,1),opacity .22s';
+      g.style.opacity = '.2';
+      g.setAttribute('transform', `translate(${bx},${by})`);
     });
-
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest('.calendar-menu')) {
-        options.classList.remove('active');
-      }
+    mine.forEach(({ g }, i) => {
+      const ni = nodes.findIndex(x => x.g === g);
+      setTimeout(() => {
+        nodes[ni].tx = 0; nodes[ni].ty = 0;
+        g.style.transition = 'transform .36s cubic-bezier(.22,.68,0,1.15),opacity .25s';
+        g.style.opacity = '1';
+        g.setAttribute('transform', 'translate(0,0)');
+      }, i * 15);
     });
+    if (done) setTimeout(done, mine.length * 15 + 380);
+  }
 
-    document.querySelectorAll('.calendar-options a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        options.classList.remove('active');
-      });
+  function explodeAll(done) {
+    nodes.forEach(({ g }, i) => {
+      const a = Math.random() * Math.PI * 2, r = 180 + Math.random() * 380;
+      nodes[i].tx = Math.cos(a) * r; nodes[i].ty = Math.sin(a) * r;
+      g.style.transition = 'transform .32s cubic-bezier(.4,0,.2,1),opacity .22s';
+      g.style.opacity = '1';
+      g.setAttribute('transform', `translate(${nodes[i].tx},${nodes[i].ty})`);
     });
+    if (done) setTimeout(done, 480);
+  }
 
-    // Language toggle
-    let currentLang = 'en';
-    document.querySelectorAll('.lang-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        currentLang = this.dataset.lang;
-        document.querySelectorAll('.lang-btn').forEach(function (b) { b.classList.remove('active'); });
-        this.classList.add('active');
-        document.querySelectorAll('[data-en][data-it]').forEach(function (el) {
-          el.textContent = el.getAttribute('data-' + currentLang);
+  function intro(done) {
+    nodes.forEach(({ g }, i) => {
+      const a = (i / nodes.length) * Math.PI * 2, r = 600 + Math.random() * 150;
+      nodes[i].tx = Math.cos(a) * r; nodes[i].ty = Math.sin(a) * r;
+      g.style.transition = 'none'; g.style.opacity = '0';
+      g.setAttribute('transform', `translate(${nodes[i].tx},${nodes[i].ty})`);
+    });
+    setTimeout(() => {
+      nodes.forEach(({ g }) => { g.style.transition = 'opacity .2s'; g.style.opacity = '.15'; });
+      setTimeout(done, 300);
+    }, 80);
+  }
+
+  /* start */
+  if (alreadySeen) {
+    /* UI subito visibile, animazione gira comunque */
+    startUI();
+    setTimeout(() => {
+      intro(() => {
+        assembleGroup('H', () => {
+          setTimeout(() => {
+            explodeAll(() => {
+              setTimeout(() => {
+                assembleGroup('5');
+              }, 300);
+            });
+          }, 1600);
         });
       });
-    });
-
-    // Payment method toggle
-    var paymentSelect = document.getElementById('paymentMethod');
-    var paymentBox = document.getElementById('paymentBox');
-    var paypalInfo = document.getElementById('paypalInfo');
-    var ibanInfo = document.getElementById('ibanInfo');
-
-    paymentSelect.addEventListener('change', function () {
-      var val = this.value;
-      if (!val) {
-        paymentBox.style.display = 'none';
-        return;
-      }
-      paymentBox.style.display = 'block';
-      paypalInfo.style.display = val === 'paypal' ? 'block' : 'none';
-      ibanInfo.style.display = val === 'iban' ? 'block' : 'none';
-    });
-
-    // Form submission
-    var bookingForm = document.getElementById('bookingForm');
-    var submitBtn = document.getElementById('submitBtn');
-    var errorMsg = document.getElementById('errorMsg');
-    var successMsg = document.getElementById('successMsg');
-
-    bookingForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      errorMsg.style.display = 'none';
-      submitBtn.disabled = true;
-      submitBtn.textContent = '...';
-
-      var payload = {
-        name: document.getElementById('firstName').value.trim(),
-        surname: document.getElementById('lastName').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        paymentMethod: paymentSelect.value,
-        language: currentLang
-      };
-
-      try {
-        var res = await fetch(BASE_URL + '/festival/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+    }, 300);
+  } else {
+    /* prima visita: UI appare solo alla fine */
+    setTimeout(() => {
+      intro(() => {
+        assembleGroup('H', () => {
+          setTimeout(() => {
+            explodeAll(() => {
+              setTimeout(() => {
+                assembleGroup('5', () => {
+                  setTimeout(startUI, 450);
+                });
+              }, 300);
+            });
+          }, 1600);
         });
-
-        if (!res.ok) {
-          var err = await res.json();
-          throw new Error(err.message || 'Error');
-        }
-
-        bookingForm.style.display = 'none';
-        successMsg.style.display = 'block';
-        // update translatable elements in success message
-        successMsg.querySelectorAll('[data-en][data-it]').forEach(function (el) {
-          el.textContent = el.getAttribute('data-' + currentLang);
-        });
-      } catch (err) {
-        errorMsg.textContent = err.message;
-        errorMsg.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = submitBtn.getAttribute('data-' + currentLang) || 'Book Your Ticket';
-      }
-    });
-  </script>
-
-  <script data-goatcounter="https://habitat-festival.goatcounter.com/count"
-          async src="//gc.zgo.at/count.js"></script>
-
+      });
+    }, 300);
+  }
+</script>
 </body>
 </html>
