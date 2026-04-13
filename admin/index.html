@@ -667,7 +667,7 @@
                                     <tr>
                                         <td @click="editingMembership = m"
                                             style="cursor:pointer; text-decoration:underline;"
-                                            x-text="m.surname + ' ' + m.name"></td>
+                                            x-text="formatName(m.surname) + ' ' + formatName(m.name)"></td>
                                         <td x-text="m.email"></td>
                                         <td x-text="m.city"></td>
                                         <td>
@@ -704,7 +704,7 @@
                             <tbody>
                                 <template x-for="m in deletedMemberships" :key="m.id">
                                     <tr>
-                                        <td x-text="m.surname + ' ' + m.name"></td>
+                                        <td x-text="formatName(m.surname) + ' ' + formatName(m.name)"></td>
                                         <td x-text="m.email"></td>
                                         <td x-text="formatDate(m.deletedAt)"></td>
                                         <td>

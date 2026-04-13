@@ -196,6 +196,11 @@ document.addEventListener('alpine:init', () => {
             return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
         },
 
+        formatName(str) {
+            if (!str) return '';
+            return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        },
+
         formatDateTime(dateStr) {
             if (!dateStr) return '-';
             const d = new Date(dateStr);
