@@ -1227,7 +1227,22 @@
                     <div class="card">
                         <button x-show="canWrite" @click="openCreateBooking()" class="create">+ NUOVA
                             PRENOTAZIONE</button>
-                        <table>
+
+                        <div style="display:flex; gap:8px; margin-bottom:16px; border-bottom:1px solid #ddd; padding-bottom:4px;">
+                            <button @click="bookingSubTab='active'"
+                                :style="bookingSubTab==='active' ? 'font-weight:bold; border-bottom:2px solid #000; background:none; border-top:none; border-left:none; border-right:none; padding:4px 10px; cursor:pointer;' : 'background:none; border:none; padding:4px 10px; cursor:pointer; color:#666;'">
+                                Attive
+                            </button>
+                            <button @click="bookingSubTab='completed'"
+                                :style="bookingSubTab==='completed' ? 'font-weight:bold; border-bottom:2px solid #000; background:none; border-top:none; border-left:none; border-right:none; padding:4px 10px; cursor:pointer;' : 'background:none; border:none; padding:4px 10px; cursor:pointer; color:#666;'">
+                                Completate
+                                <span x-show="items.filter(b => b.guestStatus === 'checkout').length > 0"
+                                    x-text="'(' + items.filter(b => b.guestStatus === 'checkout').length + ')'"
+                                    style="font-size:11px; font-weight:normal;"></span>
+                            </button>
+                        </div>
+
+                        <table x-show="bookingSubTab === 'active'">
                             <thead>
                                 <tr>
                                     <th>Ospite</th>
@@ -1240,7 +1255,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="b in items" :key="b.id">
+                                <template x-for="b in items.filter(b => b.guestStatus !== 'checkout')" :key="b.id">
                                     <tr
                                         :class="(b.room === 'da assegnare' || (!b.hasMembership && b.guestStatus === 'standby')) && 'alert-red'">
                                         <td @click="canWrite && openEditBooking(b)"
@@ -1274,6 +1289,45 @@
                                                 <button @click="openCheckout(b.id)"
                                                     style="background:#000; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;">CHECKOUT</button>
                                             </template>
+                                            <button @click="deleteItem(b.id)" class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <table x-show="bookingSubTab === 'completed'">
+                            <thead>
+                                <tr>
+                                    <th>Ospite</th>
+                                    <th>Stanza</th>
+                                    <th>Da</th>
+                                    <th>A</th>
+                                    <th>Stato Ospite</th>
+                                    <th>Proposta</th>
+                                    <th x-show="canWrite">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="b in items.filter(b => b.guestStatus === 'checkout')" :key="b.id">
+                                    <tr>
+                                        <td @click="canWrite && openEditBooking(b)"
+                                            :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
+                                            <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
+                                        </td>
+                                        <td x-text="b.room"></td>
+                                        <td x-text="formatDate(b.checkIn)"></td>
+                                        <td x-text="formatDate(b.checkOut)"></td>
+                                        <td>
+                                            <span class="status-tag"
+                                                :style="'color:' + getGuestStatusColor(b.guestStatus) + '; border-color:' + getGuestStatusColor(b.guestStatus)"
+                                                x-text="getGuestStatusLabel(b.guestStatus)"></span>
+                                        </td>
+                                        <td>
+                                            <button x-show="b.residency?.proposal" @click="proposalModal = b.residency"
+                                                style="font-size:10px; color:#2b6cb0;">LEGGI</button>
+                                        </td>
+                                        <td x-show="canWrite">
                                             <button @click="deleteItem(b.id)" class="btn-del">X</button>
                                         </td>
                                     </tr>
@@ -2504,14 +2558,22 @@
                             </template>
                         </select>
 
-                        <label>Oggetto Email</label>
-                        <input type="text" x-model="residencyApproval.emailSubject">
+                        <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                            <input type="checkbox" x-model="residencyApproval.sendEmail">
+                            Invia email all'ospite
+                        </label>
+                        <template x-if="residencyApproval.sendEmail">
+                            <div>
+                                <label>Oggetto Email</label>
+                                <input type="text" x-model="residencyApproval.emailSubject">
 
-                        <label>Corpo Email</label>
-                        <textarea x-model="residencyApproval.emailBody" rows="6"></textarea>
+                                <label>Corpo Email</label>
+                                <textarea x-model="residencyApproval.emailBody" rows="6"></textarea>
+                            </div>
+                        </template>
 
-                        <button class="btn-blk" @click="confirmResidency()" :disabled="!residencyApproval.room">CONFERMA
-                            E INVIA</button>
+                        <button class="btn-blk" @click="confirmResidency()" :disabled="!residencyApproval.room"
+                            x-text="residencyApproval.sendEmail ? 'CONFERMA E INVIA' : 'CONFERMA'"></button>
                         <button @click="residencyApproval = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>
@@ -2721,13 +2783,22 @@
                             <span x-text="formatDate(residencyRejection.residency.toDate)"></span>
                         </p>
 
-                        <label>Oggetto Email</label>
-                        <input type="text" x-model="residencyRejection.emailSubject">
+                        <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                            <input type="checkbox" x-model="residencyRejection.sendEmail">
+                            Invia email all'ospite
+                        </label>
+                        <template x-if="residencyRejection.sendEmail">
+                            <div>
+                                <label>Oggetto Email</label>
+                                <input type="text" x-model="residencyRejection.emailSubject">
 
-                        <label>Corpo Email</label>
-                        <textarea x-model="residencyRejection.emailBody" rows="6"></textarea>
+                                <label>Corpo Email</label>
+                                <textarea x-model="residencyRejection.emailBody" rows="6"></textarea>
+                            </div>
+                        </template>
 
-                        <button class="btn-blk" @click="confirmRejection()">RIFIUTA E INVIA</button>
+                        <button class="btn-blk" @click="confirmRejection()"
+                            x-text="residencyRejection.sendEmail ? 'RIFIUTA E INVIA' : 'RIFIUTA'"></button>
                         <button @click="residencyRejection = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>

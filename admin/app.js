@@ -54,6 +54,7 @@ document.addEventListener('alpine:init', () => {
         residencyApproval: null,
         residencyRejection: null,
         residencyCount: 0,
+        bookingSubTab: 'active',
         membershipTab: 'requests',
         filter: 'all',
         habitanteFilter: 'all',
@@ -1128,13 +1129,14 @@ document.addEventListener('alpine:init', () => {
                     room: '',
                     emailSubject,
                     emailBody,
-                    roomOptions
+                    roomOptions,
+                    sendEmail: true
                 };
             } catch (e) { alert(e.message); }
         },
 
         async confirmResidency() {
-            const { residency, room, emailSubject, emailBody } = this.residencyApproval;
+            const { residency, room, emailSubject, emailBody, sendEmail } = this.residencyApproval;
             if (!room) {
                 alert('Seleziona una stanza prima di confermare');
                 return;
@@ -1143,7 +1145,7 @@ document.addEventListener('alpine:init', () => {
                 const res = await fetch(`${this.BASE_URL}/residency/${residency.id}/approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({ room, emailSubject, emailBody })
+                    body: JSON.stringify({ room, emailSubject: sendEmail ? emailSubject : '', emailBody: sendEmail ? emailBody : '' })
                 });
                 if (!res.ok) throw new Error("Errore approvazione residenza");
                 this.residencyApproval = null;
@@ -1157,17 +1159,17 @@ document.addEventListener('alpine:init', () => {
                     headers: { 'Authorization': `Bearer ${this.token}` }
                 });
                 const { subject: emailSubject, body: emailBody } = await res.json();
-                this.residencyRejection = { residency: r, emailSubject, emailBody };
+                this.residencyRejection = { residency: r, emailSubject, emailBody, sendEmail: true };
             } catch (e) { alert(e.message); }
         },
 
         async confirmRejection() {
-            const { residency, emailSubject, emailBody } = this.residencyRejection;
+            const { residency, emailSubject, emailBody, sendEmail } = this.residencyRejection;
             try {
                 const res = await fetch(`${this.BASE_URL}/residency/${residency.id}/reject`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({ emailSubject, emailBody })
+                    body: JSON.stringify({ emailSubject: sendEmail ? emailSubject : '', emailBody: sendEmail ? emailBody : '' })
                 });
                 if (!res.ok) throw new Error("Errore rifiuto residenza");
                 this.residencyRejection = null;
