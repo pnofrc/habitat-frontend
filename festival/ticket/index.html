@@ -413,8 +413,8 @@
           You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
       </div>
 
-      <button type="submit" class="book-btn" id="submitBtn" data-en="Book"
-        data-it="Prenota">Book</button>
+      <button type="submit" class="book-btn" id="submitBtn" data-en="Book Now"
+        data-it="Prenota Ora">Book Now</button>
       <div class="error-msg" id="errorMsg" style="display:none;"></div>
     </form>
 
@@ -555,7 +555,7 @@
         errorMsg.textContent = err.message;
         errorMsg.style.display = 'block';
         submitBtn.disabled = false;
-        submitBtn.textContent = submitBtn.getAttribute('data-' + currentLang) || 'Book';
+        submitBtn.textContent = submitBtn.getAttribute('data-' + currentLang) || 'Book Now';
       }
     });
   </script>
