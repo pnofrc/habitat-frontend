@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,11 @@
 
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       min-height: 100vh;
@@ -300,12 +305,22 @@
       .card {
         padding: 20px;
       }
-      .countdown { gap: 10px; }
-      .countdown-unit .value { font-size: 1.3rem; }
-      .word-list { font-size: 0.95rem; }
+
+      .countdown {
+        gap: 10px;
+      }
+
+      .countdown-unit .value {
+        font-size: 1.3rem;
+      }
+
+      .word-list {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <div class="card">
@@ -318,7 +333,7 @@
     </div>
 
     <h1>Habitat Festival 2026</h1>
-<!-- 
+    <!-- 
     <div class="countdown" id="countdown">
       <div class="countdown-unit"><div class="value" id="days">--</div><div class="label">Days</div></div>
       <div class="countdown-unit"><div class="value" id="hours">--</div><div class="label">Hours</div></div>
@@ -352,7 +367,8 @@
     </div> -->
 
     <form class="booking-form" id="bookingForm">
-      <p style="font-size: 1rem; font-weight: bold; letter-spacing: 2px; text-align: center; margin-bottom: 18px;">· Early Birds 40€ ·</p>
+      <p style="font-size: 1rem; font-weight: bold; letter-spacing: 2px; text-align: center; margin-bottom: 18px;">· 1st
+        Round 40€ ·</p>
       <label for="firstName" data-en="Name" data-it="Nome">Name</label>
       <input type="text" id="firstName" name="firstName" required>
 
@@ -363,9 +379,10 @@
       <input type="email" id="email" name="email" required>
 
       <p class="note" style="margin-top:14px; margin-bottom:2px;"
-         data-en="The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at check-in."
-         data-it="Il festival è riservato ai soci di Habitat / Distretto A. La quota di €10 per la tessera associativa verrà raccolta al check-in.">
-        The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at check-in.
+        data-en="The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at check-in."
+        data-it="Il festival è riservato ai soci di Habitat / Distretto A. La quota di €10 per la tessera associativa verrà raccolta al check-in.">
+        The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at
+        check-in.
       </p>
 
       <label for="paymentMethod" data-en="Payment method" data-it="Metodo di pagamento">Payment method</label>
@@ -377,36 +394,50 @@
 
       <div class="payment-box" id="paymentBox" style="display:none;">
         <div id="paypalInfo" style="display:none;">
-          <p data-en="Click the button below to pay via PayPal." data-it="Clicca il pulsante qui sotto per pagare tramite PayPal.">Click the button below to pay via PayPal.</p>
+          <p data-en="Click the button below to pay via PayPal."
+            data-it="Clicca il pulsante qui sotto per pagare tramite PayPal.">Click the button below to pay via PayPal.
+          </p>
           <a href="https://www.paypal.com/ncp/payment/CW9SHXGD58JX8" target="_blank" rel="noopener">PayPal</a>
-          <p class="note" data-en="Apple Pay and Card payments are also supported via PayPal." data-it="Anche Apple Pay e pagamenti con carta sono supportati tramite PayPal.">Apple Pay and Card payments are also supported via PayPal.</p>
+          <p class="note" data-en="Apple Pay and Card payments are also supported via PayPal."
+            data-it="Anche Apple Pay e pagamenti con carta sono supportati tramite PayPal.">Apple Pay and Card payments
+            are also supported via PayPal.</p>
         </div>
         <div id="ibanInfo" style="display:none;">
           <p><strong>IBAN:</strong> IT88Q0623023704000030225469</p>
-          <p style="margin-top:8px;" data-en="Reference: ... [Your Name]" data-it="Causale:... [Tuo Nome]">Reference: Festival '26 [Your Name]</p>
+          <p style="margin-top:8px;" data-en="Reference: ... [Your Name]" data-it="Causale:... [Tuo Nome]">Reference:
+            Festival '26 [Your Name]</p>
         </div>
-        <p class="note" style="margin-top:12px;" data-en="You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours." data-it="Riceverai una conferma una volta verificato il pagamento. Potrebbero essere necessarie fino a 24–48 ore.">You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
+        <p class="note" style="margin-top:12px;"
+          data-en="You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours."
+          data-it="Riceverai una conferma una volta verificato il pagamento. Potrebbero essere necessarie fino a 24–48 ore.">
+          You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
       </div>
 
-      <button type="submit" class="book-btn" id="submitBtn" data-en="Book Your Ticket" data-it="Prenota il Biglietto">Book Your Ticket</button>
+      <button type="submit" class="book-btn" id="submitBtn" data-en="Book Your Ticket"
+        data-it="Prenota il Biglietto">Book Your Ticket</button>
       <div class="error-msg" id="errorMsg" style="display:none;"></div>
     </form>
 
     <div class="success-msg" id="successMsg" style="display:none;">
-      <p data-en="Thank you! Your booking has been received." data-it="Grazie! La tua prenotazione &egrave; stata ricevuta.">Thank you! Your booking has been received.</p>
-      <p style="margin-top:10px; font-size:0.85rem; color:#666;" data-en="We'll be in touch soon with more details." data-it="Ti contatteremo presto con maggiori dettagli.">We'll be in touch soon with more details.</p>
+      <p data-en="Thank you! Your booking has been received."
+        data-it="Grazie! La tua prenotazione &egrave; stata ricevuta.">Thank you! Your booking has been received.</p>
+      <p style="margin-top:10px; font-size:0.85rem; color:#666;" data-en="We'll be in touch soon with more details."
+        data-it="Ti contatteremo presto con maggiori dettagli.">We'll be in touch soon with more details.</p>
     </div>
 
     <div class="calendar-menu">
       <div class="calendar-options" id="calendarOptions">
-        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Habitat%20Festival%202026&dates=20260717T110000/20260719T235900&ctz=Europe/Rome&details=Habitat%20Festival%202026" target="_blank" rel="noopener" data-goatcounter-click="save-date-google">Google Calendar</a>
-        <a href="habitat-festival-2026.ics" download="habitat-festival-2026.ics" data-goatcounter-click="save-date-apple">Apple Calendar</a>
-        <a href="habitat-festival-2026.ics" download="habitat-festival-2026.ics" data-goatcounter-click="save-date-download">Download .ics</a>
+        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Habitat%20Festival%202026&dates=20260717T110000/20260719T235900&ctz=Europe/Rome&details=Habitat%20Festival%202026"
+          target="_blank" rel="noopener" data-goatcounter-click="save-date-google">Google Calendar</a>
+        <a href="habitat-festival-2026.ics" download="habitat-festival-2026.ics"
+          data-goatcounter-click="save-date-apple">Apple Calendar</a>
+        <a href="habitat-festival-2026.ics" download="habitat-festival-2026.ics"
+          data-goatcounter-click="save-date-download">Download .ics</a>
       </div>
       <!-- <button class="save-btn" id="saveDate" data-en="Save the Date" data-it="Salva la Data">Save the Date</button> -->
     </div>
   </div>
-  
+
 
   <script src="../config.js"></script>
   <script>
@@ -528,9 +559,10 @@
       }
     });
   </script>
-<!-- 
+  <!-- 
   <script data-goatcounter="https://habitat-festival.goatcounter.com/count"
           async src="//gc.zgo.at/count.js"></script> -->
 
 </body>
+
 </html>
