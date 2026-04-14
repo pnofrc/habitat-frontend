@@ -37,9 +37,10 @@
     <div></div>
 
     <div id="buttons">
-      <a class="btn-h5" href="#" onclick="downloadIcs();return false;" data-key="cal">save to calendar</a>
       <a class="btn-h5" href="ticket/" data-key="tickets">tickets</a>
       <a class="btn-h5" href="program/" data-key="program">program</a>
+      <a class="btn-h5" href="#" onclick="downloadIcs();return false;" data-key="cal">save to calendar</a>
+
     </div>
 
   </div>
@@ -83,23 +84,23 @@
   }
 
 
-  function downloadIcs() {
-    const ics = [
-      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Habitat//Festival 2026//EN',
-      'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
-      'DTSTART;TZID=Europe/Rome:20260717T110000',
-      'DTEND;TZID=Europe/Rome:20260719T235900',
-      'SUMMARY:Habitat Festival 2026',
-      'DESCRIPTION:Habitat Festival 2026 — Cà de Monti\\, Tredozio',
-      'LOCATION:Cà de Monti\\, Tredozio (FC)\\, Italy',
-      'URL:https://habitattt.it/festival/',
-      'END:VEVENT','END:VCALENDAR'
-    ].join('\r\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
-    a.download = 'habitat-festival-2026.ics';
-    a.click();
-  }
+ function downloadIcs() {
+            const ics = [
+            'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Habitat//Festival 2026//EN',
+            'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+            'DTSTART;TZID=Europe/Rome:20260717T110000',
+            'DTEND;TZID=Europe/Rome:20260719T235900',
+            'SUMMARY:Habitat Festival 2026',
+            'DESCRIPTION:Habitat Festival 2026 — Cà de Monti\\, Tredozio',
+            'LOCATION:Cà de Monti\\, Tredozio (FC)\\, Italy',
+            'URL:https://5years.habitattt.it/',
+            'END:VEVENT','END:VCALENDAR'
+            ].join('\r\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+            a.download = 'habitat-festival-2026.ics';
+            a.click();
+        }
 
   /* SVG */
   const NS = 'http://www.w3.org/2000/svg';

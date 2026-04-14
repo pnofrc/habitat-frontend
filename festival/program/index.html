@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H5Y</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f4f4f4;
+      color: #000;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+    }
+
+
+    .card {
+      position: relative;
+      background: #fff;
+      padding: 40px;
+      border: 2px solid #000;
+      box-shadow: 8px 8px 0px #000;
+      max-width: 680px;
+      width: 100%;
+      text-align: center;
+    }
+    .logo { margin-bottom: 20px; }
+    .logo img { height: 10vh; }
+    h1 {
+      border-bottom: 4px solid #000;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      font-size: 1.5em;
+      letter-spacing: 2px;
+    }
+    .lang-toggle {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .lang-btn {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: transparent;
+      border: 2px solid #000;
+      padding: 4px 12px;
+      cursor: pointer;
+    }
+    .lang-btn.active { background: #000; color: #fff; }
+    .poem {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #333;
+      margin-bottom: 30px;
+      white-space: pre-line;
+      text-align: center;
+    }
+    hr {
+      border: none;
+      border-top: 2px solid #eee;
+      margin: 24px 0;
+    }
+    .prose {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .prose p + p { margin-top: 12px; }
+    .tuned {
+      font-weight: bold;
+    }
+    .book-btn {
+      display: block;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 15px 30px;
+      font-weight: bold;
+      font-size: 1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: inherit;
+      width: 100%;
+      letter-spacing: 2px;
+      text-decoration: none;
+      margin-top: 20px;
+    }
+    .book-btn:hover { background: #333; }
+    .save-btn {
+      background: #fff;
+      color: #000;
+      border: 2px solid #000;
+      padding: 15px 30px;
+      font-weight: bold;
+      font-size: 1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: inherit;
+      width: 100%;
+      letter-spacing: 2px;
+    }
+    .save-btn:hover { background: #e0e0e0; }
+    @media (max-width: 600px) {
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="it">IT</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <div class="logo">
+   <a href="../"><img src="../logo.png" alt="Habitat"></a>
+        
+    </div>
+    <h1>Habitat Festival 2026</h1>
+
+    <div class="poem">
+      <i
+        data-it="...e sono di anni proprio cinque,
+quell'essenza non si estingue..!
+la moltitudine di pratiche e di lingue
+ci da orgoglio sano senza grinfie
+
+sembrava solo qualche mese fa
+quando capitò che il convivio
+volesse essere importante 
+tanto quanto un archivio
+
+La casa pare tutt'ora un'entità
+un essere vivo ma inorganico
+che accudisce con generosità
+un pendolo tra immaginifico e pratico
+che dalle sue mura va anche al di là
+
+abitando la valle del tramazzo
+immaginiamo la romagna come un arazzo
+una storia da continuare a tessere
+qui e fuori da queste selvatiche terre
+
+Allora festeggiamo con gusto 
+questo illustro ambidestro lustro 
+tre giorni di laboratori, musiche e carezze
+dove lo star insieme e saltellare sono le certezze"
+        data-en="…and it's already five years old,
+that original essence doesn't turn cold..!
+the multitude of languages and practices,
+Trace our identity with soft touches
+
+it seemed like a few months ago 
+when the convivial attitude came to know 
+it wanted to matter, to hold and convey
+as much as an archive that never decays
+
+The house still feels like a proper entity
+a living thing, beyond all explanation
+that cuddles us quite incidentally
+a pendulum between dream and imagination
+that from its walls stretches out beyond
+
+inhabiting the tramazzo valley
+we imagine romagna as a tapestry
+a story still to weave and rally 
+here and far beyond this wild land
+
+So let us celebrate with flair
+this lustrous, ambidextrous affair 
+three days of workshops, music, gentle touch 
+where being together and skipping are maybe enough">...e sono di anni proprio cinque,
+quell'essenza non si estingue..!
+la moltitudine di pratiche e di lingue
+ci da orgoglio sano senza grinfie
+
+sembrava solo qualche mese fa
+quando capitò che il convivio
+volesse essere importante 
+tanto quanto un archivio
+
+La casa pare tutt'ora un'entità
+un essere vivo ma inorganico
+che accudisce con generosità
+un pendolo tra immaginifico e pratico
+che dalle sue mura va anche al di là
+
+abitando la valle del tramazzo
+immaginiamo la romagna come un arazzo
+una storia da continuare a tessere
+qui e fuori da queste selvatiche terre
+
+Allora festeggiamo con gusto 
+questo illustro ambidestro lustro 
+tre giorni di laboratori, musiche e carezze
+dove lo star insieme e saltellare sono le certezze</i>
+    </div>
+
+    <hr>
+
+    <div class="prose">
+      <p
+        data-it="Habitat festeggia 5 anni."
+        data-en="Habitat celebrates 5 years.">Habitat festeggia 5 anni.</p>
+      <p
+        data-it="Tre giorni di festa tra musiche variopinte, laboratori d'immaginazione, cibo conviviale, computazione sentimentale e altre meraviglie, tutto al sapore di un lustro di connessioni da tutto il mondo."
+        data-en="Three days of celebration with colorful music, imagination workshops, convivial food, sentimental computation, and other wonders, all infused with the flavor of five years of friendship from all over the world.">Tre giorni di festa tra musiche variopinte, laboratori d'immaginazione, cibo conviviale, computazione sentimentale e altre meraviglie, tutto al sapore di un lustro di connessioni da tutto il mondo.</p>
+      <p class="tuned"
+        data-it="Stay tuned, pian piano pubblicheremo il programma!"
+        data-en="Stay tuned, we'll be sharing the program soon!">Stay tuned, pian piano pubblicheremo il programma!</p>
+    </div>
+
+    <a href="../ticket/" class="book-btn"
+      data-it="Biglietti"
+      data-en="Tickets">Biglietti</a>
+
+    <a class="save-btn" onclick="downloadIcs();return false;" data-key="cal" style="display:block; text-decoration:none; margin-top:12px;"
+      data-it="Salva in Calendario"
+      data-en="Save to Calendar">Salva in Calendario</a>
+  </div>
+
+  <script>
+    let currentLang = 'it';
+    document.querySelectorAll('.lang-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        currentLang = this.dataset.lang;
+        document.querySelectorAll('.lang-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        document.querySelectorAll('[data-en][data-it]').forEach(function(el) {
+          el.textContent = el.getAttribute('data-' + currentLang);
+        });
+      });
+    });
+
+
+          function downloadIcs() {
+            const ics = [
+            'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Habitat//Festival 2026//EN',
+            'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+            'DTSTART;TZID=Europe/Rome:20260717T110000',
+            'DTEND;TZID=Europe/Rome:20260719T235900',
+            'SUMMARY:Habitat Festival 2026',
+            'DESCRIPTION:Habitat Festival 2026 — Cà de Monti\\, Tredozio',
+            'LOCATION:Cà de Monti\\, Tredozio (FC)\\, Italy',
+            'URL:https://5years.habitattt.it/',
+            'END:VEVENT','END:VCALENDAR'
+            ].join('\r\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+            a.download = 'habitat-festival-2026.ics';
+            a.click();
+        }
+  </script>
+</body>
+</html>
