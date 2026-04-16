@@ -1475,7 +1475,7 @@
                                     x-text="festivalConfirmedCount" style="color:green"></b></div>
                         </div>
                         <div class="card">
-                            <h3 style="margin:0 0 15px">Biglietti Festival</h3>
+                            <h3 style="margin:0 0 15px">In Attesa <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => !t.confirmed).length + ')'"></span></h3>
                             <table>
                                 <thead>
                                     <tr>
@@ -1483,26 +1483,46 @@
                                         <th>Cognome</th>
                                         <th>Email</th>
                                         <th>Pagamento</th>
-                                        <th>Stato</th>
                                         <th x-show="canWrite"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template x-for="t in festivalTickets" :key="t.id">
+                                    <template x-for="t in festivalTickets.filter(t => !t.confirmed)" :key="t.id">
                                         <tr>
                                             <td x-text="t.name"></td>
                                             <td x-text="t.surname"></td>
                                             <td x-text="t.email"></td>
                                             <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
-                                            <td>
-                                                <span x-show="t.confirmed" class="status-tag"
-                                                    style="color:green; border-color:green;">CONFERMATO</span>
-                                                <span x-show="!t.confirmed" class="status-tag"
-                                                    style="color:#999; border-color:#999;">IN ATTESA</span>
-                                            </td>
                                             <td x-show="canWrite">
-                                                <button x-show="!t.confirmed" @click="startFestivalApproval(t)"
-                                                    class="btn-del" style="color:green">V</button>
+                                                <button @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
+                                                <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card" x-show="festivalTickets.filter(t => t.confirmed).length > 0">
+                            <h3 style="margin:0 0 15px; color:green">Confermati <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => t.confirmed).length + ')'"></span></h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Email</th>
+                                        <th>Pagamento</th>
+                                        <th x-show="canWrite"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="t in festivalTickets.filter(t => t.confirmed)" :key="t.id">
+                                        <tr>
+                                            <td x-text="t.name"></td>
+                                            <td x-text="t.surname"></td>
+                                            <td x-text="t.email"></td>
+                                            <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
+                                            <td x-show="canWrite">
                                                 <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
                                             </td>
                                         </tr>
