@@ -401,7 +401,7 @@
           <p data-en="Click the button below to pay via PayPal."
             data-it="Clicca il pulsante qui sotto per pagare tramite PayPal.">Click the button below to pay via PayPal.
           </p>
-          <a href="https://www.paypal.com/ncp/payment/CW9SHXGD58JX8" target="_blank" rel="noopener">PayPal</a>
+          <a id="paypalLink" href="https://www.paypal.com/ncp/payment/CW9SHXGD58JX8" target="_blank" rel="noopener">PayPal</a>
           <p class="note" data-en="Apple Pay and Card payments are also supported via PayPal."
             data-it="Anche Apple Pay e pagamenti con carta sono supportati tramite PayPal.">Apple Pay and Card payments
             are also supported via PayPal.</p>
@@ -564,6 +564,37 @@
         submitBtn.disabled = false;
         submitBtn.textContent = submitBtn.getAttribute('data-' + currentLang) || 'Book Now';
       }
+    });
+
+    // PayPal link: auto-submit booking before opening PayPal
+    document.getElementById('paypalLink').addEventListener('click', function (e) {
+      var name = document.getElementById('firstName').value.trim();
+      var surname = document.getElementById('lastName').value.trim();
+      var email = document.getElementById('email').value.trim();
+
+      if (!name || !surname || !email) {
+        e.preventDefault();
+        errorMsg.textContent = currentLang === 'it'
+          ? 'Compila tutti i campi prima di procedere al pagamento.'
+          : 'Please fill in all fields before proceeding to payment.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      fetch(BASE_URL + '/festival/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, surname: surname, email: email, paymentMethod: 'paypal', language: currentLang })
+      }).then(function (res) {
+        if (res.ok) {
+          bookingForm.style.display = 'none';
+          successMsg.style.display = 'block';
+          successMsg.querySelectorAll('[data-en][data-it]').forEach(function (el) {
+            el.textContent = el.getAttribute('data-' + currentLang);
+          });
+        }
+      }).catch(function () { /* silent fail — BOOK NOW still available */ });
     });
   </script>
   <!-- 
