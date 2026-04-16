@@ -1531,10 +1531,14 @@
                             </table>
                         </div>
 
-                        <div class="card" x-show="deletedFestivalTickets.length > 0">
-                            <h3 style="margin:0 0 15px">Cestino <span style="font-weight:normal; font-size:12px;"
-                                    x-text="'(' + deletedFestivalTickets.length + ')'"></span></h3>
-                            <table>
+                        <div class="card" x-show="deletedFestivalTickets.length > 0" x-data="{ open: false }">
+                            <h3 style="margin:0; cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px;"
+                                @click="open = !open">
+                                <span x-text="open ? '▾' : '▸'" style="font-size:0.8em;"></span>
+                                Cestino <span style="font-weight:normal; font-size:12px;"
+                                    x-text="'(' + deletedFestivalTickets.length + ')'"></span>
+                            </h3>
+                            <table x-show="open" style="margin-top:15px;">
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
