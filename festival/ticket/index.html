@@ -294,8 +294,13 @@
       line-height: 1;
     }
 
-    .copy-btn:hover { color: #000; }
-    .copy-btn.copied { color: green; }
+    .copy-btn:hover {
+      color: #000;
+    }
+
+    .copy-btn.copied {
+      color: green;
+    }
 
     .payment-box .note {
       font-size: 0.8em;
@@ -417,13 +422,16 @@
             are also supported via PayPal.</p>
         </div>
         <div id="ibanInfo" style="display:none;">
-          <p><strong>IBAN:</strong> IT88Q0623023704000030225469 <button type="button" class="copy-btn" onclick="copyText('IT88Q0623023704000030225469', this)" title="Copy">&#10697;</button></p>
-          <p style="margin-top:4px;" data-en="Beneficiary: Distretto A APS" data-it="Beneficiario: Distretto A APS">Beneficiary: Distretto A APS <button type="button" class="copy-btn" onclick="copyText('Distretto A APS', this)" title="Copy">&#10697;</button></p>
+          <p><strong>IBAN:</strong> IT88Q0623023704000030225469 <button type="button" class="copy-btn"
+              onclick="copyText('IT88Q0623023704000030225469', this)" title="Copy">&#10697;</button></p>
+          <p style="margin-top:4px;" data-en="Beneficiary: Distretto A APS" data-it="Beneficiario: Distretto A APS">
+            <strong>Beneficiary: Distretto A APS</strong> <button type="button" class="copy-btn"
+              onclick="copyText('Distretto A APS', this)" title="Copy">&#10697;</button></p>
           <p style="margin-top:8px;" data-en="Reference: ... [Your Name]" data-it="Causale:... [Tuo Nome]">Reference:
             Festival '26 [Your Name]</p>
           <p class="note" style="margin-top:10px; font-weight:bold; color:green; font-size: 13px;"
             data-en="After completing the payment, make sure to press the BOOK NOW button."
-            data-it="Dopo aver completato il pagamento, assicurati di premere il pulsante PRENOTA ORA.">
+            data-it="Dopo aver completato il pagamento, premi il pulsante PRENOTA ORA.">
             After completing the payment, make sure to press the BOOK NOW button.</p>
         </div>
         <p class="note" style="margin-top:12px;"
@@ -432,12 +440,9 @@
           You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
       </div>
 
-      <a id="paypalLink"
-         href="https://www.paypal.com/ncp/payment/CW9SHXGD58JX8"
-         target="_blank" rel="noopener"
-         class="book-btn"
-         style="display:none; text-align:center; text-decoration:none;"
-         data-en="Book Now" data-it="Prenota Ora">Book Now</a>
+      <a id="paypalLink" href="https://www.paypal.com/ncp/payment/CW9SHXGD58JX8" target="_blank" rel="noopener"
+        class="book-btn" style="display:none; text-align:center; text-decoration:none;" data-en="Book Now"
+        data-it="Prenota Ora">Book Now</a>
       <button type="submit" class="book-btn" id="submitBtn" data-en="Book Now" data-it="Prenota Ora">Book Now</button>
       <div class="error-msg" id="errorMsg" style="display:none;"></div>
     </form>
@@ -447,6 +452,9 @@
         data-it="Grazie! La tua prenotazione &egrave; stata ricevuta.">Thank you! Your booking has been received.</p>
       <p style="margin-top:10px; font-size:0.85rem; color:#666;" data-en="We'll be in touch soon with more details."
         data-it="Ti contatteremo presto con maggiori dettagli.">We'll be in touch soon with more details.</p>
+      <p style="margin-top:10px; font-size:0.8rem; color:#999;"
+        data-en="Your spot will be confirmed once your payment has been verified."
+        data-it="Il tuo posto sarà confermato una volta verificato il pagamento.">Your spot will be confirmed once your payment has been verified.</p>
     </div>
 
     <div class="calendar-menu">
