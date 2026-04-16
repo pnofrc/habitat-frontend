@@ -1592,7 +1592,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template x-for="tx in paypalTransactions" :key="tx.id">
+                                    <template x-for="tx in [...paypalTransactions].sort((a,b) => new Date(b.date) - new Date(a.date))" :key="tx.id">
                                         <tr>
                                             <td x-text="formatDate(tx.date)"></td>
                                             <td x-text="tx.name || '-'"></td>
