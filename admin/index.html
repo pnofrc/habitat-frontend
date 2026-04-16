@@ -1561,6 +1561,52 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+                                <h3 style="margin:0">Pagamenti PayPal</h3>
+                                <select x-model.number="paypalDays" style="padding:4px 8px; border:1px solid #ccc; font-family:inherit;">
+                                    <option value="7">7 giorni</option>
+                                    <option value="14">14 giorni</option>
+                                    <option value="30">30 giorni</option>
+                                </select>
+                                <button @click="fetchPaypalTransactions()" :disabled="paypalLoading"
+                                    style="padding:6px 14px; border:1px solid #000; background:#fff; cursor:pointer; font-family:inherit;"
+                                    x-text="paypalLoading ? 'Caricamento...' : 'Carica transazioni'">
+                                </button>
+                                <small x-show="paypalTransactions.length > 0"
+                                    x-text="'(' + paypalTransactions.length + ' trovate)'" style="color:#666;"></small>
+                            </div>
+                            <div x-show="paypalError" style="color:red; margin-bottom:10px;" x-text="paypalError"></div>
+                            <div x-show="!paypalLoading && !paypalError && paypalTransactions.length === 0"
+                                style="color:#999; font-size:13px;">Premi "Carica transazioni" per aggiornare.</div>
+                            <table x-show="paypalTransactions.length > 0">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Importo</th>
+                                        <th>Stato</th>
+                                        <th>ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="tx in paypalTransactions" :key="tx.id">
+                                        <tr>
+                                            <td x-text="formatDate(tx.date)"></td>
+                                            <td x-text="tx.name || '-'"></td>
+                                            <td x-text="tx.email || '-'"></td>
+                                            <td x-text="tx.currency + ' ' + tx.amount.toFixed(2)"
+                                                :style="tx.amount >= 40 ? 'color:green; font-weight:bold' : ''"></td>
+                                            <td x-text="tx.status || '-'"
+                                                :style="tx.status === 'S' ? 'color:green' : (tx.status === 'V' ? 'color:red' : '')"></td>
+                                            <td style="font-size:11px; color:#666;" x-text="tx.id"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div x-show="festivalTab === 'planner'">

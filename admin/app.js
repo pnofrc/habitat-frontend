@@ -26,6 +26,10 @@ document.addEventListener('alpine:init', () => {
         festivalConfirmedCount: 0,
         festivalApproval: null,
         festivalTab: 'tickets',
+        paypalTransactions: [],
+        paypalLoading: false,
+        paypalError: null,
+        paypalDays: 30,
         plannerVenues: [],
         plannerActs: [],
         plannerSelectedDay: '2026-07-16',
@@ -1849,6 +1853,28 @@ document.addEventListener('alpine:init', () => {
                 if (!res.ok) throw new Error("Errore ripristino");
                 await this.fetchData();
             } catch (e) { alert(e.message); }
+        },
+
+        async fetchPaypalTransactions() {
+            this.paypalLoading = true;
+            this.paypalError = null;
+            try {
+                const res = await fetch(
+                    `${this.BASE_URL}/festival/paypal-transactions?days=${this.paypalDays}`,
+                    { headers: { 'Authorization': `Bearer ${this.token}` } }
+                );
+                if (res.status === 401) return this.logout();
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    this.paypalError = err.error || `Errore ${res.status}`;
+                    return;
+                }
+                this.paypalTransactions = await res.json();
+            } catch (e) {
+                this.paypalError = 'Errore di rete. Riprova.';
+            } finally {
+                this.paypalLoading = false;
+            }
         },
 
         async deleteFestivalTicket(id) {
