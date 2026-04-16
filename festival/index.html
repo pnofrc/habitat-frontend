@@ -15,6 +15,9 @@
 
   <div id="ui">
 
+        <span class="data" data-key="date" data-key="date">17-19 July 2026</span>
+
+
     <div id="top-row">
       <div id="countdown">
         <div id="countdown-label">until habitat 5 years festival</div>
@@ -26,7 +29,11 @@
           <div class="c-unit"><div class="c-num" id="cd-m">--</div><div class="c-lab" data-key="mins">min</div></div>
           <div class="c-sep">:</div>
           <div class="c-unit"><div class="c-num" id="cd-s">--</div><div class="c-lab" data-key="secs">sec</div></div>
+   
+
         </div>
+
+
       </div>
       <div id="lang">
         <span class="active" data-l="en">EN</span>
@@ -53,8 +60,8 @@
 
   /* i18n */
   const i18n = {
-    en: { 'countdown-label': 'until habitat 5 years festival', days: 'days', hours: 'hours', mins: 'min', secs: 'sec', cal: 'save to calendar', tickets: 'book now', program: 'program' },
-    it:  { 'countdown-label': 'ai 5 anni di habitat',   days: 'giorni', hours: 'ore', mins: 'min', secs: 'sec', cal: 'salva in calendario', tickets: 'prenota ora', program: 'programma' }
+    en: { 'countdown-label': 'until habitat 5 years festival', date: '17-19 July 2026',days: 'days', hours: 'hours', mins: 'min', secs: 'sec', cal: 'save to calendar', tickets: 'book now', program: 'program' },
+    it:  { 'countdown-label': 'ai 5 anni di habitat', date: '17-19 Luglio 2026',  days: 'giorni', hours: 'ore', mins: 'min', secs: 'sec', cal: 'salva in calendario', tickets: 'prenota ora', program: 'programma' }
   };
   let lang = 'en';
   function setLang(l) {

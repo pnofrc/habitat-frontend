@@ -48,8 +48,18 @@
       opacity: 1;
       pointer-events: all;
     }
+
+    .data{
+      font-weight: bold;
+      z-index: 0;
+      position: fixed;
+      width: 100%;
+      text-align: center;
+    }
  
     #top-row {
+          z-index: 1;
+          position: relative;
       width: 100%;
       display: flex;
       justify-content: space-between;
@@ -132,6 +142,10 @@
       box-shadow: 5px 5px 0 #000;
     }
     @media (max-width: 500px) {
+
+         .data{
+          top: 7rem;
+         }
       #wrap {
         --ui-top: 90px;
         --ui-bottom: 80px;
