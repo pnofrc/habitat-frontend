@@ -283,6 +283,20 @@
       background: #333;
     }
 
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      color: #999;
+      padding: 0 2px;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    .copy-btn:hover { color: #000; }
+    .copy-btn.copied { color: green; }
+
     .payment-box .note {
       font-size: 0.8em;
       color: #666;
@@ -398,16 +412,13 @@
 
       <div class="payment-box" id="paymentBox" style="display:none;">
         <div id="paypalInfo" style="display:none;">
-          <p data-en="Click the button below to pay via PayPal."
-            data-it="Clicca il pulsante qui sotto per pagare tramite PayPal.">Click the button below to pay via PayPal.
-          </p>
-          <a id="paypalLink" href="https://www.paypal.com/ncp/payment/CW9SHXGD58JX8" target="_blank" rel="noopener">PayPal</a>
           <p class="note" data-en="Apple Pay and Card payments are also supported via PayPal."
             data-it="Anche Apple Pay e pagamenti con carta sono supportati tramite PayPal.">Apple Pay and Card payments
             are also supported via PayPal.</p>
         </div>
         <div id="ibanInfo" style="display:none;">
-          <p><strong>IBAN:</strong> IT88Q0623023704000030225469</p>
+          <p><strong>IBAN:</strong> IT88Q0623023704000030225469 <button type="button" class="copy-btn" onclick="copyText('IT88Q0623023704000030225469', this)" title="Copy">&#10697;</button></p>
+          <p style="margin-top:4px;" data-en="Beneficiary: Distretto A APS" data-it="Beneficiario: Distretto A APS">Beneficiary: Distretto A APS <button type="button" class="copy-btn" onclick="copyText('Distretto A APS', this)" title="Copy">&#10697;</button></p>
           <p style="margin-top:8px;" data-en="Reference: ... [Your Name]" data-it="Causale:... [Tuo Nome]">Reference:
             Festival '26 [Your Name]</p>
           <p class="note" style="margin-top:10px; font-weight:bold; color:green; font-size: 13px;"
@@ -421,6 +432,12 @@
           You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
       </div>
 
+      <a id="paypalLink"
+         href="https://www.paypal.com/ncp/payment/CW9SHXGD58JX8"
+         target="_blank" rel="noopener"
+         class="book-btn"
+         style="display:none; text-align:center; text-decoration:none;"
+         data-en="Book Now" data-it="Prenota Ora">Book Now</a>
       <button type="submit" class="book-btn" id="submitBtn" data-en="Book Now" data-it="Prenota Ora">Book Now</button>
       <div class="error-msg" id="errorMsg" style="display:none;"></div>
     </form>
@@ -509,22 +526,27 @@
     var paypalInfo = document.getElementById('paypalInfo');
     var ibanInfo = document.getElementById('ibanInfo');
 
+    // Form submission
+    var bookingForm = document.getElementById('bookingForm');
+    var submitBtn = document.getElementById('submitBtn');
+    var paypalLink = document.getElementById('paypalLink');
+    var errorMsg = document.getElementById('errorMsg');
+    var successMsg = document.getElementById('successMsg');
+
     paymentSelect.addEventListener('change', function () {
       var val = this.value;
       if (!val) {
         paymentBox.style.display = 'none';
+        submitBtn.style.display = '';
+        paypalLink.style.display = 'none';
         return;
       }
       paymentBox.style.display = 'block';
       paypalInfo.style.display = val === 'paypal' ? 'block' : 'none';
       ibanInfo.style.display = val === 'iban' ? 'block' : 'none';
+      submitBtn.style.display = val === 'paypal' ? 'none' : '';
+      paypalLink.style.display = val === 'paypal' ? 'block' : 'none';
     });
-
-    // Form submission
-    var bookingForm = document.getElementById('bookingForm');
-    var submitBtn = document.getElementById('submitBtn');
-    var errorMsg = document.getElementById('errorMsg');
-    var successMsg = document.getElementById('successMsg');
 
     bookingForm.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -566,8 +588,20 @@
       }
     });
 
+    // Copy to clipboard
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(function () {
+        btn.innerHTML = '✓';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.innerHTML = '&#10697;';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+
     // PayPal link: auto-submit booking before opening PayPal
-    document.getElementById('paypalLink').addEventListener('click', function (e) {
+    paypalLink.addEventListener('click', function (e) {
       var name = document.getElementById('firstName').value.trim();
       var surname = document.getElementById('lastName').value.trim();
       var email = document.getElementById('email').value.trim();
