@@ -2697,22 +2697,18 @@
                                 <span style="color:#666;">Data Richiesta:</span>
                                 <span x-text="formatDate(proposalModal.createdAt)"></span>
 
-                                <template x-if="proposalModal.language">
-                                    <span style="color:#666;">Lingua:</span>
-                                    <span x-text="proposalModal.language === 'it' ? 'Italiano' : 'English'"></span>
-                                </template>
+                                <span style="color:#666;">Lingua:</span>
+                                <span x-text="proposalModal.language === 'en' ? 'English' : 'Italiano'"></span>
 
-                                <template x-if="proposalModal.status">
-                                    <span style="color:#666;">Stato:</span>
-                                    <span>
-                                        <span x-show="proposalModal.status === 'approved'"
-                                            style="color:green; font-weight:bold;">Approvata</span>
-                                        <span x-show="proposalModal.status === 'rejected'"
-                                            style="color:red; font-weight:bold;">Rifiutata</span>
-                                        <span x-show="proposalModal.status === 'pending'"
-                                            style="color:orange; font-weight:bold;">In attesa</span>
-                                    </span>
-                                </template>
+                                <span style="color:#666;">Stato:</span>
+                                <span>
+                                    <span x-show="proposalModal.status === 'approved'"
+                                        style="color:green; font-weight:bold;">Approvata</span>
+                                    <span x-show="proposalModal.status === 'rejected'"
+                                        style="color:red; font-weight:bold;">Rifiutata</span>
+                                    <span x-show="!proposalModal.status || proposalModal.status === 'pending'"
+                                        style="color:orange; font-weight:bold;">In attesa</span>
+                                </span>
                             </div>
                         </div>
 
