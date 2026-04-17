@@ -1378,7 +1378,7 @@
                             <thead>
                                 <tr>
                                     <th>Nome</th>
-                                    <th>Email</th>
+                                    <th>Data Richiesta</th>
                                     <th>Dal</th>
                                     <th>Al</th>
                                     <th>Proposta</th>
@@ -1389,7 +1389,7 @@
                                 <template x-for="r in items" :key="r.id">
                                     <tr>
                                         <td x-text="r.name"></td>
-                                        <td x-text="r.email"></td>
+                                        <td x-text="formatDate(r.createdAt)"></td>
                                         <td x-text="formatDate(r.fromDate)"></td>
                                         <td x-text="formatDate(r.toDate)"></td>
                                         <td>
@@ -2674,16 +2674,60 @@
             <template x-if="proposalModal">
                 <div class="modal-overlay" @click.self="proposalModal = null">
                     <div class="modal-box"
-                        style="text-align:left; min-width:400px; max-width:600px; max-height:80vh; overflow-y:auto;">
-                        <h3 style="margin:0 0 5px" x-text="proposalModal.name"></h3>
-                        <p style="margin:0 0 15px; font-size:12px; color:#666;">
-                            <span x-text="formatDate(proposalModal.fromDate)"></span> &rarr;
-                            <span x-text="formatDate(proposalModal.toDate)"></span>
-                        </p>
-                        <div style="white-space:pre-wrap; font-size:13px; line-height:1.5;"
-                            x-text="proposalModal.proposal"></div>
+                        style="text-align:left; min-width:400px; max-width:650px; max-height:85vh; overflow-y:auto;">
+                        <h3 style="margin:0 0 15px; font-size:20px;" x-text="proposalModal.name"></h3>
+
+                        <!-- Request Details -->
+                        <div style="margin-bottom:20px;">
+                            <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">Dettagli
+                                Richiesta</h4>
+                            <div style="display:grid; grid-template-columns:140px 1fr; gap:8px; font-size:14px;">
+                                <template x-if="proposalModal.email">
+                                    <span style="color:#666;">Email:</span>
+                                    <span x-text="proposalModal.email"></span>
+                                </template>
+
+                                <span style="color:#666;">Periodo:</span>
+                                <span>
+                                    <span x-text="formatDate(proposalModal.fromDate)"></span>
+                                    <span style="color:#999;"> &rarr; </span>
+                                    <span x-text="formatDate(proposalModal.toDate)"></span>
+                                </span>
+
+                                <span style="color:#666;">Data Richiesta:</span>
+                                <span x-text="formatDate(proposalModal.createdAt)"></span>
+
+                                <template x-if="proposalModal.language">
+                                    <span style="color:#666;">Lingua:</span>
+                                    <span x-text="proposalModal.language === 'it' ? 'Italiano' : 'English'"></span>
+                                </template>
+
+                                <template x-if="proposalModal.status">
+                                    <span style="color:#666;">Stato:</span>
+                                    <span>
+                                        <span x-show="proposalModal.status === 'approved'"
+                                            style="color:green; font-weight:bold;">Approvata</span>
+                                        <span x-show="proposalModal.status === 'rejected'"
+                                            style="color:red; font-weight:bold;">Rifiutata</span>
+                                        <span x-show="proposalModal.status === 'pending'"
+                                            style="color:orange; font-weight:bold;">In attesa</span>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Proposal -->
+                        <div style="margin-bottom:20px;">
+                            <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">
+                                Proposta</h4>
+                            <div
+                                style="white-space:pre-wrap; font-size:13px; line-height:1.6; background:#f9f9f9; padding:15px; border-radius:4px;">
+                                <span x-text="proposalModal.proposal"></span>
+                            </div>
+                        </div>
+
                         <button @click="proposalModal = null"
-                            style="width:100%; margin-top:15px; border:1px solid #000; padding:8px 20px; cursor:pointer;">Chiudi</button>
+                            style="width:100%; border:1px solid #000; padding:10px 20px; cursor:pointer; background:#fff;">Chiudi</button>
                     </div>
                 </div>
             </template>
