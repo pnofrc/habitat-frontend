@@ -162,6 +162,20 @@ document.addEventListener('alpine:init', () => {
             return new Date().getFullYear();
         },
 
+        get paypalMatchedEmails() {
+            if (!Array.isArray(this.paypalTransactions) || this.paypalTransactions.length === 0) {
+                return new Set();
+            }
+            // Filter for successful transactions with valid amounts
+            const validTransactions = this.paypalTransactions.filter(tx =>
+                tx.status === 'S' &&
+                tx.email &&
+                tx.amount >= 40  // Minimum festival ticket price threshold
+            );
+            // Return Set of lowercase emails for O(1) lookup
+            return new Set(validTransactions.map(tx => tx.email.toLowerCase().trim()));
+        },
+
         async init() {
             if (this.token) {
                 const ok = await this.fetchCurrentUser();
@@ -293,6 +307,10 @@ document.addEventListener('alpine:init', () => {
                     if (ticketsRes.status === 401) return this.logout();
                     this.festivalTickets = await ticketsRes.json();
                     this.deletedFestivalTickets = await binRes.json();
+                    // Auto-fetch PayPal transactions when on festival tickets subtab
+                    if (this.festivalTab === 'tickets') {
+                        await this.fetchPaypalTransactions();
+                    }
                     if (this.festivalTab === 'planner') {
                         await this.fetchPlannerData();
                     }
@@ -1316,6 +1334,15 @@ document.addEventListener('alpine:init', () => {
                 if (res.status === 401) return this.logout();
                 this.timelineDeadlines = await res.json();
             } catch (e) { console.error(e); }
+        },
+
+        hasPaypalMatch(ticket) {
+            // Only consider unconfirmed PayPal bookings
+            if (ticket.confirmed || ticket.paymentMethod !== 'paypal') {
+                return false;
+            }
+            if (!ticket.email) return false;
+            return this.paypalMatchedEmails.has(ticket.email.toLowerCase().trim());
         },
 
         openCreateDeadline() {

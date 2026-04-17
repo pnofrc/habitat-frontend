@@ -1473,9 +1473,19 @@
                                     x-text="festivalTicketCount"></b></div>
                             <div class="card" style="flex:1"><small>CONFERMATI</small><br><b
                                     x-text="festivalConfirmedCount" style="color:green"></b></div>
+                            <div class="card" style="flex:1" x-show="paypalTransactions.length > 0">
+                                <small>CON PAGAMENTO</small><br>
+                                <b x-text="festivalTickets.filter(t => !t.confirmed && hasPaypalMatch(t)).length"
+                                   style="color:green"></b>
+                            </div>
                         </div>
                         <div class="card">
                             <h3 style="margin:0 0 15px">In Attesa <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => !t.confirmed).length + ')'"></span></h3>
+
+                            <div x-show="paypalLoading" style="color:#666; font-size:13px; margin-bottom:10px;">
+                                Caricamento pagamenti PayPal...
+                            </div>
+
                             <table>
                                 <thead>
                                     <tr>
@@ -1488,10 +1498,15 @@
                                 </thead>
                                 <tbody>
                                     <template x-for="t in festivalTickets.filter(t => !t.confirmed)" :key="t.id">
-                                        <tr>
+                                        <tr :style="hasPaypalMatch(t) ? 'background-color: rgba(0, 255, 0, 0.1);' : ''">
                                             <td x-text="t.name"></td>
                                             <td x-text="t.surname"></td>
-                                            <td x-text="t.email"></td>
+                                            <td>
+                                                <span x-text="t.email"></span>
+                                                <span x-show="hasPaypalMatch(t)"
+                                                      style="color: green; margin-left: 8px;"
+                                                      title="Pagamento PayPal ricevuto">✓</span>
+                                            </td>
                                             <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
                                             <td x-show="canWrite">
                                                 <button @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
@@ -1569,6 +1584,7 @@
                         <div class="card" style="margin-top:20px;">
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
                                 <h3 style="margin:0">Pagamenti PayPal</h3>
+                                <small style="color:#666;">(Aggiornato automaticamente)</small>
                                 <select x-model.number="paypalDays" style="padding:4px 8px; border:1px solid #ccc; font-family:inherit;">
                                     <option value="7">7 giorni</option>
                                     <option value="14">14 giorni</option>
@@ -1580,6 +1596,10 @@
                                 </button>
                                 <small x-show="paypalTransactions.length > 0"
                                     x-text="'(' + paypalTransactions.length + ' trovate)'" style="color:#666;"></small>
+                            </div>
+                            <div x-show="paypalTransactions.length > 0"
+                                 style="color:#666; font-size:12px; margin-bottom:10px;">
+                                Le prenotazioni con pagamento ricevuto sono evidenziate in verde.
                             </div>
                             <div x-show="paypalError" style="color:red; margin-bottom:10px;" x-text="paypalError"></div>
                             <div x-show="!paypalLoading && !paypalError && paypalTransactions.length === 0"
