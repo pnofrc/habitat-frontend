@@ -2682,10 +2682,8 @@
                             <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">Dettagli
                                 Richiesta</h4>
                             <div style="display:grid; grid-template-columns:140px 1fr; gap:8px; font-size:14px;">
-                                <template x-if="proposalModal.email">
-                                    <span style="color:#666;">Email:</span>
-                                    <span x-text="proposalModal.email"></span>
-                                </template>
+                                <span style="color:#666;">Email:</span>
+                                <span x-text="proposalModal.email || 'Non fornita'"></span>
 
                                 <span style="color:#666;">Periodo:</span>
                                 <span>
