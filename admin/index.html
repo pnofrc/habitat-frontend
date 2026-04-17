@@ -2688,6 +2688,134 @@
                 </div>
             </template>
 
+            <!-- MODAL: Member Detail View -->
+            <template x-if="editingMembership">
+                <div class="modal-overlay" @click.self="editingMembership = null">
+                    <div class="modal-box"
+                        style="text-align:left; min-width:500px; max-width:700px; max-height:85vh; overflow-y:auto;">
+                        <h3 style="margin:0 0 15px; font-size:20px;"
+                            x-text="formatName(editingMembership.surname) + ' ' + formatName(editingMembership.name)">
+                        </h3>
+
+                        <!-- Personal Information -->
+                        <div style="margin-bottom:20px;">
+                            <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">
+                                Informazioni Personali</h4>
+                            <div style="display:grid; grid-template-columns:150px 1fr; gap:8px; font-size:14px;">
+                                <span style="color:#666;">Data di Nascita:</span>
+                                <span x-text="formatDate(editingMembership.birthDate)"></span>
+
+                                <span style="color:#666;">Luogo di Nascita:</span>
+                                <span
+                                    x-text="editingMembership.birthPlace + (editingMembership.birthProvince ? ' (' + editingMembership.birthProvince + ')' : '')"></span>
+
+                                <template x-if="editingMembership.birthCountry">
+                                    <span style="color:#666;">Paese di Nascita:</span>
+                                    <span x-text="editingMembership.birthCountry"></span>
+                                </template>
+
+                                <template x-if="editingMembership.vatNumber">
+                                    <span style="color:#666;">Partita IVA:</span>
+                                    <span x-text="editingMembership.vatNumber"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div style="margin-bottom:20px;">
+                            <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">Contatti
+                            </h4>
+                            <div style="display:grid; grid-template-columns:150px 1fr; gap:8px; font-size:14px;">
+                                <span style="color:#666;">Email:</span>
+                                <span x-text="editingMembership.email"></span>
+
+                                <span style="color:#666;">Telefono:</span>
+                                <span x-text="editingMembership.phoneNumber"></span>
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div style="margin-bottom:20px;">
+                            <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">
+                                Indirizzo</h4>
+                            <div style="display:grid; grid-template-columns:150px 1fr; gap:8px; font-size:14px;">
+                                <span style="color:#666;">Via:</span>
+                                <span x-text="editingMembership.address"></span>
+
+                                <span style="color:#666;">CAP:</span>
+                                <span x-text="editingMembership.zipcode"></span>
+
+                                <span style="color:#666;">Città:</span>
+                                <span
+                                    x-text="editingMembership.city + (editingMembership.province ? ' (' + editingMembership.province + ')' : '')"></span>
+
+                                <span style="color:#666;">Paese:</span>
+                                <span x-text="editingMembership.country"></span>
+                            </div>
+                        </div>
+
+                        <!-- Interests -->
+                        <div style="margin-bottom:20px;">
+                            <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">
+                                Interessi</h4>
+                            <div style="font-size:14px;">
+                                <template
+                                    x-if="editingMembership.interestHabitat || editingMembership.interestDistrettoA || editingMembership.interestQuazar || editingMembership.interestDawe">
+                                    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                                        <span x-show="editingMembership.interestHabitat"
+                                            style="background:#e8f5e9; padding:4px 12px; border-radius:12px;">Habitat</span>
+                                        <span x-show="editingMembership.interestDistrettoA"
+                                            style="background:#e3f2fd; padding:4px 12px; border-radius:12px;">Distretto
+                                            A</span>
+                                        <span x-show="editingMembership.interestQuazar"
+                                            style="background:#fff3e0; padding:4px 12px; border-radius:12px;">Quazar</span>
+                                        <span x-show="editingMembership.interestDawe"
+                                            style="background:#fce4ec; padding:4px 12px; border-radius:12px;">Dawe</span>
+                                    </div>
+                                </template>
+                                <template
+                                    x-if="!editingMembership.interestHabitat && !editingMembership.interestDistrettoA && !editingMembership.interestQuazar && !editingMembership.interestDawe">
+                                    <span style="color:#999; font-style:italic;">Nessun interesse selezionato</span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Payment & Status -->
+                        <div style="margin-bottom:20px;">
+                            <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">
+                                Pagamento e Stato</h4>
+                            <div style="display:grid; grid-template-columns:150px 1fr; gap:8px; font-size:14px;">
+                                <span style="color:#666;">Metodo Pagamento:</span>
+                                <span x-text="editingMembership.paymentMethod"></span>
+
+                                <span style="color:#666;">Stato:</span>
+                                <span x-text="editingMembership.confirmed ? 'Confermato' : 'In attesa di conferma'"
+                                    :style="editingMembership.confirmed ? 'color:green; font-weight:bold;' : 'color:orange;'"></span>
+
+                                <span style="color:#666;">Lingua:</span>
+                                <span x-text="editingMembership.language === 'it' ? 'Italiano' : 'English'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Timestamps -->
+                        <div style="margin-bottom:20px; padding-top:15px; border-top:1px solid #eee;">
+                            <div style="display:grid; grid-template-columns:150px 1fr; gap:8px; font-size:12px; color:#999;">
+                                <span>Creato il:</span>
+                                <span x-text="formatDate(editingMembership.createdAt)"></span>
+
+                                <template x-if="editingMembership.updatedAt !== editingMembership.createdAt">
+                                    <span>Aggiornato il:</span>
+                                    <span x-text="formatDate(editingMembership.updatedAt)"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <button @click="editingMembership = null"
+                            style="width:100%; border:1px solid #000; padding:10px 20px; cursor:pointer; background:#fff;">Chiudi</button>
+                    </div>
+                </div>
+            </template>
+
             <!-- MODAL: Festival Approval -->
             <template x-if="festivalApproval">
                 <div class="modal-overlay">
