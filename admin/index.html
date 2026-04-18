@@ -1475,12 +1475,12 @@
                                     x-text="festivalConfirmedCount" style="color:green"></b></div>
                             <div class="card" style="flex:1" x-show="paypalTransactions.length > 0">
                                 <small>CON PAGAMENTO</small><br>
-                                <b x-text="festivalTickets.filter(t => !t.confirmed && hasPaypalMatch(t)).length"
+                                <b x-text="festivalTickets.filter(t => !t.confirmed && hasPaypalMatch(t)).reduce((sum, t) => sum + (t.quantity || 1), 0)"
                                    style="color:green"></b>
                             </div>
                         </div>
                         <div class="card">
-                            <h3 style="margin:0 0 15px">In Attesa <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => !t.confirmed).length + ')'"></span></h3>
+                            <h3 style="margin:0 0 15px">In Attesa <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => !t.confirmed).reduce((sum, t) => sum + (t.quantity || 1), 0) + ' biglietti, ' + festivalTickets.filter(t => !t.confirmed).length + ' prenotazioni)'"></span></h3>
 
                             <div x-show="paypalLoading" style="color:#666; font-size:13px; margin-bottom:10px;">
                                 Caricamento pagamenti PayPal...
@@ -1493,6 +1493,7 @@
                                         <th>Cognome</th>
                                         <th>Email</th>
                                         <th>Pagamento</th>
+                                        <th>Quantità</th>
                                         <th x-show="canWrite"></th>
                                     </tr>
                                 </thead>
@@ -1508,7 +1509,9 @@
                                                       title="Pagamento PayPal ricevuto">✓</span>
                                             </td>
                                             <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
+                                            <td x-text="t.quantity || 1"></td>
                                             <td x-show="canWrite">
+                                                <button @click="startEditFestivalTicket(t)" title="Modifica" class="btn-del" style="color:#007bff; margin-right:4px;">✎</button>
                                                 <button @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
                                                 <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
                                             </td>
@@ -1519,7 +1522,7 @@
                         </div>
 
                         <div class="card" x-show="festivalTickets.filter(t => t.confirmed).length > 0">
-                            <h3 style="margin:0 0 15px; color:green">Confermati <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => t.confirmed).length + ')'"></span></h3>
+                            <h3 style="margin:0 0 15px; color:green">Confermati <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => t.confirmed).reduce((sum, t) => sum + (t.quantity || 1), 0) + ' biglietti, ' + festivalTickets.filter(t => t.confirmed).length + ' prenotazioni)'"></span></h3>
                             <table>
                                 <thead>
                                     <tr>
@@ -1527,6 +1530,7 @@
                                         <th>Cognome</th>
                                         <th>Email</th>
                                         <th>Pagamento</th>
+                                        <th>Quantità</th>
                                         <th x-show="canWrite"></th>
                                     </tr>
                                 </thead>
@@ -1537,6 +1541,7 @@
                                             <td x-text="t.surname"></td>
                                             <td x-text="t.email"></td>
                                             <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
+                                            <td x-text="t.quantity || 1"></td>
                                             <td x-show="canWrite">
                                                 <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
                                             </td>
@@ -1559,6 +1564,7 @@
                                         <th>Nome</th>
                                         <th>Cognome</th>
                                         <th>Email</th>
+                                        <th>Quantità</th>
                                         <th>Eliminato il</th>
                                         <th></th>
                                     </tr>
@@ -1569,6 +1575,7 @@
                                             <td x-text="t.name"></td>
                                             <td x-text="t.surname"></td>
                                             <td x-text="t.email"></td>
+                                            <td x-text="t.quantity || 1"></td>
                                             <td x-text="formatDate(t.deletedAt)"></td>
                                             <td>
                                                 <button x-show="canWrite" @click="restoreFestivalTicket(t)"
@@ -2874,6 +2881,70 @@
                         <button class="btn-blk" @click="confirmFestivalApproval()">CONFERMA E INVIA</button>
                         <button @click="festivalApproval = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Edit Festival Ticket -->
+            <template x-if="editingFestivalTicket">
+                <div class="modal-overlay" @click.self="editingFestivalTicket = null">
+                    <div class="modal-box" style="text-align:left; width:500px;">
+                        <h3 style="margin:0 0 20px;">Modifica Biglietto</h3>
+
+                        <div style="display:grid; gap:15px;">
+                            <!-- Name -->
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-weight:bold;">Nome</label>
+                                <input type="text" x-model="editingFestivalTicket.name"
+                                    style="width:100%; padding:8px; border:1px solid #ddd;">
+                            </div>
+
+                            <!-- Surname -->
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-weight:bold;">Cognome</label>
+                                <input type="text" x-model="editingFestivalTicket.surname"
+                                    style="width:100%; padding:8px; border:1px solid #ddd;">
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-weight:bold;">Email</label>
+                                <input type="email" x-model="editingFestivalTicket.email"
+                                    style="width:100%; padding:8px; border:1px solid #ddd;">
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-weight:bold;">Metodo di Pagamento</label>
+                                <select x-model="editingFestivalTicket.paymentMethod"
+                                    style="width:100%; padding:8px; border:1px solid #ddd;">
+                                    <option value="paypal">PAYPAL</option>
+                                    <option value="iban">IBAN</option>
+                                </select>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-weight:bold;">Quantità Biglietti</label>
+                                <input type="number" x-model.number="editingFestivalTicket.quantity"
+                                    min="1" step="1"
+                                    style="width:100%; padding:8px; border:1px solid #ddd;">
+                                <small style="color:#666; font-size:12px;">
+                                    Per pagamenti IBAN multipli (es. una persona paga per 2 biglietti)
+                                </small>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:10px; margin-top:20px;">
+                            <button @click="saveFestivalTicketEdit()"
+                                style="flex:1; background:#28a745; color:#fff; border:none; padding:10px; cursor:pointer;">
+                                Salva Modifiche
+                            </button>
+                            <button @click="editingFestivalTicket = null"
+                                style="flex:1; background:#6c757d; color:#fff; border:none; padding:10px; cursor:pointer;">
+                                Annulla
+                            </button>
+                        </div>
                     </div>
                 </div>
             </template>

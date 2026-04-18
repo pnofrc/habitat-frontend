@@ -25,6 +25,7 @@ document.addEventListener('alpine:init', () => {
         festivalTicketCount: 0,
         festivalConfirmedCount: 0,
         festivalApproval: null,
+        editingFestivalTicket: null,
         festivalTab: 'tickets',
         paypalTransactions: [],
         paypalLoading: false,
@@ -374,8 +375,12 @@ document.addEventListener('alpine:init', () => {
                 this.membershipRequestCount = Array.isArray(memData) ? memData.filter(m => !m.confirmed).length : 0;
                 this.membershipConfirmedCount = Array.isArray(memData) ? memData.filter(m => m.confirmed).length : 0;
                 this.residencyCount = Array.isArray(resData) ? resData.length : 0;
-                this.festivalTicketCount = Array.isArray(festData) ? festData.length : 0;
-                this.festivalConfirmedCount = Array.isArray(festData) ? festData.filter(t => t.confirmed).length : 0;
+                this.festivalTicketCount = Array.isArray(festData)
+                    ? festData.reduce((sum, t) => sum + (t.quantity || 1), 0)
+                    : 0;
+                this.festivalConfirmedCount = Array.isArray(festData)
+                    ? festData.filter(t => t.confirmed).reduce((sum, t) => sum + (t.quantity || 1), 0)
+                    : 0;
             } catch (e) { console.error(e); }
         },
 
@@ -1880,6 +1885,68 @@ document.addEventListener('alpine:init', () => {
                 if (!res.ok) throw new Error("Errore ripristino");
                 await this.fetchData();
             } catch (e) { alert(e.message); }
+        },
+
+        startEditFestivalTicket(ticket) {
+            // Clone ticket to avoid mutating original
+            this.editingFestivalTicket = {
+                id: ticket.id,
+                name: ticket.name,
+                surname: ticket.surname,
+                email: ticket.email,
+                paymentMethod: ticket.paymentMethod,
+                quantity: ticket.quantity || 1
+            };
+        },
+
+        async saveFestivalTicketEdit() {
+            const ticket = this.editingFestivalTicket;
+
+            // Validation
+            if (!ticket.name?.trim() || !ticket.surname?.trim() || !ticket.email?.trim()) {
+                alert('Nome, Cognome ed Email sono obbligatori');
+                return;
+            }
+
+            if (ticket.quantity < 1) {
+                alert('La quantità deve essere almeno 1');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/${ticket.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: ticket.name,
+                        surname: ticket.surname,
+                        email: ticket.email,
+                        paymentMethod: ticket.paymentMethod,
+                        quantity: ticket.quantity
+                    })
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.message || 'Errore durante il salvataggio');
+                }
+
+                // Update local data
+                const updatedTicket = await res.json();
+                const index = this.festivalTickets.findIndex(t => t.id === updatedTicket.id);
+                if (index !== -1) {
+                    this.festivalTickets[index] = updatedTicket;
+                }
+
+                this.editingFestivalTicket = null;
+                alert('Modifiche salvate con successo');
+            } catch (err) {
+                console.error('Edit error:', err);
+                alert(err.message || 'Errore durante il salvataggio');
+            }
         },
 
         async fetchPaypalTransactions() {
