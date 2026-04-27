@@ -1543,6 +1543,7 @@
                                             <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
                                             <td x-text="t.quantity || 1"></td>
                                             <td x-show="canWrite">
+                                                <button @click="startEditFestivalTicket(t)" title="Modifica" class="btn-del" style="color:#007bff; margin-right:4px;">✎</button>
                                                 <button @click="deleteFestivalTicket(t.id)" class="btn-del">X</button>
                                             </td>
                                         </tr>
@@ -2889,7 +2890,13 @@
             <template x-if="editingFestivalTicket">
                 <div class="modal-overlay" @click.self="editingFestivalTicket = null">
                     <div class="modal-box" style="text-align:left; width:500px;">
-                        <h3 style="margin:0 0 20px;">Modifica Biglietto</h3>
+                        <h3 style="margin:0 0 20px;">
+                            Modifica Biglietto
+                            <span x-show="festivalTickets.find(t => t.id === editingFestivalTicket.id)?.confirmed"
+                                  style="color:green; font-size:14px; font-weight:normal;">
+                                (Confermato)
+                            </span>
+                        </h3>
 
                         <div style="display:grid; gap:15px;">
                             <!-- Name -->
@@ -2933,6 +2940,27 @@
                                     Per pagamenti IBAN multipli (es. una persona paga per 2 biglietti)
                                 </small>
                             </div>
+
+                            <!-- Notes -->
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-weight:bold;">Note Interne</label>
+                                <textarea x-model="editingFestivalTicket.notes"
+                                    rows="3"
+                                    placeholder="Note amministrative (non visibili al cliente)"
+                                    style="width:100%; padding:8px; border:1px solid #ddd; resize:vertical; font-family:inherit;"></textarea>
+                                <small style="color:#666; font-size:12px;">
+                                    Es: motivo della modifica, dettagli pagamento, circostanze speciali
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Warning for confirmed tickets -->
+                        <div x-show="festivalTickets.find(t => t.id === editingFestivalTicket.id)?.confirmed"
+                             style="margin-top:15px; padding:10px; background:#fff3cd; border:1px solid #ffc107; border-radius:4px;">
+                            <strong style="color:#856404;">⚠️ Attenzione:</strong>
+                            <span style="color:#856404;">
+                                Questo biglietto è già confermato. L'email di conferma è già stata inviata con i dati precedenti.
+                            </span>
                         </div>
 
                         <div style="display:flex; gap:10px; margin-top:20px;">

@@ -1895,7 +1895,8 @@ document.addEventListener('alpine:init', () => {
                 surname: ticket.surname,
                 email: ticket.email,
                 paymentMethod: ticket.paymentMethod,
-                quantity: ticket.quantity || 1
+                quantity: ticket.quantity || 1,
+                notes: ticket.notes || ''
             };
         },
 
@@ -1925,7 +1926,8 @@ document.addEventListener('alpine:init', () => {
                         surname: ticket.surname,
                         email: ticket.email,
                         paymentMethod: ticket.paymentMethod,
-                        quantity: ticket.quantity
+                        quantity: ticket.quantity,
+                        notes: ticket.notes
                     })
                 });
 
