@@ -171,7 +171,7 @@ document.addEventListener('alpine:init', () => {
             const validTransactions = this.paypalTransactions.filter(tx =>
                 tx.status === 'S' &&
                 tx.email &&
-                tx.amount >= 40  // Minimum festival ticket price threshold
+                tx.amount >= 55  // Minimum festival ticket price threshold
             );
             // Return Set of lowercase emails for O(1) lookup
             return new Set(validTransactions.map(tx => tx.email.toLowerCase().trim()));
