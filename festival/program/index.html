@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="icon" type="image/x-icon" href="../5.svg">
   <title>H5Y</title>
   <style>
     * {
@@ -53,10 +54,20 @@
       letter-spacing: 2px;
     }
 
+.header{
+  display: flex;
+  justify-content: space-between;
+  align-items: anchor-center;
+}
+
+.header a{
+  text-decoration: none !important;
+  color: black !important;
+  font-size: 3rem;
+}
+
     .lang-toggle {
-      position: absolute;
-      top: 12px;
-      right: 12px;
+      height: 40px;
       display: flex;
       gap: 8px;
     }
@@ -77,14 +88,7 @@
       color: #fff;
     }
 
-    .poem {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: #333;
-      margin-bottom: 30px;
-      white-space: pre-line;
-      text-align: center;
-    }
+
 
     hr {
       border: none;
@@ -138,22 +142,44 @@
       letter-spacing: 2px;
     }
 
-    @media (max-width: 600px) {
-      .card {
-        padding: 20px;
-      }
-    }
-
-    /* Font Face Declaration */
+   
     @font-face {
-      font-family: 'Untitled1';
-      src: url('fonts/Untitled1-Regular.woff2') format('woff2'),
-        url('fonts/Untitled1-Regular.woff') format('woff'),
-        url('fonts/Untitled1-Regular.otf') format('opentype');
+      font-family: 'Hababo';
+      src: url('../Hababo/Hababo-Regular.woff2') format('woff2'),
+        url('../Hababo/Hababo-Regular.woff') format('woff'),
+        url('../Hababo/Hababo-Regular.otf') format('opentype');
       font-weight: normal;
       font-style: normal;
       font-display: swap;
     }
+
+    .hababo{
+      font-family: 'Hababo';
+      letter-spacing: -5px;
+    }
+
+    .dove{
+      margin: 5vh 0;
+    }
+
+    .head {
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      margin: 3vh 0;
+      gap: 10px;
+    }
+
+    .head img {
+      width: 30%;
+    }
+
+    .head span {
+      letter-spacing: -15px;
+      font-size: 5em;
+      font-family: 'Hababo', 'Courier New', Courier, monospace;
+    }
+
 
     /* Artists Section Title */
     .artists-title {
@@ -171,11 +197,12 @@
       text-align: center;
     }
 
+
     /* Individual Artist Names */
     .artist-name {
-      font-family: 'Untitled1', 'Courier New', Courier, monospace;
-      font-size: 2.5rem;
-      line-height: 1.3;
+      font-family: 'Hababo', 'Courier New', Courier, monospace;
+      font-size: 2.5em;
+      line-height: 1.7;
       letter-spacing: -10px;
       color: #333;
     }
@@ -185,129 +212,102 @@
       font-size: 0.85rem;
       letter-spacing: normal;
       white-space: nowrap;
+      position: relative;
+      bottom: 0.5rem; 
     }
 
     .details {
       display: block;
       font-size: 0.9rem;
       letter-spacing: normal;
-      margin-top: -0.3rem;
+      margin: -0.3rem 0 0.3rem 0;
+      line-height: 1;
     }
+
+    .next{display: inline; font-weight: bold; font-size: 1.5rem;}
+
+
+     @media (max-width: 600px) {
+
+      .head span{
+        font-size: 12vw;
+      }
+
+      .artist-name {
+        font-size: 1.55em;
+      }
+
+      .next{
+        font-size: 1.3em;
+      }
+
+      .card {
+        padding: 20px;
+      }
+    }
+
+
   </style>
 </head>
 
 <body>
   <div class="card">
-    <div class="lang-toggle">
-      <button class="lang-btn active" data-lang="it">IT</button>
-      <button class="lang-btn" data-lang="en">EN</button>
+
+
+    <div class="header">
+
+    
+        <a href="../">←</a>
+
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="it">IT</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+
     </div>
-    <div class="logo">
+
+
+    <!-- <div class="logo">
       <a href="../"><img src="../logo.png" alt="Habitat"></a>
 
-    </div>
-    <h1>Habitat 5 Years Festival 2026</h1>
-    <h4 data-it="17-19 Luglio 2026" data-en="17-19 July 2026">17-19 Luglio 2026</h4>
+    </div> -->
+    <!-- <h1>Habitat 5 Years Festival 2026</h1> -->
 
-    <div class="poem">
-      <i data-it="...e sono di anni proprio cinque,
-quell'essenza non si estingue..!
-la moltitudine di pratiche e di lingue
-ci da orgoglio sano senza grinfie
-
-sembrava solo qualche mese fa
-quando capitò che il convivio
-volesse essere importante 
-tanto quanto un archivio
-
-La casa pare tutt'ora un'entità
-un essere vivo ma inorganico
-che accudisce con generosità
-un pendolo tra immaginifico e pratico
-che dalle sue mura va anche al di là
-
-abitando la valle del Tramazzo
-immaginiamo la Romagna come un arazzo
-una storia da continuare a tessere
-qui e fuori da queste selvatiche terre
-
-Allora festeggiamo con gusto 
-questo illustro ambidestro lustro 
-tre giorni di laboratori, musiche e carezze
-dove lo star insieme e saltellare sono le certezze" data-en="…and it's already five years old,
-that original essence doesn't turn cold..!
-the multitude of languages and practices,
-Trace our identity with soft touches
-
-it seemed like a few months ago 
-when the convivial attitude came to know 
-it wanted to matter, to hold and convey
-as much as an archive that never decays
-
-The house still feels like a proper entity
-a living thing, beyond all explanation
-that cuddles us quite incidentally
-a pendulum between dream and imagination
-that from its walls stretches out beyond
-
-inhabiting the Tramazzo valley
-we imagine Romagna as a tapestry
-a story still to weave and rally 
-here and far beyond this wild land
-
-So let us celebrate with flair
-this lustrous, ambidextrous affair 
-three days of workshops, music, gentle touch 
-where being together and skipping are maybe enough">...e sono di anni proprio cinque,
-        quell'essenza non si estingue..!
-        la moltitudine di pratiche e di lingue
-        ci da orgoglio sano senza grinfie
-
-        sembrava solo qualche mese fa
-        quando capitò che il convivio
-        volesse essere importante
-        tanto quanto un archivio
-
-        La casa pare tutt'ora un'entità
-        un essere vivo ma inorganico
-        che accudisce con generosità
-        un pendolo tra immaginifico e pratico
-        che dalle sue mura va anche al di là
-
-        abitando la valle del Tramazzo
-        immaginiamo la Romagna come un arazzo
-        una storia da continuare a tessere
-        qui e fuori da queste selvatiche terre
-
-        Allora festeggiamo con gusto
-        questo illustro ambidestro lustro
-        tre giorni di laboratori, musiche e carezze
-        dove lo star insieme e saltellare sono le certezze</i>
+    <div class="head">
+      <span>HabiTat</span>
+      <img src="../5.svg" alt="5years logo">
+      <span>Years</span>
     </div>
 
-    <hr>
+    <div class="dove">
+       <h4 data-it="17-19 Luglio 2026" data-en="17-19 July 2026">17-19 Luglio 2026</h4>
+      <h4>Cà de Monti, Tredozio</h4>
+    </div>
+   
 
-    <h2 class="artists-title" data-it="Artisti & Performers" data-en="Artists & Performers">
-      Artisti & Performers
-    </h2>
+
+
+    <!-- <h2 class="artists-title" data-it="Artisti & Performers" data-en="Artists & Performers">
+      Artist3 & Performers
+    </h2> -->
 
     <div class="artists-list">
       <br>
       <div class="artist-name">Alice&nbsp;Flaviana</div>
-      <div class="artist-name">Amphibia</div>
-      <div class="artist-name">Bassi&nbsp;Gradassi</div>
+      <div class="artist-name">Amphibia&nbsp;<span class="details"> (dj Torpedo, rrrapido, Rally k, Herbalife, Padre Bio)</span></div>
+      <div class="artist-name">Bassi&nbsp;Gradassi<span class="details">(di Late, dj Trombetta)</span></div>
       <div class="artist-name">Chantssss <span class="live">(live)</span></div>
       <div class="artist-name">Classical&nbsp;Hooligans</div>
       <div class="artist-name">Carl&nbsp;Ahnebrink<span class="details">(FLEE Project)</span></div>
       <div class="artist-name">Enrico&nbsp;Malatesta&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">Flux&nbsp;by&nbsp;Uchina</div>
+      <div class="artist-name">Flux&nbsp;by&nbsp;Uchina&nbsp;<span class="details">(VENA)</span></div>
       <div class="artist-name">Giesse</div>
       <div class="artist-name">Habitat T.P.U.</div>
       <div class="artist-name">Jungla <span class="live">(live)</span></div>
       <div class="artist-name">Lorenzo&nbsp;Travaglini&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">La&nbsp;Messinscena</div>
-      <div class="artist-name">Lemethi</div>
-      <div class="artist-name">Proxy&nbsp;Bar</div>
+      <div class="artist-name">La&nbsp;Messinscena&nbsp;<span class="details">(tundra, nini)</span></div>
+      <div class="artist-name">Lemethi&nbsp;<span class="details">(rumore b)</span></div>
+      <div class="artist-name">Proxy&nbsp;Bar&nbsp;<span class="details">(Markk b2b poni)</span></div>
       <div class="artist-name">Mira&nbsp;<span class="live">(live)</span></div>
       <div class="artist-name">Nicolas&nbsp;Gaunin&nbsp;<span class="live">(live)</span></div>
       <div class="artist-name">Mizuna<span class="details">(Erta, Oleno)</span></div>
@@ -319,7 +319,20 @@ where being together and skipping are maybe enough">...e sono di anni proprio ci
       <div class="artist-name">Trampa&nbsp;<span class="live">(live)</span></div>
       <div class="artist-name">Yulia&nbsp;Kachan</div>
       <br>
-      <div class="live">& many more...</div>
+      <div class="next">
+        <span data-en="& soon announced juicy" data-it="& presto annunciati">& presto annunciati</span>
+        <span data-en="workshops" data-it="laboratori," class="hababo">laboratori,</span>
+        <span data-en=", convivial" data-it="atti">atti</span>
+        <span data-en="acts" data-it="conviviali" class="hababo">conviviali</span>
+        <span data-en="and frugal" data-it="e pasti">e pasti</span>
+        <span data-en="meals," data-it="Piu o meno" class="hababo">Piu o meno</span>
+        <span data-en="more or less..." data-it="frugali...">frugali...</span>
+      </div>
+
+
+      <br><br>
+
+
     </div>
 
     <a href="../ticket/" class="book-btn" data-it="Prenota Ora" data-en="Book Now">Prenota Ora</a>
@@ -327,6 +340,7 @@ where being together and skipping are maybe enough">...e sono di anni proprio ci
     <a class="save-btn" onclick="downloadIcs();return false;" data-key="cal"
       style="display:block; text-decoration:none; margin-top:12px;" data-it="Salva in Calendario"
       data-en="Save to Calendar">Salva in Calendario</a>
+
   </div>
 
   <script>

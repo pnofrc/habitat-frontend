@@ -141,7 +141,34 @@
       border: 2px solid #000;
       box-shadow: 5px 5px 0 #000;
     }
+
+.poem {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-line;
+  text-align: center;
+  color: white;
+  text-shadow: 0 0 10px rgba(0,0,0,0.5);
+  mix-blend-mode: difference;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 8px;
+  margin-bottom: 30px;
+
+opacity: 0; transition: opacity 0.9s ease; }
+.poem.visible { opacity: 1; }
+
     @media (max-width: 500px) {
+
+       .poem {
+    max-height: 50vh;
+    font-size: 0.8rem;
+    margin-top: 5em;
+      background: linear-gradient( to bottom, black 0%, #ffffff7a 100% ) left bottom transparent no-repeat;
+    background-size: auto;
+  background-size: 100% 13px;
+opacity: 0; transition: opacity 0.9s ease; }
+.poem.visible { opacity: 1; }
 
          .data{
           top: 7rem;

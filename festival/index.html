@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>H5Y</title>
   <link rel="stylesheet" href="style.css">
+     <link rel="icon" type="image/x-icon" href="5.svg">
+
 </head>
 <body>
 
@@ -15,7 +17,7 @@
 
   <div id="ui">
 
-        <span class="data" data-key="date" data-key="date">17-19 July 2026</span>
+        <span class="data"><span data-key="date">17-19 July 2026</span> <br> <span data-key="place">Cà de Monti, Tredozio - Italy</span></span>
 
 
     <div id="top-row">
@@ -41,7 +43,81 @@
       </div>
     </div>
 
-    <div></div>
+        <div class="poem">
+      <i data-it="...e sono di anni proprio cinque,
+quell'essenza non si estingue..!
+la moltitudine di pratiche e di lingue
+ci da orgoglio sano senza grinfie
+
+sembrava solo qualche mese fa
+quando capitò che il convivio
+volesse essere importante 
+tanto quanto un archivio
+
+La casa pare tutt'ora un'entità
+un essere vivo ma inorganico
+che accudisce con generosità
+un pendolo tra immaginifico e pratico
+che dalle sue mura va anche al di là
+
+abitando la valle del Tramazzo
+immaginiamo la Romagna come un arazzo
+una storia da continuare a tessere
+qui e fuori da queste selvatiche terre
+
+Allora festeggiamo con gusto 
+questo illustro ambidestro lustro 
+tre giorni di laboratori, musiche e carezze
+dove lo star insieme e saltellare sono le certezze" data-en="…and it's already five years old,
+that original essence doesn't turn cold..!
+the multitude of languages and practices,
+Trace our identity with soft touches
+
+it seemed like a few months ago 
+when the convivial attitude came to know 
+it wanted to matter, to hold and convey
+as much as an archive that never decays
+
+The house still feels like a proper entity
+a living thing, beyond all explanation
+that cuddles us quite incidentally
+a pendulum between dream and imagination
+that from its walls stretches out beyond
+
+inhabiting the Tramazzo valley
+we imagine Romagna as a tapestry
+a story still to weave and rally 
+here and far beyond this wild land
+
+So let us celebrate with flair
+this lustrous, ambidextrous affair 
+three days of workshops, music, gentle touch 
+where being together and skipping are maybe enough">…and it's already five years old,
+that original essence doesn't turn cold..!
+the multitude of languages and practices,
+Trace our identity with soft touches
+
+it seemed like a few months ago 
+when the convivial attitude came to know 
+it wanted to matter, to hold and convey
+as much as an archive that never decays
+
+The house still feels like a proper entity
+a living thing, beyond all explanation
+that cuddles us quite incidentally
+a pendulum between dream and imagination
+that from its walls stretches out beyond
+
+inhabiting the Tramazzo valley
+we imagine Romagna as a tapestry
+a story still to weave and rally 
+here and far beyond this wild land
+
+So let us celebrate with flair
+this lustrous, ambidextrous affair 
+three days of workshops, music, gentle touch 
+where being together and skipping are maybe enough</i>
+    </div>
 
     <div id="buttons">
       <a class="btn-h5" href="ticket/" data-key="tickets">book now</a>
@@ -60,8 +136,8 @@
 
   /* i18n */
   const i18n = {
-    en: { 'countdown-label': 'until habitat 5 years festival', date: '17-19 July 2026',days: 'days', hours: 'hours', mins: 'min', secs: 'sec', cal: 'save to calendar', tickets: 'book now', program: 'program' },
-    it:  { 'countdown-label': 'ai 5 anni di habitat', date: '17-19 Luglio 2026',  days: 'giorni', hours: 'ore', mins: 'min', secs: 'sec', cal: 'salva in calendario', tickets: 'prenota ora', program: 'programma' }
+    en: { 'countdown-label': 'until habitat 5 years festival', date: '17-19 July 2026', place: 'Cà de Monti, Tredozio - Italy',days: 'days', hours: 'hours', mins: 'min', secs: 'sec', cal: 'save to calendar', tickets: 'book now', program: 'program' },
+    it:  { 'countdown-label': 'ai 5 anni di habitat', date: '17-19 Luglio 2026', place: 'Cà de Monti, Tredozio (FC)',  days: 'giorni', hours: 'ore', mins: 'min', secs: 'sec', cal: 'salva in calendario', tickets: 'prenota ora', program: 'programma' }
   };
   let lang = 'en';
   function setLang(l) {
@@ -70,6 +146,7 @@
     const t = i18n[l];
     document.getElementById('countdown-label').textContent = t['countdown-label'];
     document.querySelectorAll('[data-key]').forEach(el => { if (t[el.dataset.key]) el.textContent = t[el.dataset.key]; });
+    document.querySelectorAll('[data-it][data-en]').forEach(el => { el.textContent = el.dataset[l]; });
   }
   document.querySelectorAll('#lang span').forEach(s => s.addEventListener('click', () => setLang(s.dataset.l)));
 
@@ -89,6 +166,10 @@
     setInterval(tickCountdown, 1000);
     localStorage.setItem(SEEN_KEY, '1');
   }
+
+  function showPoem() {
+  document.querySelector('.poem').classList.add('visible');
+}
 
 
  function downloadIcs() {
@@ -160,7 +241,7 @@
       setTimeout(() => {
         nodes[ni].tx = 0; nodes[ni].ty = 0;
         g.style.transition = 'transform .36s cubic-bezier(.22,.68,0,1.15),opacity .25s';
-        g.style.opacity = '1';
+        g.style.opacity = '.8';
         g.setAttribute('transform', 'translate(0,0)');
       }, i * 15);
     });
@@ -172,7 +253,7 @@
       const a = Math.random() * Math.PI * 2, r = 180 + Math.random() * 380;
       nodes[i].tx = Math.cos(a) * r; nodes[i].ty = Math.sin(a) * r;
       g.style.transition = 'transform .32s cubic-bezier(.4,0,.2,1),opacity .22s';
-      g.style.opacity = '1';
+      g.style.opacity = '.8';
       g.setAttribute('transform', `translate(${nodes[i].tx},${nodes[i].ty})`);
     });
     if (done) setTimeout(done, 480);
@@ -201,7 +282,7 @@
           setTimeout(() => {
             explodeAll(() => {
               setTimeout(() => {
-                assembleGroup('5');
+               assembleGroup('5', () => { setTimeout(showPoem, 300); });
               }, 300);
             });
           }, 1600);
@@ -217,7 +298,7 @@
             explodeAll(() => {
               setTimeout(() => {
                 assembleGroup('5', () => {
-                  setTimeout(startUI, 450);
+                 setTimeout(() => { startUI(); showPoem(); }, 450); 
                 });
               }, 300);
             });
