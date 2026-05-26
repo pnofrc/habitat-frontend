@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../5.svg">
+    <title>H5Y</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f4f4f4;
+            color: #000;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+        }
+
+
+        .card {
+            position: relative;
+            background: #fff;
+            padding: 40px;
+            width: 1080px;
+            height: 1920px;
+            text-align: center;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            height: 10vh;
+        }
+
+        h1 {
+            border-bottom: 4px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-size: 1.5em;
+            letter-spacing: 2px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: anchor-center;
+        }
+
+        .header a {
+            text-decoration: none !important;
+            color: black !important;
+            font-size: 3rem;
+        }
+
+        .lang-toggle {
+            height: 40px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .lang-btn {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: transparent;
+            border: 2px solid #000;
+            padding: 4px 12px;
+            cursor: pointer;
+        }
+
+        .lang-btn.active {
+            background: #000;
+            color: #fff;
+        }
+
+
+
+        hr {
+            border: none;
+            border-top: 2px solid #eee;
+            margin: 24px 0;
+        }
+
+        .prose {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .prose p+p {
+            margin-top: 12px;
+        }
+
+        .tuned {
+            font-weight: bold;
+        }
+
+
+
+        @font-face {
+            font-family: 'Hababo';
+            src: url('../../Hababo/Hababo-Regular.woff2') format('woff2'),
+                url('../Hababo/Hababo-Regular.woff') format('woff'),
+                url('../Hababo/Hababo-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        .hababo {
+            font-family: 'Hababo';
+            letter-spacing: -5px;
+        }
+
+        .dove {
+            margin: 1vh 0 2vh 0;
+        }
+
+        .head {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            margin: 1vh 0;
+            gap: 10px;
+        }
+
+        .head img {
+            width:25%;
+        }
+
+        .head span {
+            letter-spacing: -15px;
+            font-size: 4em;
+            font-family: 'Hababo', 'Courier New', Courier, monospace;
+        }
+
+        .artists-list {
+            margin-bottom: 30px;
+            text-align: center;
+            display: flex;
+        }
+
+        .artists-list div{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+
+        .artist-name {
+            font-family: 'Hababo', 'Courier New', Courier, monospace;
+            font-size: 2.4em;
+            line-height: 1.5;
+            letter-spacing: -10px;
+            color: #333;
+        }
+
+
+        .live {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            letter-spacing: normal;
+            white-space: nowrap;
+            position: relative;
+            bottom: 0.5rem;
+        }
+
+        .details {
+            display: block;
+            font-size: 0.9rem;
+            letter-spacing: normal;
+            margin: -0.3rem 0 0.3rem 0;
+            line-height: 1;
+        }
+
+        .next {
+            display: inline;
+            font-weight: bold;
+            font-size: 1.5rem;
+            width: 75%;
+            margin-top: 1em;
+        }
+        .ops{
+            position: relative;
+            left: 20px;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+                margin:0; padding:0;
+            }
+            .card * { 
+                visibility: visible;
+            }
+            }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+
+
+        <div class="head">
+            <span>HabiTat</span>
+            <img src="../../5.svg" alt="5years logo">
+            <span>Years</span>
+        </div>
+
+        <div class="dove">
+            <h4 data-it="17-19 Luglio 2026" data-en="17-19 July 2026">17-19 Luglio 2026</h4>
+            <h4>Cà de Monti, Tredozio - Italy</h4>
+        </div>
+
+
+
+
+        <!-- <h2 class="artists-title" data-it="Artisti & Performers" data-en="Artists & Performers">
+      Artist3 & Performers
+    </h2> -->
+
+        <div class="artists-list">
+            <div>
+                <div class="artist-name">flaviana</div>
+                <div class="artist-name">amphibia&nbsp;<span class="details"> (dj torpedo, rrrapido, rally k, herbalife,
+                        padre
+                        bio)</span></div>
+                <div class="artist-name">bassi&nbsp;gradassi<span class="details">(di late, dj trombetta)</span></div>
+                <div class="artist-name ops">bruised&nbsp;SpringsTeen&nbsp;<span class="live">(live)</span></div>
+                <div class="artist-name">chantssss <span class="live">(live)</span></div>
+                <div class="artist-name ops">Classical&nbsp;hooligans</div>
+                <div class="artist-name">carl&nbsp;ahnebrink<span class="details">(FLEE Project)</span></div>
+                <div class="artist-name">enrico&nbsp;malatesta&nbsp;<span class="live">(live)</span></div>
+                <div class="artist-name">flux&nbsp;by&nbsp;uchina&nbsp;<span class="details">(VENA)</span></div>
+                <div class="artist-name">giesse</div>
+                <div class="artist-name">habitat t.p.U.</div>
+                <div class="artist-name">jungla <span class="live">(live)</span></div>
+                <div class="artist-name">Kuthi&nbsp;Jin&nbsp;<span class="live">(live)</span></div>
+            </div>
+
+            <div>
+                <div class="artist-name">lorenzo&nbsp;travaglini&nbsp;<span class="live">(live)</span></div>
+                <div class="artist-name">la&nbsp;messinscena&nbsp;<span class="details">(tundra, nini)</span></div>
+                <div class="artist-name">lemethi&nbsp;<span class="details">(rumore b)</span></div>
+                <div class="artist-name">proxy&nbsp;bar&nbsp;<span class="details">(marKK b2b poni)</span></div>
+                <div class="artist-name">mira&nbsp;<span class="live">(live)</span></div>
+                <div class="artist-name">mizuna<span class="details">(erta, oleno)</span></div>
+                <div class="artist-name">nicolas&nbsp;gaunin&nbsp;<span class="live">(live)</span></div>
+                <div class="artist-name">privato</div>
+                <div class="artist-name">ramzi&nbsp;<span class="live">(live)</span></div>
+                <div class="artist-name">reptilian&nbsp;expo</div>
+                <div class="artist-name">sister&nbsp;effect</div>
+                <div class="artist-name">trampa&nbsp;<span class="live">(live)</span></div>
+                <div class="artist-name">Yulia&nbsp;kachan</div>
+            </div>
+
+            
+
+
+
+        </div>
+<div class="next">
+                <span data-en="& soon announced juicy" data-it="& presto annunciati">& presto annunciati</span>
+                <span data-en="workshops" data-it="laboratori," class="hababo">laboratori,</span>
+                <span data-en=", convivial" data-it="atti">atti</span>
+                <span data-en="acts" data-it="conviviali" class="hababo">conviviali</span>
+                <span data-en="and frugal" data-it="e pasti">e pasti</span>
+                <span data-en="meals," data-it="Piu o meno" class="hababo">Piu o meno</span>
+                <span data-en="more or less..." data-it="frugali...">frugali...</span>
+            </div>
+
+    </div>
+
+
+</body>
+
+</html>
