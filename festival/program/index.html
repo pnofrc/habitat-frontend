@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="icon" type="image/x-icon" href="../5.svg">
+  <link rel="icon" type="image/x-icon" href="../5.svg">
   <title>H5Y</title>
   <style>
     * {
@@ -54,17 +54,17 @@
       letter-spacing: 2px;
     }
 
-.header{
-  display: flex;
-  justify-content: space-between;
-  align-items: anchor-center;
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: anchor-center;
+    }
 
-.header a{
-  text-decoration: none !important;
-  color: black !important;
-  font-size: 3rem;
-}
+    .header a {
+      text-decoration: none !important;
+      color: black !important;
+      font-size: 3rem;
+    }
 
     .lang-toggle {
       height: 40px;
@@ -142,7 +142,7 @@
       letter-spacing: 2px;
     }
 
-   
+
     @font-face {
       font-family: 'Hababo';
       src: url('../Hababo/Hababo-Regular.woff2') format('woff2'),
@@ -153,12 +153,12 @@
       font-display: swap;
     }
 
-    .hababo{
+    .hababo {
       font-family: 'Hababo';
       letter-spacing: -5px;
     }
 
-    .dove{
+    .dove {
       margin: 5vh 0;
     }
 
@@ -176,7 +176,7 @@
 
     .head span {
       letter-spacing: -15px;
-      font-size: 5em;
+      font-size: 4em;
       font-family: 'Hababo', 'Courier New', Courier, monospace;
     }
 
@@ -213,7 +213,7 @@
       letter-spacing: normal;
       white-space: nowrap;
       position: relative;
-      bottom: 0.5rem; 
+      bottom: 0.5rem;
     }
 
     .details {
@@ -224,17 +224,21 @@
       line-height: 1;
     }
 
-    .next{display: inline; font-weight: bold; font-size: 1.5rem;}
+    .next {
+      display: inline;
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
 
 
-     @media (max-width: 600px) {
+    @media (max-width: 600px) {
 
-      body{
+      body {
         background-color: white;
         padding: 0px;
       }
 
-      .head span{
+      .head span {
         font-size: 12vw;
       }
 
@@ -242,7 +246,7 @@
         font-size: 1.55em;
       }
 
-      .next{
+      .next {
         font-size: 1.3em;
       }
 
@@ -252,9 +256,6 @@
         box-shadow: none !important;
       }
     }
-
-
-
   </style>
 </head>
 
@@ -264,8 +265,8 @@
 
     <div class="header">
 
-    
-        <a href="../">←</a>
+
+      <a href="../">←</a>
 
       <div class="lang-toggle">
         <button class="lang-btn active" data-lang="it">IT</button>
@@ -288,10 +289,10 @@
     </div>
 
     <div class="dove">
-       <h4 data-it="17-19 Luglio 2026" data-en="17-19 July 2026">17-19 Luglio 2026</h4>
+      <h4 data-it="17-19 Luglio 2026" data-en="17-19 July 2026">17-19 Luglio 2026</h4>
       <h4>Cà de Monti, Tredozio</h4>
     </div>
-   
+
 
 
 
@@ -301,31 +302,32 @@
 
     <div class="artists-list">
       <br>
-      <div class="artist-name">Alice&nbsp;Flaviana</div>
-      <div class="artist-name">Amphibia&nbsp;<span class="details"> (dj Torpedo, rrrapido, Rally k, Herbalife, Padre Bio)</span></div>
-      <div class="artist-name">Bassi&nbsp;Gradassi<span class="details">(di Late, dj Trombetta)</span></div>
-      <div class="artist-name">Chantssss <span class="live">(live)</span></div>
-      <div class="artist-name">Classical&nbsp;Hooligans</div>
-      <div class="artist-name">Carl&nbsp;Ahnebrink<span class="details">(FLEE Project)</span></div>
-      <div class="artist-name">Enrico&nbsp;Malatesta&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">Flux&nbsp;by&nbsp;Uchina&nbsp;<span class="details">(VENA)</span></div>
-      <div class="artist-name">Giesse</div>
-      <div class="artist-name">Habitat T.P.U.</div>
-      <div class="artist-name">Jungla <span class="live">(live)</span></div>
-      <div class="artist-name">Lorenzo&nbsp;Travaglini&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">La&nbsp;Messinscena&nbsp;<span class="details">(tundra, nini)</span></div>
-      <div class="artist-name">Lemethi&nbsp;<span class="details">(rumore b)</span></div>
-      <div class="artist-name">Proxy&nbsp;Bar&nbsp;<span class="details">(Markk b2b poni)</span></div>
-      <div class="artist-name">Mira&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">Nicolas&nbsp;Gaunin&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">Mizuna<span class="details">(Erta, Oleno)</span></div>
-      <div class="artist-name">Privato</div>
-      <div class="artist-name">Ramzi&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">Reptilian&nbsp;Expo</div>
-      <div class="artist-name">Señor&nbsp;Service&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">Sister&nbsp;Effect</div>
-      <div class="artist-name">Trampa&nbsp;<span class="live">(live)</span></div>
-      <div class="artist-name">Yulia&nbsp;Kachan</div>
+      <div class="artist-name">flaviana</div>
+      <div class="artist-name">amphibia&nbsp;<span class="details"> (dj torpedo, rrrapido, rally k, herbalife, padre
+          bio)</span></div>
+      <div class="artist-name">bassi&nbsp;gradassi<span class="details">(di late, dj trombetta)</span></div>
+      <div class="artist-name">chantssss <span class="live">(live)</span></div>
+      <div class="artist-name">Classical&nbsp;hooligans</div>
+      <div class="artist-name">carl&nbsp;ahnebrink<span class="details">(FLEE Project)</span></div>
+      <div class="artist-name">enrico&nbsp;malatesta&nbsp;<span class="live">(live)</span></div>
+      <div class="artist-name">flux&nbsp;by&nbsp;uchina&nbsp;<span class="details">(VENA)</span></div>
+      <div class="artist-name">giesse</div>
+      <div class="artist-name">habitat t.p.U.</div>
+      <div class="artist-name">jungla <span class="live">(live)</span></div>
+      <div class="artist-name">lorenzo&nbsp;travaglini&nbsp;<span class="live">(live)</span></div>
+      <div class="artist-name">la&nbsp;messinscena&nbsp;<span class="details">(tundra, nini)</span></div>
+      <div class="artist-name">lemethi&nbsp;<span class="details">(rumore b)</span></div>
+      <div class="artist-name">proxy&nbsp;bar&nbsp;<span class="details">(marKK b2b poni)</span></div>
+      <div class="artist-name">mira&nbsp;<span class="live">(live)</span></div>
+      <div class="artist-name">nicolas&nbsp;gaunin&nbsp;<span class="live">(live)</span></div>
+      <div class="artist-name">mizuna<span class="details">(erta, oleno)</span></div>
+      <div class="artist-name">privato</div>
+      <div class="artist-name">ramzi&nbsp;<span class="live">(live)</span></div>
+      <div class="artist-name">reptilian&nbsp;expo</div>
+      <div class="artist-name">señor&nbsp;service&nbsp;<span class="live">(live)</span></div>
+      <div class="artist-name">sister&nbsp;effect</div>
+      <div class="artist-name">trampa&nbsp;<span class="live">(live)</span></div>
+      <div class="artist-name">Yulia&nbsp;kachan</div>
       <br>
       <div class="next">
         <span data-en="& soon announced juicy" data-it="& presto annunciati">& presto annunciati</span>
