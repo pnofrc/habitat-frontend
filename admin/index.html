@@ -1556,6 +1556,7 @@
                                         <th>Email</th>
                                         <th>Pagamento</th>
                                         <th>Quantità</th>
+                                        <th>Data</th>
                                         <th x-show="canWrite"></th>
                                     </tr>
                                 </thead>
@@ -1572,6 +1573,7 @@
                                             </td>
                                             <td x-text="t.paymentMethod" style="text-transform:uppercase;"></td>
                                             <td x-text="t.quantity || 1"></td>
+                                            <td x-text="formatDate(t.createdAt)"></td>
                                             <td x-show="canWrite">
                                                 <button @click="startEditFestivalTicket(t)" title="Modifica" class="btn-del" style="color:#007bff; margin-right:4px;">✎</button>
                                                 <button @click="startFestivalApproval(t)" class="btn-del" style="color:green">V</button>
