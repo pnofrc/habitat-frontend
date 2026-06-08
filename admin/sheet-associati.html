@@ -265,10 +265,15 @@
                 },
 
                 exportCSV() {
-                    const headers = "Cognome,Nome,Email,DataNascita,CF,Citta,Telefono,Pagamento\n";
-                    const rows = this.filteredItems.map(m =>
-                        `${m.surname},${m.name},${m.email},${this.formatDate(m.birthDate)},${m.vatNumber},${m.city},${m.phoneNumber},${m.paymentMethod}`
-                    ).join("\n");
+                    const headers = "Cognome,Nome,Email,DataNascita,LuogoNascita,ProvNascita,PaeseNascita,CF,Indirizzo,CAP,CittaResidenza,ProvResidenza,PaeseResidenza,Telefono,Interessi,MetodoPagamento\n";
+                    const rows = this.filteredItems.map(m => {
+                        const interessi = [
+                            m.interestHabitat && 'Habitat',
+                            m.interestDistrettoA && 'Distretto A',
+                            m.interestQuazar && 'Quazar'
+                        ].filter(Boolean).join('; ');
+                        return `${m.surname || ''},${m.name || ''},${m.email || ''},${this.formatDate(m.birthDate) || ''},${m.birthPlace || ''},${m.birthProvince || ''},${m.birthCountry || ''},${m.vatNumber || ''},${m.address || ''},${m.zipcode || ''},${m.city || ''},${m.province || ''},${m.country || ''},${m.phoneNumber || ''},${interessi},${m.paymentMethod || ''}`;
+                    }).join("\n");
                     const blob = new Blob([headers + rows], { type: 'text/csv' });
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
