@@ -1409,6 +1409,9 @@ document.addEventListener('alpine:init', () => {
             if (tab === 'timeline') {
                 await this.fetchTimeline();
             }
+            if (tab === 'invites') {
+                await this.loadFestivalInvites();
+            }
         },
 
         async fetchTimeline() {
