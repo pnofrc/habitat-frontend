@@ -387,6 +387,9 @@
       <span>discovery</span>
     </div> -->
 
+    <!-- Invite Status Message -->
+    <div id="inviteStatus" style="display:none; margin-bottom:20px; padding:15px; border:2px solid #000;"></div>
+
     <!-- BOOKING FORM - TEMPORARILY DISABLED FOR SOLD OUT -->
     <!--
     <form class="booking-form" id="bookingForm">
@@ -502,6 +505,46 @@
 
   <script src="../config.js"></script>
   <script>
+    // Parse URL for invite token: /festival/ticket/?invite=TOKEN
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteToken = urlParams.get('invite');
+
+    if (inviteToken) {
+        const inviteStatus = document.getElementById('inviteStatus');
+        const soldOutMsg = document.querySelector('.sold-out-msg');
+        const bookingForm = document.getElementById('bookingForm');
+
+        inviteStatus.style.display = 'block';
+        inviteStatus.innerHTML = '<p style="text-align:center;">Validating invite...</p>';
+
+        fetch(BASE_URL + '/festival/invites/validate/' + inviteToken)
+            .then(async res => {
+                if (!res.ok) throw new Error((await res.json()).message || 'Invalid invite');
+                return res.json();
+            })
+            .then(data => {
+                if (!data.valid) {
+                    throw new Error(data.error || 'Invalid invite');
+                }
+
+                // Valid: hide sold-out, show form
+                soldOutMsg.style.display = 'none';
+                bookingForm.style.display = 'block';
+
+                inviteStatus.innerHTML = `<p style="color:green; font-weight:bold; text-align:center;">✓ Valid invite (${data.remainingUses} uses remaining)</p>`;
+                inviteStatus.style.borderColor = 'green';
+
+                window.festivalInviteToken = inviteToken;
+            })
+            .catch(err => {
+                // Invalid: show error, keep sold-out visible
+                inviteStatus.innerHTML = `<p style="color:red; text-align:center;"><b>Invalid Invite</b><br>${err.message}</p>`;
+                inviteStatus.style.borderColor = 'red';
+                soldOutMsg.style.display = 'block';
+                bookingForm.style.display = 'none';
+            });
+    }
+
     // // Countdown
     // const target = new Date('2026-07-17T11:00:00').getTime();
 
@@ -596,7 +639,8 @@
         surname: document.getElementById('lastName').value.trim(),
         email: document.getElementById('email').value.trim(),
         paymentMethod: paymentSelect.value,
-        language: currentLang
+        language: currentLang,
+        invite_token: window.festivalInviteToken || undefined
       };
 
       try {
@@ -656,7 +700,7 @@
       fetch(BASE_URL + '/festival/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, surname: surname, email: email, paymentMethod: 'paypal', language: currentLang })
+        body: JSON.stringify({ name: name, surname: surname, email: email, paymentMethod: 'paypal', language: currentLang, invite_token: window.festivalInviteToken || undefined })
       }).then(function (res) {
         if (res.ok) {
           bookingForm.style.display = 'none';

@@ -27,6 +27,10 @@ document.addEventListener('alpine:init', () => {
         festivalApproval: null,
         editingFestivalTicket: null,
         festivalTab: 'tickets',
+        festivalInvites: [],
+        newInviteForm: { maxUses: 1, expiresAt: '', notes: '' },
+        editingFestivalInvite: null,
+        inviteFilter: 'all',
         paypalTransactions: [],
         paypalLoading: false,
         paypalError: null,
@@ -373,6 +377,9 @@ document.addEventListener('alpine:init', () => {
                     if (this.festivalTab === 'tickets') {
                         await this.fetchPaypalTransactions();
                     }
+                    if (this.festivalTab === 'invites') {
+                        await this.loadFestivalInvites();
+                    }
                     if (this.festivalTab === 'planner') {
                         await this.fetchPlannerData();
                     }
@@ -450,6 +457,18 @@ document.addEventListener('alpine:init', () => {
             return this.items.filter(m =>
                 this.membershipTab === 'confirmed' ? m.confirmed : !m.confirmed
             );
+        },
+
+        get festivalInviteStats() {
+            const now = new Date();
+            const active = this.festivalInvites.filter(i =>
+                i.usedCount < i.maxUses && new Date(i.expiresAt) > now
+            ).length;
+            const exhausted = this.festivalInvites.filter(i => i.usedCount >= i.maxUses).length;
+            const expired = this.festivalInvites.filter(i =>
+                i.usedCount < i.maxUses && new Date(i.expiresAt) <= now
+            ).length;
+            return { active, exhausted, expired, total: this.festivalInvites.length };
         },
 
         get filteredItems() {
@@ -2045,6 +2064,81 @@ document.addEventListener('alpine:init', () => {
                     await this.fetchData();
                 } catch (e) { alert(e.message); }
             }
+        },
+
+        async loadFestivalInvites() {
+            const res = await fetch(`${this.BASE_URL}/festival/invites/`, {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            if (res.status === 401) return this.logout();
+            if (!res.ok) throw new Error('Error loading invites');
+            this.festivalInvites = await res.json();
+        },
+
+        openCreateInvite() {
+            const defaultExpiry = new Date();
+            defaultExpiry.setDate(defaultExpiry.getDate() + 7);
+            this.newInviteForm = {
+                maxUses: 1,
+                expiresAt: defaultExpiry.toISOString().slice(0, 16),
+                notes: ''
+            };
+            this.editingFestivalInvite = 'new';
+        },
+
+        async saveFestivalInvite() {
+            const form = this.newInviteForm;
+            if (!form.expiresAt || new Date(form.expiresAt) <= new Date()) {
+                alert('Invalid expiration date');
+                return;
+            }
+
+            const res = await fetch(`${this.BASE_URL}/festival/invites/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(form)
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.message || 'Error creating invite');
+            }
+
+            this.editingFestivalInvite = null;
+            await this.loadFestivalInvites();
+            alert('Invite created!');
+        },
+
+        async copyInviteLink(token) {
+            const link = `${window.location.origin}/festival/ticket/?invite=${token}`;
+            await navigator.clipboard.writeText(link);
+            alert('Link copied!');
+        },
+
+        async deleteFestivalInvite(id) {
+            if (!confirm('Delete this invite?')) return;
+
+            const res = await fetch(`${this.BASE_URL}/festival/invites/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                alert(error.message || 'Error deleting invite');
+                return;
+            }
+
+            await this.loadFestivalInvites();
+        },
+
+        getInviteStatus(invite) {
+            if (invite.usedCount >= invite.maxUses) return { label: 'Exhausted', color: 'orange' };
+            if (new Date(invite.expiresAt) <= new Date()) return { label: 'Expired', color: 'red' };
+            return { label: 'Active', color: 'green' };
         },
 
         // ── Calendar ──

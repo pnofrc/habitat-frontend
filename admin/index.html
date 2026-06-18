@@ -1459,6 +1459,8 @@
                     <div class="planner-sub-tabs">
                         <button :class="festivalTab === 'tickets' && 'active'"
                             @click="switchFestivalTab('tickets')">Biglietti</button>
+                        <button :class="festivalTab === 'invites' && 'active'"
+                            @click="switchFestivalTab('invites')">Inviti <span x-text="'(' + festivalInviteStats.active + ')'"></span></button>
                         <button :class="festivalTab === 'planner' && 'active'"
                             @click="switchFestivalTab('planner')">Planner</button>
                         <button :class="festivalTab === 'volunteers' && 'active'"
@@ -1702,6 +1704,102 @@
                                     </template>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- INVITES TAB -->
+                    <div x-show="festivalTab === 'invites'">
+                        <!-- Stats -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
+                            <div class="card" style="flex:1">
+                                <small>ATTIVI</small><br>
+                                <b x-text="festivalInviteStats.active" style="color:green"></b>
+                            </div>
+                            <div class="card" style="flex:1">
+                                <small>ESAURITI</small><br>
+                                <b x-text="festivalInviteStats.exhausted" style="color:orange"></b>
+                            </div>
+                            <div class="card" style="flex:1">
+                                <small>SCADUTI</small><br>
+                                <b x-text="festivalInviteStats.expired" style="color:red"></b>
+                            </div>
+                            <div class="card" style="flex:1">
+                                <small>TOTALE</small><br>
+                                <b x-text="festivalInviteStats.total"></b>
+                            </div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+                            <h3 style="margin:0">Inviti</h3>
+                            <button x-show="canWrite" class="create" @click="openCreateInvite()">+ CREA INVITO</button>
+                        </div>
+
+                        <!-- Invites Table -->
+                        <div class="card">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Token</th>
+                                        <th>Max Usi</th>
+                                        <th>Usati</th>
+                                        <th>Scade</th>
+                                        <th>Note</th>
+                                        <th>Stato</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="invite in festivalInvites" :key="invite.id">
+                                        <tr>
+                                            <td>
+                                                <code x-text="invite.token.slice(0, 8) + '...'"></code>
+                                            </td>
+                                            <td x-text="invite.maxUses"></td>
+                                            <td x-text="invite.usedCount"></td>
+                                            <td x-text="new Date(invite.expiresAt).toLocaleString('it-IT')"></td>
+                                            <td x-text="invite.notes || '-'"></td>
+                                            <td>
+                                                <span :style="'color:' + getInviteStatus(invite).color + '; font-weight:bold;'"
+                                                      x-text="getInviteStatus(invite).label"></span>
+                                            </td>
+                                            <td>
+                                                <button @click="copyInviteLink(invite.token)"
+                                                        style="padding:4px 8px; font-size:11px; margin-right:4px;">
+                                                    COPIA LINK
+                                                </button>
+                                                <button x-show="canWrite" @click="deleteFestivalInvite(invite.id)"
+                                                        style="padding:4px 8px; font-size:11px; background:red; color:white;">
+                                                    ELIMINA
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="festivalInvites.length === 0">
+                                        <td colspan="7" style="text-align:center; color:#999;">Nessun invito</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Create Invite Modal -->
+                    <div x-show="editingFestivalInvite === 'new'" class="modal" @click.self="editingFestivalInvite = null">
+                        <div class="modal-content">
+                            <h3>Crea Nuovo Invito</h3>
+                            <label>Max Usi</label>
+                            <input type="number" x-model="newInviteForm.maxUses" min="1" required>
+
+                            <label>Scade il</label>
+                            <input type="datetime-local" x-model="newInviteForm.expiresAt" required>
+
+                            <label>Note (opzionale)</label>
+                            <input type="text" x-model="newInviteForm.notes" placeholder="es. Invito per amici">
+
+                            <div style="display:flex; gap:10px; margin-top:20px;">
+                                <button @click="saveFestivalInvite()" class="create" style="flex:1">CREA</button>
+                                <button @click="editingFestivalInvite = null" style="flex:1">ANNULLA</button>
+                            </div>
                         </div>
                     </div>
 
