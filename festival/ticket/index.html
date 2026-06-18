@@ -541,6 +541,7 @@
                 if (data.isGift) {
                     document.getElementById('priceSection').style.display = 'none';
                     document.getElementById('paymentMethodSection').style.display = 'none';
+                    document.getElementById('paymentMethod').removeAttribute('required');
 
                     const giftMsg = currentLang === 'it'
                         ? `✓ Invito Omaggio<br><small>(${data.remainingUses} usi rimanenti)</small>`
