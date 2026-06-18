@@ -28,7 +28,7 @@ document.addEventListener('alpine:init', () => {
         editingFestivalTicket: null,
         festivalTab: 'tickets',
         festivalInvites: [],
-        newInviteForm: { maxUses: 1, expiresAt: '', notes: '' },
+        newInviteForm: { maxUses: 1, expiresAt: '', notes: '', isGift: false },
         editingFestivalInvite: null,
         inviteFilter: 'all',
         paypalTransactions: [],
@@ -2084,7 +2084,8 @@ document.addEventListener('alpine:init', () => {
             this.newInviteForm = {
                 maxUses: 1,
                 expiresAt: defaultExpiry.toISOString().slice(0, 16),
-                notes: ''
+                notes: '',
+                isGift: false
             };
             this.editingFestivalInvite = 'new';
         },

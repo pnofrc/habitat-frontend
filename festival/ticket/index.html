@@ -407,49 +407,51 @@
       <label for="email">Email</label>
       <input type="email" id="email" name="email" required>
 
-      <p class="note" style="margin-top:14px; margin-bottom:2px;"
+      <p class="note" id="membershipNote" style="margin-top:14px; margin-bottom:2px;"
         data-en="The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at check-in."
         data-it="Il festival è riservato ai soci di Habitat / Distretto A. La quota di €10 per la tessera associativa verrà raccolta al check-in.">
         The festival is exclusively for Habitat / Distretto A members. A €10 membership card fee will be collected at
         check-in.
       </p>
 
-      <label for="paymentMethod" data-en="Payment method" data-it="Metodo di pagamento">Payment method</label>
-      <select id="paymentMethod" name="paymentMethod" required>
-        <option value="" data-en="Choose..." data-it="Scegli...">Choose...</option>
-        <option value="paypal">PAYPAL / APPLE PAY / CARD</option>
-        <option value="iban" data-en="Bank transfer (IBAN)" data-it="Bonifico (IBAN)">Bank transfer (IBAN)</option>
-      </select>
+      <div id="paymentMethodSection">
+        <label for="paymentMethod" data-en="Payment method" data-it="Metodo di pagamento">Payment method</label>
+        <select id="paymentMethod" name="paymentMethod" required>
+          <option value="" data-en="Choose..." data-it="Scegli...">Choose...</option>
+          <option value="paypal">PAYPAL / APPLE PAY / CARD</option>
+          <option value="iban" data-en="Bank transfer (IBAN)" data-it="Bonifico (IBAN)">Bank transfer (IBAN)</option>
+        </select>
 
-      <div class="payment-box" id="paymentBox" style="display:none;">
-        <div id="paypalInfo" style="display:none;">
-          <p class="note" data-en="Apple Pay and Card payments are also supported via PayPal."
-            data-it="Anche Apple Pay e pagamenti con carta sono supportati tramite PayPal.">Apple Pay and Card payments
-            are also supported via PayPal.</p>
+        <div class="payment-box" id="paymentBox" style="display:none;">
+          <div id="paypalInfo" style="display:none;">
+            <p class="note" data-en="Apple Pay and Card payments are also supported via PayPal."
+              data-it="Anche Apple Pay e pagamenti con carta sono supportati tramite PayPal.">Apple Pay and Card payments
+              are also supported via PayPal.</p>
+          </div>
+          <div id="ibanInfo" style="display:none;">
+            <p><strong>IBAN:</strong> IT88Q0623023704000030225469 <button type="button" class="copy-btn"
+                onclick="copyText('IT88Q0623023704000030225469', this)" title="Copy">&#10697;</button></p>
+            <p style="margin-top:4px;" data-en="Beneficiary: Distretto A APS" data-it="Beneficiario: Distretto A APS">
+              <strong>Beneficiary: Distretto A APS</strong> <button type="button" class="copy-btn"
+                onclick="copyText('Distretto A APS', this)" title="Copy">&#10697;</button>
+            </p>
+            <p style="margin-top:8px;" data-en="Reference: ... [Your Name]" data-it="Causale:... [Tuo Nome]">Reference:
+              Festival '26 [Your Name]</p>
+            <p class="note" style="margin-top:10px; font-weight:bold; color:green; font-size: 13px;"
+              data-en="After completing the payment, make sure to press the BOOK NOW button."
+              data-it="Dopo aver completato il pagamento, premi il pulsante PRENOTA ORA.">
+              After completing the payment, make sure to press the BOOK NOW button.</p>
+          </div>
+          <p class="note" style="margin-top:12px;"
+            data-en="You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours."
+            data-it="Riceverai una conferma una volta verificato il pagamento. Potrebbero essere necessarie fino a 24–48 ore.">
+            You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
         </div>
-        <div id="ibanInfo" style="display:none;">
-          <p><strong>IBAN:</strong> IT88Q0623023704000030225469 <button type="button" class="copy-btn"
-              onclick="copyText('IT88Q0623023704000030225469', this)" title="Copy">&#10697;</button></p>
-          <p style="margin-top:4px;" data-en="Beneficiary: Distretto A APS" data-it="Beneficiario: Distretto A APS">
-            <strong>Beneficiary: Distretto A APS</strong> <button type="button" class="copy-btn"
-              onclick="copyText('Distretto A APS', this)" title="Copy">&#10697;</button>
-          </p>
-          <p style="margin-top:8px;" data-en="Reference: ... [Your Name]" data-it="Causale:... [Tuo Nome]">Reference:
-            Festival '26 [Your Name]</p>
-          <p class="note" style="margin-top:10px; font-weight:bold; color:green; font-size: 13px;"
-            data-en="After completing the payment, make sure to press the BOOK NOW button."
-            data-it="Dopo aver completato il pagamento, premi il pulsante PRENOTA ORA.">
-            After completing the payment, make sure to press the BOOK NOW button.</p>
-        </div>
-        <p class="note" style="margin-top:12px;"
-          data-en="You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours."
-          data-it="Riceverai una conferma una volta verificato il pagamento. Potrebbero essere necessarie fino a 24–48 ore.">
-          You will receive a confirmation once your payment has been verified. This may take up to 24–48 hours.</p>
+
+        <a id="paypalLink" href="https://www.paypal.com/ncp/payment/JVV53DLH9RK3N" target="_blank" rel="noopener"
+          class="book-btn" style="display:none; text-align:center; text-decoration:none;" data-en="Book Now"
+          data-it="Prenota Ora">Book Now</a>
       </div>
-
-      <a id="paypalLink" href="https://www.paypal.com/ncp/payment/JVV53DLH9RK3N" target="_blank" rel="noopener"
-        class="book-btn" style="display:none; text-align:center; text-decoration:none;" data-en="Book Now"
-        data-it="Prenota Ora">Book Now</a>
       <button type="submit" class="book-btn" id="submitBtn" data-en="Book Now" data-it="Prenota Ora">Book Now</button>
       <div class="error-msg" id="errorMsg" style="display:none;"></div>
     </form>
@@ -529,10 +531,20 @@
                 soldOutMsg.style.display = 'none';
                 bookingForm.style.display = 'block';
 
-                inviteStatus.innerHTML = `<p style="color:green; font-weight:bold; text-align:center;">✓ Valid invite (${data.remainingUses} uses remaining)</p>`;
-                inviteStatus.style.borderColor = 'green';
-
+                // Store invite info globally
                 window.festivalInviteToken = inviteToken;
+                window.festivalInviteIsGift = data.isGift || false;
+
+                // Hide payment section for gift invites
+                if (data.isGift) {
+                    document.getElementById('paymentMethodSection').style.display = 'none';
+                    document.getElementById('membershipNote').style.display = 'none';
+
+                    inviteStatus.innerHTML = `<p style="color:green; font-weight:bold; text-align:center;">✓ Complimentary Invite<br><small>(${data.remainingUses} uses remaining)</small></p>`;
+                } else {
+                    inviteStatus.innerHTML = `<p style="color:green; font-weight:bold; text-align:center;">✓ Valid invite (${data.remainingUses} uses remaining)</p>`;
+                }
+                inviteStatus.style.borderColor = 'green';
             })
             .catch(err => {
                 // Invalid: show error, keep sold-out visible
@@ -632,14 +644,25 @@
       submitBtn.disabled = true;
       submitBtn.textContent = '...';
 
+      const isGift = window.festivalInviteIsGift || false;
+
       var payload = {
         name: document.getElementById('firstName').value.trim(),
         surname: document.getElementById('lastName').value.trim(),
         email: document.getElementById('email').value.trim(),
-        paymentMethod: paymentSelect.value,
+        paymentMethod: isGift ? null : paymentSelect.value,
         language: currentLang,
         invite_token: window.festivalInviteToken || undefined
       };
+
+      // Validate payment method only for non-gift tickets
+      if (!isGift && !payload.paymentMethod) {
+        errorMsg.textContent = 'Please select a payment method';
+        errorMsg.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = submitBtn.getAttribute('data-' + currentLang) || 'Book Now';
+        return;
+      }
 
       try {
         var res = await fetch(BASE_URL + '/festival/', {

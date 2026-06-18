@@ -1754,6 +1754,10 @@
                                         <tr>
                                             <td>
                                                 <code x-text="invite.token.slice(0, 8) + '...'"></code>
+                                                <span x-show="invite.isGift"
+                                                      style="margin-left:8px; padding:2px 6px; background:#fef3c7; color:#92400e; border:1px solid #fbbf24; border-radius:3px; font-size:10px; text-transform:uppercase; font-weight:bold;">
+                                                    OMAGGIO
+                                                </span>
                                             </td>
                                             <td x-text="invite.maxUses"></td>
                                             <td x-text="invite.usedCount"></td>
@@ -1789,6 +1793,14 @@
                             <h3>Crea Nuovo Invito</h3>
                             <label>Max Usi</label>
                             <input type="number" x-model="newInviteForm.maxUses" min="1" required>
+
+                            <label style="display:flex; gap:10px; align-items:center; margin-top:15px; cursor:pointer;">
+                                <input type="checkbox" x-model="newInviteForm.isGift" style="cursor:pointer;">
+                                <span>Invito omaggio (nessun pagamento richiesto)</span>
+                            </label>
+                            <p class="note" style="margin-top:5px; font-size:0.85rem; color:#666;">
+                                Se selezionato, gli ospiti NON dovranno inserire un metodo di pagamento.
+                            </p>
 
                             <label>Scade il</label>
                             <input type="datetime-local" x-model="newInviteForm.expiresAt" required>
