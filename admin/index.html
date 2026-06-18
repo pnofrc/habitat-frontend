@@ -1514,7 +1514,7 @@
                                     <template x-for="tier in festivalRevenueByPrice" :key="tier.category">
                                         <tr style="border-bottom: 1px solid #eee;">
                                             <td style="padding: 10px;">
-                                                <span x-text="tier.category.replace('_', ' ').toUpperCase()"
+                                                <span x-text="tier.category === 'gift' ? 'OMAGGIO' : tier.category.replace('_', ' ').toUpperCase()"
                                                       style="font-weight: 500;"></span>
                                                 <span x-text="' (€' + tier.price + ')'"
                                                       style="color: #888; font-size: 0.85em;"></span>
@@ -1794,13 +1794,15 @@
                             <label>Max Usi</label>
                             <input type="number" x-model="newInviteForm.maxUses" min="1" required>
 
-                            <label style="display:flex; gap:10px; align-items:center; justify-content:flex-start; margin-top:15px; cursor:pointer; text-align:left;">
-                                <input type="checkbox" x-model="newInviteForm.isGift" style="cursor:pointer;">
-                                <span>Invito omaggio (nessun pagamento richiesto)</span>
-                            </label>
-                            <p class="note" style="margin-top:5px; margin-left:0; font-size:0.85rem; color:#666; text-align:left;">
-                                Se selezionato, gli ospiti NON dovranno inserire un metodo di pagamento.
-                            </p>
+                            <div style="margin-top:15px; margin-bottom:10px;">
+                                <label style="display:block; cursor:pointer; text-align:left;">
+                                    <input type="checkbox" x-model="newInviteForm.isGift" style="margin-right:8px; cursor:pointer; vertical-align:middle;">
+                                    <span style="vertical-align:middle;">Invito omaggio (nessun pagamento richiesto)</span>
+                                </label>
+                                <p class="note" style="margin:5px 0 0 0; padding-left:22px; font-size:0.85rem; color:#666; text-align:left;">
+                                    Se selezionato, gli ospiti NON dovranno inserire un metodo di pagamento.
+                                </p>
+                            </div>
 
                             <label>Scade il</label>
                             <input type="datetime-local" x-model="newInviteForm.expiresAt" required>
