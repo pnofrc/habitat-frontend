@@ -71,13 +71,6 @@ document.addEventListener('alpine:init', () => {
         stats: { totalIn: 0, totalOut: 0, balance: 0 },
         loginData: { username: '', password: '' },
 
-        // Mobile state
-        isMobile: false,
-        activeTab: 'finance',
-        showMobileSidebar: false,
-        showFilters: false,
-        currentVenueIndex: 0,
-
         // User management state
         currentUser: null,
         usersList: [],
@@ -174,21 +167,6 @@ document.addEventListener('alpine:init', () => {
             return new Date().getFullYear();
         },
 
-        get mobileHeaderTitle() {
-            const titles = {
-                finance: 'Finance',
-                team: 'Team',
-                events: 'Eventi',
-                membership: 'Tessere',
-                admin: 'Admin'
-            };
-            return titles[this.activeTab] || 'Formulario';
-        },
-
-        get currentVenue() {
-            return this.plannerDayVenues[this.currentVenueIndex] || {};
-        },
-
         get paypalMatchedEmails() {
             if (!Array.isArray(this.paypalTransactions) || this.paypalTransactions.length === 0) {
                 return new Set();
@@ -265,9 +243,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         async init() {
-            this.checkMobile();
-            window.addEventListener('resize', () => this.checkMobile());
-
             if (this.token) {
                 const ok = await this.fetchCurrentUser();
                 if (ok) await this.fetchData();
@@ -357,55 +332,7 @@ document.addEventListener('alpine:init', () => {
             this.editingCategory = null;
             this.editingTarget = null;
             this.confirmModal = null;
-            if (this.isMobile) this.closeMobileSidebar();
             await this.fetchData();
-        },
-
-        checkMobile() {
-            this.isMobile = window.innerWidth < 768;
-            if (!this.isMobile) this.showMobileSidebar = false;
-        },
-
-        setActiveTab(tab) {
-            this.activeTab = tab;
-            const tabViews = {
-                finance: 'expenses',
-                team: 'guests',
-                events: 'festival',
-                admin: 'users',
-                membership: 'membership'
-            };
-            this.setView(tabViews[tab]);
-        },
-
-        openMobileSidebar() {
-            if (this.isMobile) {
-                this.showMobileSidebar = true;
-                document.body.style.overflow = 'hidden';
-            }
-        },
-
-        closeMobileSidebar() {
-            this.showMobileSidebar = false;
-            document.body.style.overflow = '';
-        },
-
-        prevVenue() {
-            if (this.currentVenueIndex > 0) this.currentVenueIndex--;
-        },
-
-        nextVenue() {
-            if (this.currentVenueIndex < this.plannerDayVenues.length - 1) this.currentVenueIndex++;
-        },
-
-        getActsForVenueAndSlot(venueId, slotValue) {
-            return this.plannerActs.filter(act => {
-                if (act.venueId !== venueId || act.day !== this.plannerSelectedDay) return false;
-                const slotTime = parseInt(slotValue.replace(':', ''));
-                const actStart = parseInt(act.startTime.replace(':', ''));
-                const actEnd = parseInt(act.endTime.replace(':', ''));
-                return slotTime >= actStart && slotTime < actEnd;
-            });
         },
 
         async fetchData() {
@@ -660,12 +587,7 @@ document.addEventListener('alpine:init', () => {
                     labels,
                     datasets: [{ label: 'Saldo', data, borderColor: '#000', tension: 0.1, fill: false }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    aspectRatio: window.innerWidth < 768 ? 1.5 : 2.5,
-                    scales: { x: { ticks: { font: { size: 9 } } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { font: { size: 9 } } } } }
             });
         },
 
@@ -1128,7 +1050,6 @@ document.addEventListener('alpine:init', () => {
 
         openCreateGuest() {
             this.editingGuest = { name: '', email: '', phone: '', isConfirmed: false };
-            this.openMobileSidebar();
         },
 
         async saveGuest() {
@@ -1252,12 +1173,10 @@ document.addEventListener('alpine:init', () => {
                 isExit: true, receiptType: 'nessuno', payerType: 'habitat', paymentMethod: 'cash',
                 isRepeatable: false, repeatInterval: 'monthly', expenseType: ''
             };
-            this.openMobileSidebar();
         },
 
         openEdit(item) {
             this.editingItem = { ...item, isExit: String(item.isExit) === 'true', date: item.date.split('T')[0] };
-            this.openMobileSidebar();
         },
 
         async openCreateBooking() {
@@ -1271,7 +1190,6 @@ document.addEventListener('alpine:init', () => {
                 feedback: '',
                 room: 'da assegnare'
             };
-            this.openMobileSidebar();
         },
 
         async openEditBooking(b) {
@@ -1289,7 +1207,6 @@ document.addEventListener('alpine:init', () => {
                 guest: guestId,
                 feedback: b.feedback || ''
             };
-            this.openMobileSidebar();
         },
 
         async startResidencyApproval(r) {
@@ -1374,7 +1291,6 @@ document.addEventListener('alpine:init', () => {
 
         openCreateResidency() {
             this.editingResidency = { name: '', email: '', fromDate: '', toDate: '', proposal: '' };
-            this.openMobileSidebar();
         },
 
         async saveResidency() {
@@ -1773,7 +1689,6 @@ document.addEventListener('alpine:init', () => {
                 endTime: '',
                 price: 0,
             };
-            this.openMobileSidebar();
         },
 
         openEditAct(act) {
@@ -1782,7 +1697,6 @@ document.addEventListener('alpine:init', () => {
                 venueId: act.venueId || act.venue?.id || null,
             };
             delete this.editingAct.venue;
-            this.openMobileSidebar();
         },
 
         async saveAct() {
@@ -2067,7 +1981,6 @@ document.addEventListener('alpine:init', () => {
                 quantity: ticket.quantity || 1,
                 notes: ticket.notes || ''
             };
-            this.openMobileSidebar();
         },
 
         async saveFestivalTicketEdit() {
@@ -2241,15 +2154,10 @@ document.addEventListener('alpine:init', () => {
                 this.calendarInstance = null;
             }
             const self = this;
-            const isMobile = window.innerWidth < 768;
             this.calendarInstance = new FullCalendar.Calendar(el, {
-                initialView: isMobile ? 'listWeek' : 'dayGridMonth',
+                initialView: 'dayGridMonth',
                 locale: 'it',
-                headerToolbar: isMobile ? {
-                    left: 'prev,next',
-                    center: 'title',
-                    right: 'dayGridMonth,listWeek'
-                } : {
+                headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,listWeek'

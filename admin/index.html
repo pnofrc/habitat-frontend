@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Formulario</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
@@ -64,38 +63,13 @@
 
         .logincard {
             border: 1px solid #000;
-            padding: 20px;
+            padding: 15px;
             margin-bottom: 20px;
-            width: 280px;
-            max-width: 90%;
+            width: 200px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-        }
-
-        .logincard input {
-            width: 100%;
-            min-height: 44px;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 1px solid #000;
-            font-family: courier;
-            font-size: 14px;
-        }
-
-        .logincard label {
-            align-self: flex-start;
-            margin-bottom: 4px;
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #666;
-        }
-
-        .logincard button {
-            width: 100%;
-            min-height: 48px;
-            margin-top: 8px;
         }
 
         table {
@@ -606,391 +580,6 @@
             padding: 0 14px;
             margin-bottom: 0;
         }
-
-        /* Mobile Styles */
-        @media (max-width: 767px) {
-            /* Login page mobile */
-            .logincard {
-                width: 100%;
-                max-width: 320px;
-                padding: 24px;
-                margin: 0 16px;
-            }
-
-            .logincard img {
-                height: 48px !important;
-                margin-bottom: 24px !important;
-            }
-
-            .logincard input {
-                font-size: 16px;
-                /* Prevent zoom on iOS */
-            }
-
-            /* Hide desktop nav */
-            nav {
-                display: none !important;
-            }
-
-            /* Mobile header */
-            .mobile-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 12px;
-                border-bottom: 1px solid #000;
-                position: sticky;
-                top: 0;
-                background: #fff;
-                z-index: 20;
-            }
-
-            /* Secondary navigation */
-            .mobile-secondary-nav {
-                display: flex;
-                gap: 8px;
-                overflow-x: auto;
-                padding: 8px 12px;
-                border-bottom: 1px solid #eee;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-                background: #fff;
-                position: sticky;
-                top: 48px;
-                z-index: 19;
-            }
-
-            .mobile-secondary-nav::-webkit-scrollbar {
-                display: none;
-            }
-
-            .mobile-secondary-nav button {
-                padding: 8px 16px;
-                white-space: nowrap;
-                border: 1px solid #ccc;
-                background: #fff;
-                font-size: 11px;
-                text-transform: uppercase;
-                min-height: 36px;
-                flex-shrink: 0;
-            }
-
-            .mobile-secondary-nav button.active {
-                background: #000;
-                color: #fff;
-                border-color: #000;
-            }
-
-            /* Bottom navigation */
-            .mobile-bottom-nav {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 64px;
-                background: #fff;
-                border-top: 1px solid #000;
-                display: flex;
-                justify-content: space-around;
-                align-items: center;
-                z-index: 100;
-                padding: 0;
-                gap: 0;
-            }
-
-            .mobile-tab {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                flex: 1;
-                height: 100%;
-                border: none;
-                background: none;
-                padding: 4px;
-                gap: 2px;
-                min-height: 64px;
-                text-transform: none;
-            }
-
-            .mobile-tab.active {
-                background: rgba(0, 0, 0, 0.05);
-                font-weight: bold;
-            }
-
-            .mobile-tab-icon {
-                font-size: 20px;
-                line-height: 1;
-            }
-
-            .mobile-tab-label {
-                font-size: 10px;
-                text-transform: uppercase;
-            }
-
-            /* Container adjustments */
-            .container {
-                padding: 12px;
-                padding-bottom: 80px;
-            }
-
-            /* Hide desktop tables */
-            .desktop-table {
-                display: none;
-            }
-
-            /* Mobile card styles */
-            .mobile-card-list {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .mobile-card {
-                border: 1px solid #000;
-                padding: 14px;
-                cursor: pointer;
-                background: #fff;
-            }
-
-            .mobile-card:active {
-                background: #f9f9f9;
-            }
-
-            .mobile-card-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 10px;
-            }
-
-            .mobile-card-header h4 {
-                margin: 0;
-                font-size: 13px;
-                font-weight: bold;
-                flex: 1;
-            }
-
-            .mobile-badge {
-                font-size: 12px;
-                font-weight: bold;
-                padding: 4px 8px;
-                border-radius: 4px;
-                white-space: nowrap;
-                margin-left: 8px;
-            }
-
-            .badge-green {
-                background: rgba(16, 185, 129, 0.1);
-                color: #10b981;
-            }
-
-            .badge-red {
-                background: rgba(239, 68, 68, 0.1);
-                color: #ef4444;
-            }
-
-            .badge-blue {
-                background: rgba(59, 130, 246, 0.1);
-                color: #3b82f6;
-            }
-
-            .badge-gray {
-                background: rgba(107, 114, 128, 0.1);
-                color: #6b7280;
-            }
-
-            .mobile-card-body {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-bottom: 8px;
-            }
-
-            .mobile-card-row {
-                display: flex;
-                justify-content: space-between;
-                font-size: 12px;
-                gap: 8px;
-            }
-
-            .mobile-label {
-                color: #888;
-                text-transform: uppercase;
-                font-size: 10px;
-                font-weight: normal;
-                white-space: nowrap;
-            }
-
-            .mobile-card-actions {
-                display: flex;
-                gap: 8px;
-                border-top: 1px solid #eee;
-                padding-top: 10px;
-                margin-top: 4px;
-            }
-
-            .mobile-card-actions button {
-                flex: 1;
-                border: 1px solid #000;
-                padding: 8px;
-                min-height: 44px;
-                background: #fff;
-            }
-
-            .mobile-card-actions button:active {
-                background: #f0f0f0;
-            }
-
-            /* Sidebar as bottom sheet */
-            .sidebar {
-                position: fixed;
-                top: auto;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                height: 85vh;
-                max-height: none;
-                transform: translateY(100%);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                border-left: none;
-                border-top: 1px solid #000;
-                border-radius: 16px 16px 0 0;
-                z-index: 400;
-                overflow-y: auto;
-            }
-
-            .sidebar.mobile-open {
-                transform: translateY(0);
-            }
-
-            .sidebar::before {
-                content: '';
-                position: absolute;
-                top: 8px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 40px;
-                height: 4px;
-                background: #ccc;
-                border-radius: 2px;
-            }
-
-            .sidebar-backdrop {
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.4);
-                z-index: 350;
-                display: block;
-            }
-
-            /* Mobile Planner */
-            .planner-grid {
-                display: none;
-            }
-
-            .mobile-planner {
-                display: block;
-            }
-
-            .mobile-venue-selector {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 12px;
-                border: 1px solid #000;
-                margin-bottom: 10px;
-                background: #f9f9f9;
-            }
-
-            .mobile-venue-selector button {
-                padding: 8px 16px;
-                background: #fff;
-                border: 1px solid #000;
-                font-size: 16px;
-                min-height: 44px;
-            }
-
-            .mobile-venue-selector button:disabled {
-                opacity: 0.3;
-                cursor: not-allowed;
-            }
-
-            .mobile-time-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-            }
-
-            .mobile-time-row {
-                display: grid;
-                grid-template-columns: 50px 1fr;
-                min-height: 40px;
-                border-bottom: 1px solid #eee;
-            }
-
-            .mobile-time-row .time-label {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 11px;
-                color: #666;
-                background: #fafafa;
-                border-right: 1px solid #eee;
-            }
-
-            .mobile-act-slot {
-                padding: 4px;
-                background: #fff;
-                cursor: pointer;
-                min-height: 36px;
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .act-block {
-                padding: 8px;
-                border-radius: 4px;
-                font-size: 11px;
-                border: 1px solid;
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-            }
-
-            .act-block strong {
-                font-size: 12px;
-            }
-
-            .act-block small {
-                font-size: 10px;
-                color: #666;
-            }
-
-            /* Touch targets */
-            button, a, .clickable {
-                min-height: 44px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            input, select, textarea {
-                min-height: 44px;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .mobile-header,
-            .mobile-bottom-nav,
-            .desktop-hide,
-            .mobile-card-list,
-            .sidebar-backdrop {
-                display: none !important;
-            }
-        }
     </style>
 </head>
 
@@ -1010,36 +599,6 @@
 
     <template x-if="token">
         <main>
-            <!-- Mobile Header -->
-            <div class="mobile-header" x-show="isMobile">
-                <img src="https://habitattt.it/images/h.logo.png" style="height: 24px;">
-                <h1 x-text="mobileHeaderTitle" style="margin: 0; font-size: 16px; text-transform: uppercase;"></h1>
-                <button @click="logout" style="font-size: 10px;">LOGOUT</button>
-            </div>
-
-            <!-- Mobile Secondary Navigation -->
-            <div class="mobile-secondary-nav" x-show="isMobile && activeTab === 'finance'">
-                <button @click="setView('expenses')" :class="view === 'expenses' && 'active'">Flow Cassa</button>
-                <button @click="setView('finance')" :class="view === 'finance' && 'active'">Finance</button>
-            </div>
-
-            <div class="mobile-secondary-nav" x-show="isMobile && activeTab === 'team'">
-                <button @click="setView('guests')" :class="view === 'guests' && 'active'">Ospiti</button>
-                <button @click="setView('bookings')" :class="view === 'bookings' && 'active'">Prenotazioni</button>
-                <button @click="setView('residency')" :class="view === 'residency' && 'active'">Residenze</button>
-            </div>
-
-            <div class="mobile-secondary-nav" x-show="isMobile && activeTab === 'events'">
-                <button @click="setView('festival')" :class="view === 'festival' && 'active'">Festival</button>
-                <button @click="setView('calendar')" :class="view === 'calendar' && 'active'">Calendar</button>
-            </div>
-
-            <div class="mobile-secondary-nav" x-show="isMobile && activeTab === 'admin' && currentUser?.role === 'admin'">
-                <button @click="setView('users')" :class="view === 'users' && 'active'">Users</button>
-                <button @click="setView('telegram')" :class="view === 'telegram' && 'active'">Telegram</button>
-                <button @click="setView('activity')" :class="view === 'activity' && 'active'">Activity</button>
-            </div>
-
             <nav>
                 <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
                     style="height: 28px; margin-right: 10px;">
@@ -1092,7 +651,7 @@
                             <button @click="window.open('sheet-associati.html', '_blank')"
                                 style="border:1px solid #000; padding:5px 10px;">APRI FOGLIO CALCOLO</button>
                         </div>
-                        <table class="activity-table desktop-table">
+                        <table class="activity-table">
                             <thead>
                                 <tr>
                                     <th>Socio</th>
@@ -1128,41 +687,6 @@
                                 </template>
                             </tbody>
                         </table>
-
-                        <!-- Mobile Card View -->
-                        <div class="mobile-card-list desktop-hide" x-show="isMobile">
-                            <template x-for="m in filteredMemberships" :key="m.id">
-                                <div class="mobile-card" @click="editingMembership = m">
-                                    <div class="mobile-card-header">
-                                        <h4 x-text="formatName(m.surname) + ' ' + formatName(m.name)"></h4>
-                                        <span class="mobile-badge" :class="membershipTab === 'requests' ? 'badge-blue' : 'badge-green'" x-text="membershipTab === 'requests' ? 'Richiesta' : 'Confermato'"></span>
-                                    </div>
-                                    <div class="mobile-card-body">
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Email</span>
-                                            <span x-text="m.email"></span>
-                                        </div>
-                                        <div class="mobile-card-row" x-show="m.city">
-                                            <span class="mobile-label">Città</span>
-                                            <span x-text="m.city"></span>
-                                        </div>
-                                        <div class="mobile-card-row" x-show="m.interestHabitat || m.interestDistrettoA || m.interestQuazar">
-                                            <span class="mobile-label">Interessi</span>
-                                            <span x-text="[m.interestHabitat && 'Habitat', m.interestDistrettoA && 'Distretto A', m.interestQuazar && 'Quazar'].filter(Boolean).join(', ')" style="font-size: 11px;"></span>
-                                        </div>
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Pagamento</span>
-                                            <span x-text="m.paymentMethod"></span>
-                                        </div>
-                                    </div>
-                                    <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                        <button x-show="membershipTab === 'requests'" @click="confirmMembership(m)">Conferma</button>
-                                        <button @click="editingMembership = m">Dettagli</button>
-                                        <button @click="deleteItem(m.id)">Elimina</button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
                     </div>
 
                     <div class="card" x-show="membershipTab === 'confirmed' && deletedMemberships.length > 0">
@@ -1250,7 +774,7 @@
                                 Gestisci Categorie</button>
                         </div>
 
-                        <table class="desktop-table">
+                        <table>
                             <thead>
                                 <tr>
                                     <th>Titolo</th>
@@ -1287,44 +811,6 @@
                                 </template>
                             </tbody>
                         </table>
-
-                        <!-- Mobile Card View -->
-                        <div class="mobile-card-list desktop-hide" x-show="isMobile">
-                            <template x-for="item in filteredItems" :key="item.id">
-                                <div class="mobile-card" @click="canWrite && openEdit(item)">
-                                    <div class="mobile-card-header">
-                                        <h4 x-text="item.title"></h4>
-                                        <span class="mobile-badge" :class="item.isExit ? 'badge-red' : 'badge-green'" x-text="item.amount + '€'"></span>
-                                    </div>
-                                    <div class="mobile-card-body">
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Data</span>
-                                            <span x-text="formatDate(item.date)"></span>
-                                        </div>
-                                        <div class="mobile-card-row" x-show="item.expenseType">
-                                            <span class="mobile-label">Tipo</span>
-                                            <span x-text="item.expenseType" style="text-transform: capitalize;"></span>
-                                        </div>
-                                        <div class="mobile-card-row" x-show="item.payerType === 'habitat' || item.specificHabitante">
-                                            <span class="mobile-label">Pagato da</span>
-                                            <span x-text="item.payerType === 'habitat' ? 'Habitat' : item.specificHabitante" style="text-transform: capitalize;"></span>
-                                        </div>
-                                        <div class="mobile-card-row" x-show="item.paymentMethod">
-                                            <span class="mobile-label">Modalità</span>
-                                            <span x-text="item.paymentMethod"></span>
-                                        </div>
-                                        <div class="mobile-card-row" x-show="item.receiptType && item.receiptType !== 'nessuno'">
-                                            <span class="mobile-label">Documento</span>
-                                            <span x-text="item.receiptType"></span>
-                                        </div>
-                                    </div>
-                                    <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                        <button @click="openEdit(item)">Modifica</button>
-                                        <button @click="deleteItem(item.id)">Elimina</button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
                     </div>
                 </div>
 
@@ -1611,7 +1097,7 @@
                                 <button x-show="canWrite" @click="openCreateGuest()" class="create">+ NUOVO
                                     OSPITE</button>
                             </div>
-                            <table class="desktop-table">
+                            <table>
                                 <thead>
                                     <tr>
                                         <th>Ospite</th>
@@ -1639,28 +1125,6 @@
                                     </template>
                                 </tbody>
                             </table>
-
-                            <!-- Mobile Card View -->
-                            <div class="mobile-card-list desktop-hide" x-show="isMobile">
-                                <template x-for="g in items" :key="g.id">
-                                    <div class="mobile-card" @click="selectGuest(g)">
-                                        <div class="mobile-card-header">
-                                            <h4 x-text="g.name"></h4>
-                                            <span class="mobile-badge" :class="g.isConfirmed ? 'badge-green' : 'badge-red'" x-text="g.isConfirmed ? 'OK' : 'DA CONFERMARE'"></span>
-                                        </div>
-                                        <div class="mobile-card-body">
-                                            <div class="mobile-card-row" x-show="isGuestPresent(g.id)">
-                                                <span class="mobile-label">Stato</span>
-                                                <span style="color: green; font-weight: bold;">In casa</span>
-                                            </div>
-                                        </div>
-                                        <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                            <button @click="selectGuest(g)">Dettagli</button>
-                                            <button @click="deleteItem(g.id)">Elimina</button>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
                         </div>
                     </template>
 
@@ -1778,7 +1242,7 @@
                             </button>
                         </div>
 
-                        <table class="desktop-table" x-show="bookingSubTab === 'active'">
+                        <table x-show="bookingSubTab === 'active'">
                             <thead>
                                 <tr>
                                     <th>Ospite</th>
@@ -1832,46 +1296,7 @@
                             </tbody>
                         </table>
 
-                        <!-- Mobile Card View - Active -->
-                        <div class="mobile-card-list desktop-hide" x-show="isMobile && bookingSubTab === 'active'">
-                            <template x-for="b in items.filter(b => b.guestStatus !== 'checkout')" :key="b.id">
-                                <div class="mobile-card" @click="canWrite && openEditBooking(b)">
-                                    <div class="mobile-card-header">
-                                        <h4>
-                                            <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
-                                            <span x-show="!b.hasMembership && b.guestStatus === 'standby'" style="color:red; margin-left:4px;">⚠</span>
-                                        </h4>
-                                        <span class="mobile-badge badge-blue" x-text="getGuestStatusLabel(b.guestStatus)"></span>
-                                    </div>
-                                    <div class="mobile-card-body">
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Stanza</span>
-                                            <span x-text="b.room"></span>
-                                        </div>
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Check-in</span>
-                                            <span x-text="formatDate(b.checkIn)"></span>
-                                        </div>
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Check-out</span>
-                                            <span x-text="formatDate(b.checkOut)"></span>
-                                        </div>
-                                    </div>
-                                    <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                        <template x-if="b.guestStatus === 'standby' && b.status !== 'cancelled'">
-                                            <button @click="b.hasMembership && checkinGuest(b.id)" :disabled="!b.hasMembership" :style="!b.hasMembership ? 'opacity: 0.5; cursor: not-allowed;' : ''">Check-in</button>
-                                        </template>
-                                        <template x-if="b.guestStatus === 'in_progress'">
-                                            <button @click="openCheckout(b.id)">Checkout</button>
-                                        </template>
-                                        <button @click="openEditBooking(b)">Modifica</button>
-                                        <button @click="deleteItem(b.id)">Elimina</button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-
-                        <table class="desktop-table" x-show="bookingSubTab === 'completed'">
+                        <table x-show="bookingSubTab === 'completed'">
                             <thead>
                                 <tr>
                                     <th>Ospite</th>
@@ -1909,36 +1334,6 @@
                                 </template>
                             </tbody>
                         </table>
-
-                        <!-- Mobile Card View - Completed -->
-                        <div class="mobile-card-list desktop-hide" x-show="isMobile && bookingSubTab === 'completed'">
-                            <template x-for="b in items.filter(b => b.guestStatus === 'checkout')" :key="b.id">
-                                <div class="mobile-card" @click="canWrite && openEditBooking(b)">
-                                    <div class="mobile-card-header">
-                                        <h4 x-text="b.guest?.name || b.guest || 'N/A'"></h4>
-                                        <span class="mobile-badge badge-gray">Completata</span>
-                                    </div>
-                                    <div class="mobile-card-body">
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Stanza</span>
-                                            <span x-text="b.room"></span>
-                                        </div>
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Check-in</span>
-                                            <span x-text="formatDate(b.checkIn)"></span>
-                                        </div>
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Check-out</span>
-                                            <span x-text="formatDate(b.checkOut)"></span>
-                                        </div>
-                                    </div>
-                                    <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                        <button @click="openEditBooking(b)">Dettagli</button>
-                                        <button @click="deleteItem(b.id)">Elimina</button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
                     </div>
 
                     <div class="card" x-show="deletedBookings.length > 0">
@@ -1979,7 +1374,7 @@
                     <div class="card">
                         <button x-show="canWrite" @click="openCreateResidency()" class="create">+ NUOVA
                             RICHIESTA</button>
-                        <table class="desktop-table">
+                        <table>
                             <thead>
                                 <tr>
                                     <th>Nome</th>
@@ -2010,37 +1405,6 @@
                                 </template>
                             </tbody>
                         </table>
-
-                        <!-- Mobile Card View -->
-                        <div class="mobile-card-list desktop-hide" x-show="isMobile">
-                            <template x-for="r in items" :key="r.id">
-                                <div class="mobile-card">
-                                    <div class="mobile-card-header">
-                                        <h4 x-text="r.name"></h4>
-                                        <span class="mobile-badge badge-blue">Residenza</span>
-                                    </div>
-                                    <div class="mobile-card-body">
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Richiesta</span>
-                                            <span x-text="formatDate(r.createdAt)"></span>
-                                        </div>
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Dal</span>
-                                            <span x-text="formatDate(r.fromDate)"></span>
-                                        </div>
-                                        <div class="mobile-card-row">
-                                            <span class="mobile-label">Al</span>
-                                            <span x-text="formatDate(r.toDate)"></span>
-                                        </div>
-                                    </div>
-                                    <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                        <button x-show="r.proposal" @click="proposalModal = r">Proposta</button>
-                                        <button @click="startResidencyApproval(r)">Approva</button>
-                                        <button @click="startResidencyRejection(r)">Rifiuta</button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
                     </div>
 
                     <div class="card" x-show="deletedResidencies.length > 0">
@@ -2186,7 +1550,7 @@
                                 Caricamento pagamenti PayPal...
                             </div>
 
-                            <table class="desktop-table">
+                            <table>
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
@@ -2221,47 +1585,11 @@
                                     </template>
                                 </tbody>
                             </table>
-
-                            <!-- Mobile Card View - Pending -->
-                            <div class="mobile-card-list desktop-hide" x-show="isMobile">
-                                <template x-for="t in festivalTickets.filter(t => !t.confirmed)" :key="t.id">
-                                    <div class="mobile-card" :class="hasPaypalMatch(t) && 'has-payment'">
-                                        <div class="mobile-card-header">
-                                            <h4 x-text="t.name + ' ' + t.surname"></h4>
-                                            <span class="mobile-badge badge-blue">
-                                                <span x-text="t.quantity || 1"></span> <span x-show="(t.quantity || 1) > 1">pax</span>
-                                            </span>
-                                        </div>
-                                        <div class="mobile-card-body">
-                                            <div class="mobile-card-row">
-                                                <span class="mobile-label">Email</span>
-                                                <span x-text="t.email" style="font-size: 11px;"></span>
-                                            </div>
-                                            <div class="mobile-card-row">
-                                                <span class="mobile-label">Pagamento</span>
-                                                <span>
-                                                    <span x-text="t.paymentMethod" style="text-transform: uppercase;"></span>
-                                                    <span x-show="hasPaypalMatch(t)" style="color: green; margin-left: 4px;">✓</span>
-                                                </span>
-                                            </div>
-                                            <div class="mobile-card-row">
-                                                <span class="mobile-label">Data</span>
-                                                <span x-text="formatDate(t.createdAt)"></span>
-                                            </div>
-                                        </div>
-                                        <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                            <button @click="startEditFestivalTicket(t)">Modifica</button>
-                                            <button @click="startFestivalApproval(t)">Conferma</button>
-                                            <button @click="deleteFestivalTicket(t.id)">Elimina</button>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
                         </div>
 
                         <div class="card" x-show="festivalTickets.filter(t => t.confirmed).length > 0">
                             <h3 style="margin:0 0 15px; color:green">Confermati <span style="font-weight:normal; font-size:12px;" x-text="'(' + festivalTickets.filter(t => t.confirmed).reduce((sum, t) => sum + (t.quantity || 1), 0) + ' biglietti, ' + festivalTickets.filter(t => t.confirmed).length + ' prenotazioni)'"></span></h3>
-                            <table class="desktop-table">
+                            <table>
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
@@ -2288,34 +1616,6 @@
                                     </template>
                                 </tbody>
                             </table>
-
-                            <!-- Mobile Card View - Confirmed -->
-                            <div class="mobile-card-list desktop-hide" x-show="isMobile">
-                                <template x-for="t in festivalTickets.filter(t => t.confirmed)" :key="t.id">
-                                    <div class="mobile-card">
-                                        <div class="mobile-card-header">
-                                            <h4 x-text="t.name + ' ' + t.surname"></h4>
-                                            <span class="mobile-badge badge-green">
-                                                <span x-text="t.quantity || 1"></span> <span x-show="(t.quantity || 1) > 1">pax</span>
-                                            </span>
-                                        </div>
-                                        <div class="mobile-card-body">
-                                            <div class="mobile-card-row">
-                                                <span class="mobile-label">Email</span>
-                                                <span x-text="t.email" style="font-size: 11px;"></span>
-                                            </div>
-                                            <div class="mobile-card-row">
-                                                <span class="mobile-label">Pagamento</span>
-                                                <span x-text="t.paymentMethod" style="text-transform: uppercase;"></span>
-                                            </div>
-                                        </div>
-                                        <div class="mobile-card-actions" x-show="canWrite" @click.stop>
-                                            <button @click="startEditFestivalTicket(t)">Modifica</button>
-                                            <button @click="deleteFestivalTicket(t.id)">Elimina</button>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
                         </div>
 
                         <div class="card" x-show="deletedFestivalTickets.length > 0" x-data="{ open: false }">
@@ -2465,11 +1765,11 @@
                                             </td>
                                             <td>
                                                 <button @click="copyInviteLink(invite.token)"
-                                                        style="padding:4px 8px; font-size:11px; background:#007bff; color:white; border:none; cursor:pointer; margin-right:4px;">
+                                                        style="padding:4px 8px; font-size:11px; margin-right:4px;">
                                                     COPIA LINK
                                                 </button>
-                                                <button x-show="canWrite && invite.usedCount === 0" @click="deleteFestivalInvite(invite.id)"
-                                                        style="padding:4px 8px; font-size:11px; background:red; color:white; border:none; cursor:pointer;">
+                                                <button x-show="canWrite" @click="deleteFestivalInvite(invite.id)"
+                                                        style="padding:4px 8px; font-size:11px; background:red; color:white;">
                                                     ELIMINA
                                                 </button>
                                             </td>
@@ -2562,7 +1862,7 @@
                         </div>
 
                         <div class="card" style="overflow:auto;">
-                            <div class="planner-grid desktop-table"
+                            <div class="planner-grid"
                                 :style="`grid-template-columns: 50px repeat(${Math.max(plannerDayVenues.length, 1)}, minmax(140px, 1fr)); grid-template-rows: 40px repeat(${plannerTimeSlots.length}, 18px);`">
                                 <div class="time-label header" style="grid-row:1; grid-column:1;">ORA</div>
                                 <template x-for="(v, vIndex) in plannerDayVenues" :key="v.id">
@@ -2596,31 +1896,6 @@
                                             x-text="act.price ? ('€ ' + parseFloat(act.price).toFixed(2)) : '€ 0.00'"></small>
                                     </div>
                                 </template>
-                            </div>
-
-                            <!-- Mobile Planner -->
-                            <div class="mobile-planner desktop-hide" x-show="isMobile">
-                                <div class="mobile-venue-selector">
-                                    <button @click="prevVenue()" :disabled="currentVenueIndex === 0">◀</button>
-                                    <h3 x-text="currentVenue.name || 'Seleziona venue'" style="margin: 0;"></h3>
-                                    <button @click="nextVenue()" :disabled="currentVenueIndex >= plannerDayVenues.length - 1">▶</button>
-                                </div>
-
-                                <div class="mobile-time-grid">
-                                    <template x-for="slot in plannerTimeSlots" :key="slot.value">
-                                        <div class="mobile-time-row">
-                                            <span class="time-label" x-text="slot.label"></span>
-                                            <div class="mobile-act-slot">
-                                                <template x-for="act in getActsForVenueAndSlot(currentVenue.id, slot.value)" :key="act.id">
-                                                    <div class="act-block" @click="canWrite && openEditAct(act)" :style="`background: ${actColor(act)}; border-color: ${actBorderColor(act)};`">
-                                                        <strong x-text="act.title"></strong>
-                                                        <small x-text="act.startTime + ' - ' + act.endTime"></small>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
                             </div>
                         </div>
 
@@ -3022,12 +2297,9 @@
 
             </div>
 
-            <!-- Sidebar Backdrop -->
-            <div class="sidebar-backdrop" x-show="isMobile && showMobileSidebar" @click="closeMobileSidebar()"></div>
-
             <!-- SIDEBAR: Edit Expense -->
             <template x-if="editingItem">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingItem.id ? 'Modifica Voce' : 'Nuova Voce'"></h3>
                     <label>Titolo</label><input type="text" x-model="editingItem.title">
                     <label>Descrizione</label><textarea x-model="editingItem.description" rows="2"></textarea>
@@ -3105,7 +2377,7 @@
 
             <!-- SIDEBAR: Edit Guest -->
             <template x-if="editingGuest">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingGuest.id ? 'MODIFICA OSPITE' : 'NUOVO OSPITE'"></h3>
                     <label>Nome</label><input type="text" x-model="editingGuest.name">
                     <label>Email</label><input type="email" x-model="editingGuest.email">
@@ -3121,7 +2393,7 @@
 
             <!-- SIDEBAR: Edit Residency -->
             <template x-if="editingResidency">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingResidency.id ? 'MODIFICA RICHIESTA' : 'NUOVA RICHIESTA'"></h3>
                     <label>Nome</label><input type="text" x-model="editingResidency.name">
                     <label>Email</label><input type="email" x-model="editingResidency.email">
@@ -3136,7 +2408,7 @@
 
             <!-- SIDEBAR: Edit Booking -->
             <template x-if="editingBooking">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3>RESIDENZA</h3>
                     <template x-if="!editingBooking.id">
                         <label><input type="checkbox" x-model="newGuestToggle" style="width:auto"> Nuovo Ospite?</label>
@@ -3176,7 +2448,7 @@
 
             <!-- SIDEBAR: Edit User -->
             <template x-if="editingUser">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingUser.id ? 'MODIFICA UTENTE' : 'NUOVO UTENTE'"></h3>
                     <label>Username</label><input type="text" x-model="editingUser.username">
                     <label
@@ -3233,7 +2505,7 @@
 
             <!-- SIDEBAR: Calendar Event -->
             <template x-if="editingCalendarEvent">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingCalendarEvent.uid ? 'MODIFICA EVENTO' : 'NUOVO EVENTO'"></h3>
                     <label>Titolo</label><input type="text" x-model="editingCalendarEvent.summary">
                     <label style="margin-top:10px;">
@@ -3257,7 +2529,7 @@
 
             <!-- SIDEBAR: Edit Telegram Chat -->
             <template x-if="editingChat">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingChat.id ? 'MODIFICA CHAT' : 'NUOVA CHAT'"></h3>
                     <label>Chat ID</label>
                     <input type="text" x-model="editingChat.chatId" :disabled="!!editingChat.id">
@@ -3295,7 +2567,7 @@
 
             <!-- SIDEBAR: Edit Finance Entry -->
             <template x-if="editingFinance">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingFinance.id ? 'Modifica Voce' : 'Nuova Voce'"></h3>
 
                     <label>Name *</label>
@@ -3350,7 +2622,7 @@
 
             <!-- SIDEBAR: Edit Finance Category -->
             <template x-if="editingCategory">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingCategory.id ? 'Edit Category' : 'New Category'"></h3>
 
                     <label>Name *</label>
@@ -3364,7 +2636,7 @@
 
             <!-- SIDEBAR: Edit Yearly Target -->
             <template x-if="editingTarget">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="'Set Target for ' + editingTarget.year"></h3>
 
                     <label>Target Income (€)</label>
@@ -3449,7 +2721,7 @@
 
             <!-- SIDEBAR: Edit Flow Cassa Category -->
             <template x-if="editingFlowCassaCategory">
-                <div class="sidebar" :class="isMobile && showMobileSidebar && 'mobile-open'">
+                <div class="sidebar">
                     <h3 x-text="editingFlowCassaCategory.id ? 'Modifica Categoria' : 'Nuova Categoria'"></h3>
 
                     <label>Nome *</label>
@@ -4069,30 +3341,6 @@
                     </div>
                 </div>
             </template>
-
-            <!-- Mobile Bottom Navigation -->
-            <nav class="mobile-bottom-nav" x-show="isMobile">
-                <button class="mobile-tab" :class="activeTab === 'finance' && 'active'" @click="setActiveTab('finance')">
-                    <span class="mobile-tab-icon">💰</span>
-                    <span class="mobile-tab-label">Finance</span>
-                </button>
-                <button class="mobile-tab" :class="activeTab === 'team' && 'active'" @click="setActiveTab('team')">
-                    <span class="mobile-tab-icon">🏠</span>
-                    <span class="mobile-tab-label">Team</span>
-                </button>
-                <button class="mobile-tab" :class="activeTab === 'events' && 'active'" @click="setActiveTab('events')">
-                    <span class="mobile-tab-icon">📅</span>
-                    <span class="mobile-tab-label">Eventi</span>
-                </button>
-                <button class="mobile-tab" :class="activeTab === 'membership' && 'active'" @click="setActiveTab('membership')">
-                    <span class="mobile-tab-icon">👤</span>
-                    <span class="mobile-tab-label">Tessere</span>
-                </button>
-                <button class="mobile-tab" :class="activeTab === 'admin' && 'active'" @click="setActiveTab('admin')" x-show="currentUser?.role === 'admin'">
-                    <span class="mobile-tab-icon">⚙️</span>
-                    <span class="mobile-tab-label">Admin</span>
-                </button>
-            </nav>
 
         </main>
     </template>
