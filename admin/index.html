@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
@@ -95,7 +96,7 @@
         }
 
         .sidebar {
-            position: absolute;
+            position: fixed;
             top: 0;
             right: 0;
             width: 350px;
@@ -580,6 +581,139 @@
             padding: 0 14px;
             margin-bottom: 0;
         }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        .nav-hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            min-height: unset;
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: #000;
+            transition: all .2s;
+        }
+
+        .mobile-nav-drawer {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            body { font-size: 14px; }
+
+            nav {
+                padding: 10px 14px;
+                gap: 0;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            nav .nav-tabs { display: none !important; }
+            nav .nav-user { display: none !important; }
+            nav .nav-hamburger-area { display: flex !important; }
+
+            /* Mobile drawer */
+            .mobile-nav-drawer {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: #fff;
+                z-index: 500;
+                overflow-y: auto;
+                padding: 20px;
+            }
+
+            .mobile-nav-drawer .drawer-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid #000;
+                padding-bottom: 14px;
+                margin-bottom: 16px;
+            }
+
+            .mobile-nav-drawer button {
+                display: block;
+                width: 100%;
+                text-align: left;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 14px 0;
+                border-bottom: 1px solid #eee;
+                border-radius: 0;
+                min-height: unset;
+            }
+
+            .mobile-nav-drawer button.active {
+                text-decoration: underline;
+            }
+
+            .mobile-nav-drawer .drawer-logout {
+                color: red;
+                margin-top: 20px;
+                border-bottom: none;
+            }
+
+            /* Container */
+            .container {
+                padding: 12px;
+                max-width: 100%;
+            }
+
+            /* Sidebar: full screen */
+            .sidebar {
+                width: 100% !important;
+                left: 0;
+                right: 0;
+                border-left: none;
+                border-top: 2px solid #000;
+                padding: 16px;
+                top: 0;
+            }
+
+            /* Modal */
+            .modal-box {
+                width: 92vw;
+                max-width: 92vw;
+                padding: 16px;
+            }
+
+            /* Tables: horizontal scroll */
+            .card {
+                padding: 10px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table { min-width: 520px; }
+            table td { white-space: normal; }
+
+            /* Inputs: prevent iOS zoom */
+            input, select, textarea { font-size: 16px !important; }
+
+            /* Touch targets */
+            button { min-height: 40px; }
+            .btn-blk { padding: 13px; font-size: 14px; }
+            .btn-del { min-height: 36px; }
+
+            /* Flex rows wrap */
+            .activity-filters { grid-template-columns: 1fr; }
+            .planner-grid { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .timeline-wrap { padding: 12px; }
+
+            /* Cards stat row */
+            div[style*="display: flex"][style*="gap: 10px"][style*="text-align: center"] {
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
 
@@ -601,43 +735,110 @@
         <main>
             <nav>
                 <img src="https://habitattt.it/images/h.logo.png" alt="Habitat"
-                    style="height: 28px; margin-right: 10px;">
-                <button x-show="visibleTabs.includes('expenses')" :class="view === 'expenses' && 'active'"
-                    @click="setView('expenses')">Flow Cassa</button>
-                <button x-show="visibleTabs.includes('finance')" :class="view === 'finance' && 'active'"
-                    @click="setView('finance')">Finance</button>
-                <button x-show="visibleTabs.includes('guests')" :class="view === 'guests' && 'active'"
-                    @click="setView('guests')">Ospitalita'</button>
-                <button x-show="visibleTabs.includes('bookings')" :class="view === 'bookings' && 'active'"
-                    @click="setView('bookings')">Prenotazioni</button>
-                <button x-show="visibleTabs.includes('residency')" :class="view === 'residency' && 'active'"
-                    @click="setView('residency')">Residenze <span x-show="residencyCount > 0"
-                        x-text="'(' + residencyCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('membership')"
-                    :class="view === 'membership' && membershipTab === 'requests' && 'active'"
-                    @click="membershipTab = 'requests'; setView('membership')">Richiesta Tessere <span
-                        x-show="membershipRequestCount > 0" x-text="'(' + membershipRequestCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('membership')"
-                    :class="view === 'membership' && membershipTab === 'confirmed' && 'active'"
-                    @click="membershipTab = 'confirmed'; setView('membership')">Tesserati <span
-                        x-show="membershipConfirmedCount > 0"
-                        x-text="'(' + membershipConfirmedCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('festival')" :class="view === 'festival' && 'active'"
-                    @click="setView('festival')">Festival <span x-show="festivalTicketCount > 0"
-                        x-text="'(' + festivalTicketCount + ')'"></span></button>
-                <button x-show="visibleTabs.includes('calendar')" :class="view === 'calendar' && 'active'"
-                    @click="setView('calendar')">Calendario</button>
-                <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'"
-                    @click="setView('users')">Gestione Utenti</button>
-                <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'"
-                    @click="setView('telegram')">Telegram Bot</button>
-                <button x-show="visibleTabs.includes('activity')" :class="view === 'activity' && 'active'"
-                    @click="setView('activity')">Attivita'</button>
-                <span style="margin-left: auto; display: flex; align-items: center;">
+                    style="height: 28px; margin-right: 10px; flex-shrink:0;">
+
+                <!-- Desktop tabs -->
+                <div class="nav-tabs" style="display:flex; gap:20px; align-items:center; flex:1; flex-wrap:wrap;">
+                    <button x-show="visibleTabs.includes('expenses')" :class="view === 'expenses' && 'active'"
+                        @click="setView('expenses')">Flow Cassa</button>
+                    <button x-show="visibleTabs.includes('finance')" :class="view === 'finance' && 'active'"
+                        @click="setView('finance')">Finance</button>
+                    <span x-show="visibleTabs.includes('finance')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('guests')" :class="view === 'guests' && 'active'"
+                        @click="setView('guests')">Ospitalita'</button>
+                    <button x-show="visibleTabs.includes('bookings')" :class="view === 'bookings' && 'active'"
+                        @click="setView('bookings')">Prenotazioni</button>
+                    <button x-show="visibleTabs.includes('residency')" :class="view === 'residency' && 'active'"
+                        @click="setView('residency')">Residenze <span x-show="residencyCount > 0"
+                            x-text="'(' + residencyCount + ')'"></span></button>
+                    <span x-show="visibleTabs.includes('residency')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('membership')"
+                        :class="view === 'membership' && membershipTab === 'requests' && 'active'"
+                        @click="membershipTab = 'requests'; setView('membership')">Richiesta Tessere <span
+                            x-show="membershipRequestCount > 0" x-text="'(' + membershipRequestCount + ')'"></span></button>
+                    <button x-show="visibleTabs.includes('membership')"
+                        :class="view === 'membership' && membershipTab === 'confirmed' && 'active'"
+                        @click="membershipTab = 'confirmed'; setView('membership')">Tesserati <span
+                            x-show="membershipConfirmedCount > 0"
+                            x-text="'(' + membershipConfirmedCount + ')'"></span></button>
+                    <span x-show="visibleTabs.includes('membership')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('festival')" :class="view === 'festival' && 'active'"
+                        @click="setView('festival')">Festival <span x-show="festivalTicketCount > 0"
+                            x-text="'(' + festivalTicketCount + ')'"></span></button>
+                    <span x-show="visibleTabs.includes('festival')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('calendar')" :class="view === 'calendar' && 'active'"
+                        @click="setView('calendar')">Calendario</button>
+                    <span x-show="visibleTabs.includes('calendar')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'"
+                        @click="setView('users')">Gestione Utenti</button>
+                    <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'"
+                        @click="setView('telegram')">Telegram Bot</button>
+                    <button x-show="visibleTabs.includes('activity')" :class="view === 'activity' && 'active'"
+                        @click="setView('activity')">Attivita'</button>
+                </div>
+
+                <!-- Desktop user/logout -->
+                <span class="nav-user" style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                     <span class="user-info" x-show="currentUser" x-text="currentUser?.username"></span>
-                    <button @click="logout" style="color: red;">LOGOUT</button>
+                    <button @click="logout" style="color:red;">LOGOUT</button>
+                </span>
+
+                <!-- Mobile: current view label + hamburger -->
+                <span class="nav-hamburger-area" style="display:none; align-items:center; gap:10px; flex:1; justify-content:space-between;">
+                    <span style="font-size:13px; font-weight:bold; text-transform:uppercase;" x-text="view"></span>
+                    <button class="nav-hamburger" @click="mobileNavOpen = true" style="min-height:unset;">
+                        <span></span><span></span><span></span>
+                    </button>
                 </span>
             </nav>
+
+            <!-- Mobile drawer overlay -->
+            <div class="mobile-nav-drawer" x-show="mobileNavOpen" @click.self="mobileNavOpen = false">
+                <div class="drawer-header">
+                    <img src="https://habitattt.it/images/h.logo.png" alt="Habitat" style="height:24px;">
+                    <button @click="mobileNavOpen = false" style="font-size:22px; min-height:unset; padding:4px 8px; font-weight:normal;">✕</button>
+                </div>
+                <template x-if="visibleTabs.includes('expenses')">
+                    <button :class="view==='expenses'&&'active'" @click="setView('expenses'); mobileNavOpen=false">Flow Cassa</button>
+                </template>
+                <template x-if="visibleTabs.includes('finance')">
+                    <button :class="view==='finance'&&'active'" @click="setView('finance'); mobileNavOpen=false">Finance</button>
+                </template>
+                <template x-if="visibleTabs.includes('guests')">
+                    <button :class="view==='guests'&&'active'" @click="setView('guests'); mobileNavOpen=false">Ospitalita'</button>
+                </template>
+                <template x-if="visibleTabs.includes('bookings')">
+                    <button :class="view==='bookings'&&'active'" @click="setView('bookings'); mobileNavOpen=false">Prenotazioni</button>
+                </template>
+                <template x-if="visibleTabs.includes('residency')">
+                    <button :class="view==='residency'&&'active'" @click="setView('residency'); mobileNavOpen=false">Residenze <span x-show="residencyCount>0" x-text="'('+residencyCount+')'"></span></button>
+                </template>
+                <template x-if="visibleTabs.includes('membership')">
+                    <button :class="view==='membership'&&membershipTab==='requests'&&'active'" @click="membershipTab='requests'; setView('membership'); mobileNavOpen=false">Richiesta Tessere <span x-show="membershipRequestCount>0" x-text="'('+membershipRequestCount+')'"></span></button>
+                </template>
+                <template x-if="visibleTabs.includes('membership')">
+                    <button :class="view==='membership'&&membershipTab==='confirmed'&&'active'" @click="membershipTab='confirmed'; setView('membership'); mobileNavOpen=false">Tesserati <span x-show="membershipConfirmedCount>0" x-text="'('+membershipConfirmedCount+')'"></span></button>
+                </template>
+                <template x-if="visibleTabs.includes('festival')">
+                    <button :class="view==='festival'&&'active'" @click="setView('festival'); mobileNavOpen=false">Festival <span x-show="festivalTicketCount>0" x-text="'('+festivalTicketCount+')'"></span></button>
+                </template>
+                <template x-if="visibleTabs.includes('calendar')">
+                    <button :class="view==='calendar'&&'active'" @click="setView('calendar'); mobileNavOpen=false">Calendario</button>
+                </template>
+                <template x-if="visibleTabs.includes('users')">
+                    <button :class="view==='users'&&'active'" @click="setView('users'); mobileNavOpen=false">Gestione Utenti</button>
+                </template>
+                <template x-if="visibleTabs.includes('telegram')">
+                    <button :class="view==='telegram'&&'active'" @click="setView('telegram'); mobileNavOpen=false">Telegram Bot</button>
+                </template>
+                <template x-if="visibleTabs.includes('activity')">
+                    <button :class="view==='activity'&&'active'" @click="setView('activity'); mobileNavOpen=false">Attivita'</button>
+                </template>
+                <div style="border-top:1px solid #eee; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:12px; color:#666;" x-text="currentUser?.username"></span>
+                    <button class="drawer-logout" @click="logout; mobileNavOpen=false" style="color:red; width:auto; border:none;">LOGOUT</button>
+                </div>
+            </div>
 
             <div class="container">
 
@@ -737,6 +938,25 @@
                         </button>
                     </div>
 
+                    <!-- Cassa cibo -->
+                    <div class="card" style="margin-bottom: 20px; border-left: 4px solid #2c7a7b;">
+                        <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                            <div>
+                                <small style="color:#666;">CASSA CIBO — ENTRATE</small><br>
+                                <b x-text="'€' + cassaCiboIn.toFixed(2)" style="font-size:18px; color:#2c7a7b;"></b>
+                            </div>
+                            <div>
+                                <small style="color:#666;">SPESE CIBO</small><br>
+                                <b x-text="'€' + cassaCiboOut.toFixed(2)" style="font-size:18px; color:red;"></b>
+                            </div>
+                            <div>
+                                <small style="color:#666;">DISPONIBILE</small><br>
+                                <b x-text="'€' + cassaCiboBalance.toFixed(2)"
+                                   :style="cassaCiboBalance >= 0 ? 'font-size:18px; color:green;' : 'font-size:18px; color:red;'"></b>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px;">
@@ -765,6 +985,12 @@
                                         <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
                                     </template>
                                 </select>
+                                <select x-model="expenseSort" style="width: auto; margin:0">
+                                    <option value="date-desc">Data ↓</option>
+                                    <option value="date-asc">Data ↑</option>
+                                    <option value="alpha-asc">A → Z</option>
+                                    <option value="alpha-desc">Z → A</option>
+                                </select>
                             </div>
                             <button x-show="canWrite" @click="openCreate()"
                                 style="padding: 4px 10px; cursor: pointer; background: #000; color:#fff; border:none;">+
@@ -777,10 +1003,12 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th x-show="canWrite" style="width:40px;"></th>
                                     <th>Titolo</th>
                                     <th>&#x20AC;</th>
                                     <th>Data</th>
                                     <th>Tipo</th>
+                                    <th>Cibo</th>
                                     <th style="background: #fdf2f2;">Pagato da</th>
                                     <th style="background: #fdf2f2;">Modalita</th>
                                     <th style="background: #fdf2f2;">Documento</th>
@@ -788,23 +1016,27 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="item in filteredItems" :key="item.id">
+                                <template x-for="(item, idx) in filteredItems" :key="item.id">
                                     <tr>
                                         <td @click="canWrite && openEdit(item)" x-text="item.title"
                                             :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"></td>
                                         <td x-text="item.amount + '&#x20AC;'"
-                                            :style="item.isExit ? 'color:red' : 'color:green'"></td>
+                                            :style="String(item.isExit) === 'true' ? 'color:red' : 'color:green'"></td>
                                         <td x-text="formatDate(item.date)"></td>
                                         <td x-text="item.expenseType || '-'"
                                             style="text-transform: capitalize; font-size: 11px;"></td>
-
+                                        <td>
+                                            <span x-show="item.isFood && String(item.isExit) === 'true'"
+                                                title="Spesa cibo" style="color:#2c7a7b; font-size:14px;" x-text="foodEmoji(item.id)"></span>
+                                        </td>
                                         <td x-text="item.payerType === 'habitat' ? 'Habitat' : (item.specificHabitante || '-')"
                                             style="text-transform: capitalize; font-size: 11px;"></td>
-                                        <td x-text="item.paymentMethod || '-'" style="font-size: 11px; color: #666;">
+                                        <td x-text="item.paymentMethod || '-'" style="font-size: 11px; color: #666;"></td>
+                                        <td style="font-size: 11px;">
+                                            <span x-text="item.receiptType === 'nessuno' ? '-' : (item.receiptType || '-')"></span>
+                                            <a x-show="item.receiptImagePath" :href="BASE_URL + item.receiptImagePath"
+                                               target="_blank" style="font-size:10px; margin-left:4px; color:#2b6cb0;">📎</a>
                                         </td>
-                                        <td x-text="item.receiptType === 'nessuno' ? '-' : (item.receiptType || '-')"
-                                            style="font-size: 11px;"></td>
-
                                         <td x-show="canWrite"><button @click="deleteItem(item.id)"
                                                 class="btn-del">X</button></td>
                                     </tr>
@@ -885,8 +1117,10 @@
                                 <template x-for="item in filteredFinanceItems.filter(f => f.type === 'income')" :key="item.id">
                                     <tbody>
                                         <tr>
-                                            <td x-text="item.name" @click="canWrite && openEditFinance(item)"
-                                                :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"></td>
+                                            <td @click="canWrite && openEditFinance(item)"
+                                                :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
+                                                <span x-text="item.name"></span>
+                                            </td>
                                             <td x-text="item.category || '-'"></td>
                                             <td x-text="item.flowCategory ? getFlowCategoryLabel(item.flowCategory) : '-'"></td>
                                             <td x-text="'€' + item.amount.toFixed(2)" style="color: green;"></td>
@@ -935,8 +1169,10 @@
                                 <template x-for="item in filteredFinanceItems.filter(f => f.type === 'expense')" :key="item.id">
                                     <tbody>
                                         <tr>
-                                            <td x-text="item.name" @click="canWrite && openEditFinance(item)"
-                                                :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"></td>
+                                            <td @click="canWrite && openEditFinance(item)"
+                                                :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
+                                                <span x-text="item.name"></span>
+                                            </td>
                                             <td x-text="item.category || '-'"></td>
                                             <td x-text="item.flowCategory ? getFlowCategoryLabel(item.flowCategory) : '-'"></td>
                                             <td x-text="'€' + item.amount.toFixed(2)" style="color: red;"></td>
@@ -1255,15 +1491,38 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="b in items.filter(b => b.guestStatus !== 'checkout')" :key="b.id">
-                                    <tr
-                                        :class="(b.room === 'da assegnare' || (!b.hasMembership && b.guestStatus === 'standby')) && 'alert-red'">
+                                <template x-for="b in primaryBookings(['standby', 'in_progress'])" :key="b.id">
+                                    <tr :class="(b.room === 'da assegnare' ||
+                                        (b.guestStatus === 'standby' && (!b.hasMembership || b._compBookings?.some(cb => !cb.hasMembership)))) && 'alert-red'">
                                         <td @click="canWrite && openEditBooking(b)"
                                             :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
-                                            <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
-                                            <span x-show="!b.hasMembership && b.guestStatus === 'standby'"
-                                                title="Tessera associativa mancante"
-                                                style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
+                                            <!-- Camera doppia con gruppo: mostra tutti i nomi in fila -->
+                                            <template x-if="b._compBookings?.length > 0">
+                                                <span>
+                                                    <span x-text="b.guest?.name || 'N/A'"></span>
+                                                    <template x-for="cb in b._compBookings" :key="cb.id">
+                                                        <span> + <span x-text="cb.guest?.name"></span></span>
+                                                    </template>
+                                                    <span x-show="!b.hasMembership || b._compBookings?.some(cb => !cb.hasMembership)"
+                                                        title="Tessera mancante per almeno una persona"
+                                                        style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
+                                                </span>
+                                            </template>
+                                            <!-- Stanza condivisa o ospite singolo -->
+                                            <template x-if="!b._compBookings?.length">
+                                                <span>
+                                                    <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
+                                                    <span x-show="!b.hasMembership && b.guestStatus === 'standby'"
+                                                        title="Tessera associativa mancante"
+                                                        style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
+                                                </span>
+                                            </template>
+                                            <span x-show="b.rideToPersons?.length > 0 || b.needsRideTo"
+                                                :title="'Benzina andata: ' + (b.rideToPersons?.join(', ') || 'sì')"
+                                                style="margin-left:3px;">🚗↑<span x-show="b.rideToPersons?.length > 1" x-text="b.rideToPersons.length" style="font-size:10px;"></span></span>
+                                            <span x-show="b.rideFromPersons?.length > 0 || b.needsRideFrom"
+                                                :title="'Benzina ritorno: ' + (b.rideFromPersons?.join(', ') || 'sì')"
+                                                style="margin-left:1px;">🚗↓<span x-show="b.rideFromPersons?.length > 1" x-text="b.rideFromPersons.length" style="font-size:10px;"></span></span>
                                         </td>
                                         <td x-text="b.room"></td>
                                         <td x-text="formatDate(b.checkIn)"></td>
@@ -1279,16 +1538,17 @@
                                         </td>
                                         <td x-show="canWrite">
                                             <template x-if="b.guestStatus === 'standby' && b.status !== 'cancelled'">
-                                                <button @click="b.hasMembership && checkinGuest(b.id)"
-                                                    :disabled="!b.hasMembership"
-                                                    :style="!b.hasMembership
-                                                        ? 'background:#ccc; color:#666; padding:3px 8px; font-size:11px; cursor:not-allowed;'
-                                                        : 'background:#2c7a7b; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;'">CHECK-IN</button>
+                                                <button @click="checkinGuest(b.id)"
+                                                    style="background:#2c7a7b; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;">CHECK-IN</button>
                                             </template>
                                             <template x-if="b.guestStatus === 'in_progress'">
-                                                <button @click="openCheckout(b.id)"
-                                                    style="background:#000; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;">CHECKOUT</button>
+                                                <span>
+                                                    <button @click="openCheckout(b.id)"
+                                                        style="background:#000; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;">CHECKOUT</button>
+                                                </span>
                                             </template>
+                                            <button @click="window.open(BASE_URL + '/bookings/' + b.id + '/receipt', '_blank')"
+                                                style="padding:3px 8px; font-size:11px; cursor:pointer; margin-left:4px;">RICEVUTA</button>
                                             <button @click="deleteItem(b.id)" class="btn-del">X</button>
                                         </td>
                                     </tr>
@@ -1309,11 +1569,21 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="b in items.filter(b => b.guestStatus === 'checkout')" :key="b.id">
+                                <template x-for="b in primaryBookings(['checkout'])" :key="b.id">
                                     <tr>
                                         <td @click="canWrite && openEditBooking(b)"
                                             :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
-                                            <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
+                                            <template x-if="b._compBookings?.length > 0">
+                                                <span>
+                                                    <span x-text="b.guest?.name || 'N/A'"></span>
+                                                    <template x-for="cb in b._compBookings" :key="cb.id">
+                                                        <span> + <span x-text="cb.guest?.name"></span></span>
+                                                    </template>
+                                                </span>
+                                            </template>
+                                            <template x-if="!b._compBookings?.length">
+                                                <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
+                                            </template>
                                         </td>
                                         <td x-text="b.room"></td>
                                         <td x-text="formatDate(b.checkIn)"></td>
@@ -1361,6 +1631,8 @@
                                         <td>
                                             <button x-show="canWrite" @click="restoreBooking(b)" class="btn-del"
                                                 style="color:green" title="Ripristina">&#x21A9;</button>
+                                            <button x-show="canWrite" @click="purgeBooking(b)" class="btn-del"
+                                                style="color:red" title="Elimina definitivamente">X</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -1388,7 +1660,13 @@
                             <tbody>
                                 <template x-for="r in items" :key="r.id">
                                     <tr>
-                                        <td x-text="r.name"></td>
+                                        <td>
+                                            <span x-text="r.name"></span>
+                                            <template x-if="r.companions && r.companions.length > 0">
+                                                <span style="font-size:10px; color:#666; margin-left:5px;"
+                                                    x-text="'+' + r.companions.length + ' pers.'"></span>
+                                            </template>
+                                        </td>
                                         <td x-text="formatDate(r.createdAt)"></td>
                                         <td x-text="formatDate(r.fromDate)"></td>
                                         <td x-text="formatDate(r.toDate)"></td>
@@ -1446,6 +1724,8 @@
                                         <td>
                                             <button x-show="canWrite" @click="restoreResidency(r)" class="btn-del"
                                                 style="color:green" title="Ripristina">&#x21A9;</button>
+                                            <button x-show="canWrite" @click="purgeResidency(r)" class="btn-del"
+                                                style="color:red" title="Elimina definitivamente">X</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -2332,8 +2612,28 @@
                             <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
                         </template>
                     </select>
+                    <template x-if="String(editingItem.isExit) === 'false'">
+                        <div class="sub-box" style="margin-bottom:8px;">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:12px;">
+                                <input type="checkbox" x-model="editingItem.isOspitalita" style="width:auto; margin:0;">
+                                Ospitalità
+                            </label>
+                            <template x-if="editingItem.isOspitalita">
+                                <div style="display:flex; align-items:center; gap:6px; margin-top:8px;">
+                                    <label style="font-size:11px; color:#666; white-space:nowrap;">di cui cibo €</label>
+                                    <input type="number" min="0" step="0.01" x-model.number="editingItem.foodAmount" style="flex:1;">
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
                     <template x-if="String(editingItem.isExit) === 'true'">
                         <div class="sub-box">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="checkbox" x-model="editingItem.isFood" style="width:auto; margin:0;">
+                                <span>Spesa cibo 🥦 (scala budget virtuale)</span>
+                            </label>
+                            <br>
                             <label>Attivita pagata</label><input type="text" x-model="editingItem.paidActivity">
                             <label>Documento</label>
                             <select x-model="editingItem.receiptType">
@@ -2341,6 +2641,18 @@
                                 <option value="scontrino">Scontrino</option>
                                 <option value="fattura">Fattura</option>
                             </select>
+                            <template x-if="editingItem.receiptType !== 'nessuno'">
+                                <div style="margin-top:8px;">
+                                    <label>Immagine scontrino/fattura</label>
+                                    <input type="file" accept="image/*,application/pdf"
+                                           @change="receiptFile = $event.target.files[0]"
+                                           style="font-size:12px; padding:4px;">
+                                    <div x-show="editingItem.receiptImagePath" style="margin-top:4px;">
+                                        <a :href="BASE_URL + editingItem.receiptImagePath" target="_blank"
+                                           style="font-size:11px; color:#2b6cb0;">📎 Vedi allegato attuale</a>
+                                    </div>
+                                </div>
+                            </template>
                             <label style="margin-top:10px;">Chi ha pagato?</label>
                             <select x-model="editingItem.payerType">
                                 <option value="habitat">Habitat (Cassa comune)</option>
@@ -2409,11 +2721,30 @@
             <template x-if="editingResidency">
                 <div class="sidebar">
                     <h3 x-text="editingResidency.id ? 'MODIFICA RICHIESTA' : 'NUOVA RICHIESTA'"></h3>
-                    <label>Nome</label><input type="text" x-model="editingResidency.name">
+                    <label>Nome (referente)</label><input type="text" x-model="editingResidency.name">
                     <label>Email</label><input type="email" x-model="editingResidency.email">
                     <label>Dal</label><input type="date" x-model="editingResidency.fromDate">
                     <label>Al</label><input type="date" x-model="editingResidency.toDate">
                     <label>Proposta</label><textarea x-model="editingResidency.proposal" rows="4"></textarea>
+
+                    <div class="sub-box" style="margin-top:10px;">
+                        <label style="font-weight:bold; font-size:11px;">PERSONE DEL GRUPPO</label>
+                        <template x-for="(name, idx) in editingResidency.companions" :key="idx">
+                            <div style="display:flex; gap:6px; align-items:center; margin-top:6px;">
+                                <input type="text" style="flex:1; font-size:12px;"
+                                    :value="editingResidency.companions[idx]"
+                                    @input="editingResidency.companions[idx] = $event.target.value"
+                                    placeholder="Nome persona">
+                                <button type="button" @click="editingResidency.companions.splice(idx, 1)"
+                                    style="border:none; background:none; cursor:pointer; color:#999; font-size:14px;">✕</button>
+                            </div>
+                        </template>
+                        <button type="button" @click="editingResidency.companions.push('')"
+                            style="margin-top:8px; font-size:11px; border:1px solid #ccc; background:#f5f5f5; padding:4px 10px; cursor:pointer; width:100%;">
+                            + persona
+                        </button>
+                    </div>
+
                     <button class="btn-blk" @click="saveResidency()">SALVA</button>
                     <button @click="editingResidency = null"
                         style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
@@ -2453,6 +2784,129 @@
                     </select>
                     <label>Feedback</label>
                     <textarea x-model="editingBooking.feedback" rows="4" placeholder=""></textarea>
+
+                    <!-- Camera doppia con gruppo: sezione per persona -->
+                    <template x-if="editingBooking._compBookings?.length > 0">
+                        <div>
+                            <div class="sub-box" style="margin-top:10px;">
+                                <label style="font-weight:bold; font-size:11px;">
+                                    TESSERA ASSOCIAZIONE — <span x-text="editingBooking.guestName"></span>
+                                    <span x-show="!editingBooking.membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
+                                </label>
+                                <select x-model="editingBooking.membershipId" style="margin-top:5px;">
+                                    <option :value="null">Nessuno</option>
+                                    <template x-for="m in memberships" :key="m.id">
+                                        <option :value="m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <template x-for="(cb, idx) in editingBooking._compBookings" :key="cb.id">
+                                <div class="sub-box" style="margin-top:8px;">
+                                    <label style="font-weight:bold; font-size:11px;">
+                                        TESSERA ASSOCIAZIONE — <span x-text="cb.guestName"></span>
+                                        <span x-show="!cb.membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
+                                    </label>
+                                    <select
+                                        :value="editingBooking._compBookings[idx].membershipId"
+                                        @change="editingBooking._compBookings[idx].membershipId = $event.target.value ? parseInt($event.target.value) : null"
+                                        style="margin-top:5px;">
+                                        <option value="">Nessuno</option>
+                                        <template x-for="m in memberships" :key="m.id">
+                                            <option :value="m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Stanza condivisa o ospite singolo: socio + gruppo libero -->
+                    <template x-if="!editingBooking._compBookings?.length">
+                        <div>
+                            <div class="sub-box" style="margin-top:10px;">
+                                <label style="font-weight:bold; font-size:11px;">SOCIO TESSERATO</label>
+                                <select x-model="editingBooking.membershipId" style="margin-top:5px;">
+                                    <option :value="null">Nessuno</option>
+                                    <template x-for="m in memberships" :key="m.id">
+                                        <option :value="m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div class="sub-box" style="margin-top:10px;">
+                                <label style="font-weight:bold; font-size:11px;">GRUPPO (persone che vengono insieme)</label>
+                                <template x-for="(name, idx) in editingBooking.companions" :key="idx">
+                                    <div style="display:flex; gap:6px; margin-top:6px; align-items:center;">
+                                        <input type="text"
+                                            :value="editingBooking.companions[idx]"
+                                            @input="editingBooking.companions[idx] = $event.target.value"
+                                            :placeholder="'Persona ' + (idx + 2)"
+                                            style="flex:1; margin-top:0; font-size:13px; padding:6px 8px;">
+                                        <button type="button" @click="editingBooking.companions.splice(idx, 1)"
+                                            style="border:1px solid #ccc; background:none; padding:4px 8px; cursor:pointer; flex-shrink:0;">✕</button>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editingBooking.companions.push('')"
+                                    style="margin-top:8px; font-size:11px; border:1px solid #000; background:none; padding:4px 10px; cursor:pointer; width:100%;">+ persona</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="sub-box" style="margin-top:10px;">
+                        <label style="font-weight:bold; font-size:11px;">BENZINA (€2/persona)</label>
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-top:8px;">
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <span style="flex:1; font-size:11px; color:#666;">Persona</span>
+                                <span style="width:36px; text-align:center; font-size:10px; color:#666;">↑ and.</span>
+                                <span style="width:36px; text-align:center; font-size:10px; color:#666;">↓ rit.</span>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <span style="flex:1; font-size:12px;" x-text="editingBooking.guestName || 'Ospite principale'"></span>
+                                <input type="checkbox" style="width:36px; margin:0;"
+                                    :checked="editingBooking.rideToPersons.includes(editingBooking.guestName || 'Ospite principale')"
+                                    @change="toggleRide('rideToPersons', editingBooking.guestName || 'Ospite principale')">
+                                <input type="checkbox" style="width:36px; margin:0;"
+                                    :checked="editingBooking.rideFromPersons.includes(editingBooking.guestName || 'Ospite principale')"
+                                    @change="toggleRide('rideFromPersons', editingBooking.guestName || 'Ospite principale')">
+                            </div>
+                            <template x-for="name in editingBooking.companions.filter(Boolean)" :key="name">
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <span style="flex:1; font-size:12px;" x-text="name"></span>
+                                    <input type="checkbox" style="width:36px; margin:0;"
+                                        :checked="editingBooking.rideToPersons.includes(name)"
+                                        @change="toggleRide('rideToPersons', name)">
+                                    <input type="checkbox" style="width:36px; margin:0;"
+                                        :checked="editingBooking.rideFromPersons.includes(name)"
+                                        @change="toggleRide('rideFromPersons', name)">
+                                </div>
+                            </template>
+                        </div>
+                        <div style="font-size:11px; color:#666; margin-top:8px;"
+                            x-text="'Totale: €' + ((editingBooking.rideToPersons.length + editingBooking.rideFromPersons.length) * 2)"></div>
+                    </div>
+
+                    <template x-if="editingBooking._invoice">
+                        <div class="sub-box" style="margin-top:10px;">
+                            <label style="font-weight:bold; font-size:11px;">IMPORTO</label>
+                            <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+                                <label style="font-size:11px; color:#666; flex:1;">Totale</label>
+                                <div style="display:flex; align-items:center; gap:3px;">
+                                    <span style="font-size:12px; color:#666;">€</span>
+                                    <input type="number" min="0" step="0.01" style="width:80px;"
+                                        :value="editingBooking._invoice.totalAmount"
+                                        @input="editingBooking._invoice.totalAmount = parseFloat($event.target.value) || 0">
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+                                <label style="font-size:11px; color:#666; flex:1;">di cui cibo</label>
+                                <div style="display:flex; align-items:center; gap:3px;">
+                                    <span style="font-size:12px; color:#666;">€</span>
+                                    <input type="number" min="0" step="0.01" style="width:80px;"
+                                        :value="editingBooking._invoice.foodAmount"
+                                        @input="editingBooking._invoice.foodAmount = parseFloat($event.target.value) || 0">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
 
                     <button class="btn-blk" @click="saveBooking()">SALVA</button>
                     <button @click="editingBooking = null"
@@ -2595,6 +3049,7 @@
 
                     <label>Amount (€) *</label>
                     <input type="number" step="0.01" x-model.number="editingFinance.amount" required>
+
 
                     <label>Category</label>
                     <select x-model.number="editingFinance.categoryId">
@@ -2816,23 +3271,51 @@
             <!-- MODAL: Residency Approval -->
             <template x-if="residencyApproval">
                 <div class="modal-overlay">
-                    <div class="modal-box" style="text-align:left; min-width:400px;">
+                    <div class="modal-box" style="text-align:left; min-width:440px; max-height:90vh; overflow-y:auto;">
                         <h3 style="margin:0 0 10px">Conferma Residenza</h3>
                         <p style="margin:0 0 15px;">
-                            <b x-text="residencyApproval.residency.name"></b> &mdash;
-                            <span x-text="formatDate(residencyApproval.residency.fromDate)"></span> &rarr;
-                            <span x-text="formatDate(residencyApproval.residency.toDate)"></span>
+                            <b x-text="residencyApproval.residency.name"></b>
                         </p>
 
-                        <label>Stanza</label>
-                        <select x-model="residencyApproval.room">
-                            <option value="">Scegli...</option>
-                            <template x-for="opt in residencyApproval.roomOptions" :key="opt.name">
-                                <option :value="opt.name" :disabled="!opt.available" x-text="opt.label"></option>
-                            </template>
-                        </select>
+                        <div style="display:flex; gap:10px; margin-bottom:15px;">
+                            <div style="flex:1;">
+                                <label>Check-in</label>
+                                <input type="date" x-model="residencyApproval.fromDate">
+                            </div>
+                            <div style="flex:1;">
+                                <label>Check-out</label>
+                                <input type="date" x-model="residencyApproval.toDate">
+                            </div>
+                        </div>
 
-                        <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <label style="margin-bottom:8px;">Assegnazione stanze</label>
+                        <template x-for="(person, idx) in residencyApproval.personRooms" :key="idx">
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                <input type="text"
+                                    :value="residencyApproval.personRooms[idx].name"
+                                    @input="residencyApproval.personRooms[idx].name = $event.target.value"
+                                    style="width:130px; font-size:12px; padding:6px 8px;"
+                                    placeholder="Nome">
+                                <select
+                                    :value="residencyApproval.personRooms[idx].room"
+                                    @change="residencyApproval.personRooms[idx].room = $event.target.value"
+                                    style="flex:1;">
+                                    <option value="">Scegli...</option>
+                                    <template x-for="opt in residencyApproval.roomOptions" :key="opt.name">
+                                        <option :value="opt.name" :disabled="!opt.available" x-text="opt.label"></option>
+                                    </template>
+                                </select>
+                                <button type="button"
+                                    x-show="residencyApproval.personRooms.length > 1"
+                                    @click="residencyApproval.personRooms.splice(idx, 1)"
+                                    style="border:1px solid #ccc; background:none; padding:4px 8px; cursor:pointer; flex-shrink:0;">✕</button>
+                            </div>
+                        </template>
+                        <button type="button"
+                            @click="residencyApproval.personRooms.push({ name: '', room: '' })"
+                            style="font-size:11px; border:1px solid #000; background:none; padding:4px 10px; cursor:pointer; margin-bottom:10px;">+ persona</button>
+
+                        <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px; margin-top:15px;">
                             <input type="checkbox" x-model="residencyApproval.sendEmail">
                             Invia email all'ospite
                         </label>
@@ -2846,7 +3329,8 @@
                             </div>
                         </template>
 
-                        <button class="btn-blk" @click="confirmResidency()" :disabled="!residencyApproval.room"
+                        <button class="btn-blk" @click="confirmResidency()"
+                            :disabled="residencyApproval.personRooms.some(p => !p.room)"
                             x-text="residencyApproval.sendEmail ? 'CONFERMA E INVIA' : 'CONFERMA'"></button>
                         <button @click="residencyApproval = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>

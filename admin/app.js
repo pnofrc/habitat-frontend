@@ -7,6 +7,7 @@ document.addEventListener('alpine:init', () => {
         chart: null,
         items: [],
         guests: [],
+        memberships: [],
         allBookings: [],
         selectedGuest: null,
         guestHistory: [],
@@ -68,7 +69,11 @@ document.addEventListener('alpine:init', () => {
         filter: 'all',
         habitanteFilter: 'all',
         typeFilter: 'all',
+        expenseSort: 'date-desc',
+        mobileNavOpen: false,
         stats: { totalIn: 0, totalOut: 0, balance: 0 },
+        foodBudget: { totalDays: 0, foodDaily: 7, virtualBudget: 0 },
+        receiptFile: null,
         loginData: { username: '', password: '' },
 
         // User management state
@@ -111,6 +116,7 @@ document.addEventListener('alpine:init', () => {
         flowItems: [],
         flowCassaCategories: [],  // Loaded from API
         editingFlowCassaCategory: null,
+        editingBookingFinance: null,
         showFlowCassaCategoryManager: false,
 
         canWriteTab(tab) {
@@ -161,6 +167,32 @@ document.addEventListener('alpine:init', () => {
 
         get financeBalance() {
             return this.financeIncomeTotal - this.financeExpenseTotal;
+        },
+
+        get foodSpent() {
+            return this.items
+                .filter(i => String(i.isExit) === 'true' && i.isFood)
+                .reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+        },
+
+        get cassaCiboIn() {
+            return this.items
+                .filter(i => String(i.isExit) === 'false' && i.isOspitalita)
+                .reduce((s, i) => s + (parseFloat(i.foodAmount) || 0), 0);
+        },
+
+        get cassaCiboOut() {
+            return this.items
+                .filter(i => String(i.isExit) === 'true' && i.isFood)
+                .reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+        },
+
+        get cassaCiboBalance() {
+            return this.cassaCiboIn - this.cassaCiboOut;
+        },
+
+        get foodBudgetRemaining() {
+            return this.foodBudget.virtualBudget - this.foodSpent;
         },
 
         get currentYear() {
@@ -243,6 +275,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         async init() {
+            const hash = window.location.hash.slice(1);
+            if (hash) this.view = hash;
             if (this.token) {
                 const ok = await this.fetchCurrentUser();
                 if (ok) await this.fetchData();
@@ -308,11 +342,7 @@ document.addEventListener('alpine:init', () => {
             return `${action}${resource}${resourceId}`;
         },
 
-        async setView(v) {
-            if (!this.visibleTabs.includes(v)) {
-                v = this.visibleTabs[0] || 'expenses';
-            }
-            this.view = v;
+        resetEditingState() {
             this.selectedGuest = null;
             this.editingItem = null;
             this.editingBooking = null;
@@ -332,33 +362,25 @@ document.addEventListener('alpine:init', () => {
             this.editingCategory = null;
             this.editingTarget = null;
             this.confirmModal = null;
+        },
+
+        async setView(v) {
+            if (!this.visibleTabs.includes(v)) {
+                v = this.visibleTabs[0] || 'expenses';
+            }
+            this.view = v;
+            window.location.hash = v;
+            this.resetEditingState();
             await this.fetchData();
         },
 
         async fetchData() {
             if (!this.token) return;
             try {
-                if (this.view === 'users') {
-                    await this.fetchUsers();
-                    return;
-                }
-
-                if (this.view === 'telegram') {
-                    await this.fetchTelegramData();
-                    return;
-                }
-
-                if (this.view === 'activity') {
-                    await this.fetchUsers();
-                    await this.fetchActivity();
-                    return;
-                }
-
-                if (this.view === 'calendar') {
-                    this.$nextTick(() => this.initCalendar());
-                    return;
-                }
-
+                if (this.view === 'users') { await this.fetchUsers(); return; }
+                if (this.view === 'telegram') { await this.fetchTelegramData(); return; }
+                if (this.view === 'activity') { await this.fetchUsers(); await this.fetchActivity(); return; }
+                if (this.view === 'calendar') { this.$nextTick(() => this.initCalendar()); return; }
                 if (this.view === 'finance') {
                     await this.fetchFinanceData();
                     await this.loadFlowCassaCategories();
@@ -403,53 +425,55 @@ document.addEventListener('alpine:init', () => {
                     const resB = await fetch(`${this.BASE_URL}/bookings/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
                     this.allBookings = await resB.json();
                 }
-
                 if (this.view === 'membership') {
-                    const resD = await fetch(`${this.BASE_URL}/membership/bin`, {
-                        headers: { 'Authorization': `Bearer ${this.token}` }
-                    });
+                    const resD = await fetch(`${this.BASE_URL}/membership/bin`, { headers: { 'Authorization': `Bearer ${this.token}` } });
                     this.deletedMemberships = await resD.json();
                 }
-
                 if (this.view === 'bookings') {
-                    const resD = await fetch(`${this.BASE_URL}/bookings/bin`, {
-                        headers: { 'Authorization': `Bearer ${this.token}` }
-                    });
+                    const resD = await fetch(`${this.BASE_URL}/bookings/bin`, { headers: { 'Authorization': `Bearer ${this.token}` } });
                     this.deletedBookings = await resD.json();
                 }
-
                 if (this.view === 'residency') {
-                    const resD = await fetch(`${this.BASE_URL}/residency/bin`, {
-                        headers: { 'Authorization': `Bearer ${this.token}` }
-                    });
+                    const resD = await fetch(`${this.BASE_URL}/residency/bin`, { headers: { 'Authorization': `Bearer ${this.token}` } });
                     this.deletedResidencies = await resD.json();
                 }
-
                 if (this.view === 'expenses') {
                     await this.loadFlowCassaCategories();
+                    await this.fetchFoodBudget();
                     this.updateStats();
                     this.$nextTick(() => this.renderChart());
                 }
 
-                // always refresh nav badge counts
-                const [memRes, resRes, festRes] = await Promise.all([
-                    fetch(`${this.BASE_URL}/membership/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
-                    fetch(`${this.BASE_URL}/residency/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
-                    fetch(`${this.BASE_URL}/festival/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
-                ]);
-                const memData = await memRes.json();
-                const resData = await resRes.json();
-                const festData = await festRes.json();
-                this.membershipRequestCount = Array.isArray(memData) ? memData.filter(m => !m.confirmed).length : 0;
-                this.membershipConfirmedCount = Array.isArray(memData) ? memData.filter(m => m.confirmed).length : 0;
-                this.residencyCount = Array.isArray(resData) ? resData.length : 0;
-                this.festivalTicketCount = Array.isArray(festData)
-                    ? festData.reduce((sum, t) => sum + (t.quantity || 1), 0)
-                    : 0;
-                this.festivalConfirmedCount = Array.isArray(festData)
-                    ? festData.filter(t => t.confirmed).reduce((sum, t) => sum + (t.quantity || 1), 0)
-                    : 0;
+                await this.updateNavBadges();
             } catch (e) { console.error(e); }
+        },
+
+        async updateNavBadges() {
+            // Reuse already-loaded data for current view; only fetch the others
+            let memData = this.view === 'membership' ? this.items : null;
+            let resData = this.view === 'residency' ? this.items : null;
+            let festData = this.view === 'festival' ? this.festivalTickets : null;
+
+            const fetches = [];
+            if (!memData) fetches.push(
+                fetch(`${this.BASE_URL}/membership/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                    .then(r => r.json()).then(d => { memData = d; })
+            );
+            if (!resData) fetches.push(
+                fetch(`${this.BASE_URL}/residency/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                    .then(r => r.json()).then(d => { resData = d; })
+            );
+            if (!festData) fetches.push(
+                fetch(`${this.BASE_URL}/festival/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                    .then(r => r.json()).then(d => { festData = d; })
+            );
+            await Promise.all(fetches);
+
+            this.membershipRequestCount = Array.isArray(memData) ? memData.filter(m => !m.confirmed).length : 0;
+            this.membershipConfirmedCount = Array.isArray(memData) ? memData.filter(m => m.confirmed).length : 0;
+            this.residencyCount = Array.isArray(resData) ? resData.length : 0;
+            this.festivalTicketCount = Array.isArray(festData) ? festData.reduce((sum, t) => sum + (t.quantity || 1), 0) : 0;
+            this.festivalConfirmedCount = Array.isArray(festData) ? festData.filter(t => t.confirmed).reduce((sum, t) => sum + (t.quantity || 1), 0) : 0;
         },
 
         get filteredMemberships() {
@@ -493,6 +517,11 @@ document.addEventListener('alpine:init', () => {
                 let matchExpenseType = this.typeFilter === 'all' || i.expenseType === this.typeFilter;
 
                 return matchType && matchHabitante && matchExpenseType;
+            }).sort((a, b) => {
+                if (this.expenseSort === 'alpha-asc') return (a.title || '').localeCompare(b.title || '');
+                if (this.expenseSort === 'alpha-desc') return (b.title || '').localeCompare(a.title || '');
+                if (this.expenseSort === 'date-asc') return new Date(a.date) - new Date(b.date);
+                return new Date(b.date) - new Date(a.date);
             });
         },
 
@@ -554,6 +583,46 @@ document.addEventListener('alpine:init', () => {
                 String(i.isExit) === 'true' ? out += val : inc += val;
             });
             this.stats = { totalIn: inc.toFixed(2), totalOut: out.toFixed(2), balance: (inc - out).toFixed(2) };
+        },
+
+        async fetchFoodBudget() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/bookings/food-budget`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.ok) this.foodBudget = await res.json();
+            } catch (e) { console.error(e); }
+        },
+
+        async reorderExpenses(fromIdx, toIdx) {
+            if (fromIdx === toIdx) return;
+            const order = [...this.filteredItems];
+            const [moved] = order.splice(fromIdx, 1);
+            order.splice(toIdx, 0, moved);
+            this.items = order;
+            try {
+                await fetch(`${this.BASE_URL}/expenses/reorder`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ order: order.map(i => i.id) })
+                });
+            } catch (e) { console.error(e); }
+        },
+
+        async uploadReceipt(expenseId) {
+            if (!this.receiptFile) return null;
+            const fd = new FormData();
+            fd.append('receipt', this.receiptFile);
+            try {
+                const res = await fetch(`${this.BASE_URL}/expenses/${expenseId}/receipt`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` },
+                    body: fd
+                });
+                if (!res.ok) throw new Error('Upload fallito');
+                const data = await res.json();
+                return data.receiptImagePath;
+            } catch (e) { alert(e.message); return null; }
         },
 
         renderChart() {
@@ -619,6 +688,40 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        openBookingFlowCassa() {
+            const b = this.editingBooking;
+            if (!b) return;
+            this.editingBookingFinance = {
+                name: `Ospitalità — ${b.guestName || 'Ospite'}`,
+                description: `${b.checkIn || ''} → ${b.checkOut || ''}, stanza: ${b.room || '-'}`,
+                amount: b._invoice?.totalAmount || 0,
+                type: 'income',
+                categoryId: null,
+                flowCategory: 'donazione',
+                included: true,
+                date: new Date().toISOString().split('T')[0],
+                notes: '',
+                isOspitalita: true,
+                foodAmount: b._invoice?.foodAmount || 0
+            };
+        },
+
+        async saveBookingFinance() {
+            try {
+                if (!this.editingBookingFinance.name || !this.editingBookingFinance.amount) {
+                    alert('Nome e importo obbligatori');
+                    return;
+                }
+                const res = await fetch(`${this.BASE_URL}/finance/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(this.editingBookingFinance)
+                });
+                if (!res.ok) throw new Error("Errore salvataggio voce");
+                this.editingBookingFinance = null;
+            } catch (e) { alert(e.message); }
+        },
+
         openCreateFinance() {
             this.editingFinance = {
                 name: '',
@@ -629,12 +732,15 @@ document.addEventListener('alpine:init', () => {
                 flowCategory: '',
                 included: true,
                 date: new Date().toISOString().split('T')[0],
-                notes: ''
+                notes: '',
             };
         },
 
         openEditFinance(item) {
-            this.editingFinance = { ...item, date: item.date ? item.date.split('T')[0] : new Date().toISOString().split('T')[0] };
+            this.editingFinance = {
+                ...item,
+                date: item.date ? item.date.split('T')[0] : new Date().toISOString().split('T')[0],
+            };
         },
 
         async saveFinance() {
@@ -693,6 +799,11 @@ document.addEventListener('alpine:init', () => {
         getFlowCategoryLabel(expenseType) {
             if (!expenseType) return '';
             return expenseType.charAt(0).toUpperCase() + expenseType.slice(1);
+        },
+
+        foodEmoji(id) {
+            const emojis = ['🥦', '🍅', '🥕', '🧅', '🫙', '🥬', '🍋', '🧄', '🫒', '🥑', '🍞', '🧀'];
+            return emojis[(id || 0) % emojis.length];
         },
 
         getFlowCategoryActual(expenseType, year, goalType) {
@@ -958,14 +1069,9 @@ document.addEventListener('alpine:init', () => {
             return expenseCount + financeCount;
         },
 
-        async selectGuest(guest) {
-            try {
-                this.selectedGuest = guest;
-                const res = await fetch(`${this.BASE_URL}/bookings/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
-                if (!res.ok) throw new Error("Errore caricamento prenotazioni");
-                const allB = await res.json();
-                this.guestHistory = allB.filter(b => (b.guest?.id || b.guest) === guest.id);
-            } catch (e) { alert(e.message); }
+        selectGuest(guest) {
+            this.selectedGuest = guest;
+            this.guestHistory = this.allBookings.filter(b => (b.guest?.id || b.guest) === guest.id);
         },
 
         async checkinGuest(bookingId) {
@@ -979,8 +1085,8 @@ document.addEventListener('alpine:init', () => {
                     const err = await res.json();
                     throw new Error(err.message || "Errore check-in");
                 }
-                if (this.selectedGuest) await this.selectGuest(this.selectedGuest);
                 await this.fetchData();
+                if (this.selectedGuest) this.selectGuest(this.selectedGuest);
             } catch (e) { alert(e.message); }
         },
 
@@ -1016,8 +1122,8 @@ document.addEventListener('alpine:init', () => {
                     throw new Error(err.message || "Errore checkout");
                 }
                 this.checkoutModal = null;
-                if (this.selectedGuest) await this.selectGuest(this.selectedGuest);
                 await this.fetchData();
+                if (this.selectedGuest) this.selectGuest(this.selectedGuest);
             } catch (e) { alert(e.message); }
         },
 
@@ -1100,6 +1206,9 @@ document.addEventListener('alpine:init', () => {
                     body: JSON.stringify(payload)
                 });
                 if (!res.ok) throw new Error("Errore salvataggio spesa");
+                const saved = await res.json();
+                if (this.receiptFile) await this.uploadReceipt(saved.id || this.editingItem.id);
+                this.receiptFile = null;
                 this.editingItem = null;
                 await this.fetchData();
             } catch (e) { alert(e.message); }
@@ -1131,12 +1240,30 @@ document.addEventListener('alpine:init', () => {
                     guestId = newG.id;
                 }
                 const isUpdate = !!this.editingBooking.id;
+                const { _compBookings, _invoice, guestName, hasMembership, guest: _g, residency: _r, ...payload } = this.editingBooking;
                 const res = await fetch(isUpdate ? `${this.BASE_URL}/bookings/${this.editingBooking.id}` : `${this.BASE_URL}/bookings/`, {
                     method: isUpdate ? 'PATCH' : 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({ ...this.editingBooking, guest: guestId })
+                    body: JSON.stringify({ ...payload, guest: guestId })
                 });
                 if (!res.ok) throw new Error("Errore salvataggio prenotazione");
+                if (_compBookings?.length) {
+                    await Promise.all(_compBookings.map(cb =>
+                        fetch(`${this.BASE_URL}/bookings/${cb.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                            body: JSON.stringify({ membershipId: cb.membershipId })
+                        })
+                    ));
+                }
+                if (_invoice && !_invoice.preview && isUpdate) {
+                    const invRes = await fetch(`${this.BASE_URL}/bookings/${this.editingBooking.id}/invoice`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                        body: JSON.stringify({ totalAmount: _invoice.totalAmount, foodAmount: _invoice.foodAmount })
+                    });
+                    if (!invRes.ok) throw new Error("Errore salvataggio fattura");
+                }
                 this.editingBooking = null;
                 this.newGuestName = '';
                 await this.fetchData();
@@ -1168,45 +1295,122 @@ document.addEventListener('alpine:init', () => {
         },
 
         openCreate() {
+            this.receiptFile = null;
             this.editingItem = {
                 title: '', description: '', amount: 0, date: new Date().toISOString().split('T')[0],
                 isExit: true, receiptType: 'nessuno', payerType: 'habitat', paymentMethod: 'cash',
-                isRepeatable: false, repeatInterval: 'monthly', expenseType: ''
+                isRepeatable: false, repeatInterval: 'monthly', expenseType: '', isFood: false,
+                isOspitalita: false, foodAmount: 0
             };
         },
 
         openEdit(item) {
-            this.editingItem = { ...item, isExit: String(item.isExit) === 'true', date: item.date.split('T')[0] };
+            this.receiptFile = null;
+            this.editingItem = {
+                ...item,
+                isExit: String(item.isExit) === 'true',
+                date: item.date.split('T')[0],
+                isOspitalita: !!item.isOspitalita,
+                foodAmount: item.foodAmount || 0
+            };
+        },
+
+        primaryBookings(statuses) {
+            const sharedRooms = ['camerata', 'cameratina'];
+            const pool = this.items.filter(b => statuses.includes(b.guestStatus));
+            const secondaryIds = new Set();
+            for (const b of pool) {
+                if (sharedRooms.includes(b.room) || !b.companions?.length) continue;
+                for (const other of pool) {
+                    if (other.id !== b.id && other.id > b.id &&
+                        b.companions.includes(other.guest?.name) && other.room === b.room) {
+                        secondaryIds.add(other.id);
+                    }
+                }
+            }
+            return pool.filter(b => !secondaryIds.has(b.id)).map(b => {
+                if (!sharedRooms.includes(b.room) && b.companions?.length > 0) {
+                    const comps = pool.filter(other =>
+                        other.id !== b.id &&
+                        b.companions.includes(other.guest?.name) &&
+                        other.room === b.room
+                    );
+                    return Object.assign({}, b, { _compBookings: comps });
+                }
+                return Object.assign({}, b, { _compBookings: [] });
+            });
+        },
+
+        async _loadBookingDeps() {
+            const fetches = [];
+            if (!this.guests.length) fetches.push(
+                fetch(`${this.BASE_URL}/guests/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                    .then(r => r.json()).then(d => { this.guests = d; })
+            );
+            if (!this.memberships.length) fetches.push(
+                fetch(`${this.BASE_URL}/membership/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
+                    .then(r => r.json()).then(d => { this.memberships = d.filter(m => m.confirmed); })
+            );
+            await Promise.all(fetches);
         },
 
         async openCreateBooking() {
-            const res = await fetch(`${this.BASE_URL}/guests/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
-            this.guests = await res.json();
+            await this._loadBookingDeps();
             this.newGuestToggle = false;
             this.editingBooking = {
                 guest: '',
                 checkIn: new Date().toISOString().split('T')[0],
                 checkOut: new Date().toISOString().split('T')[0],
                 feedback: '',
-                room: 'da assegnare'
+                room: 'da assegnare',
+                companions: [],
+                rideToPersons: [],
+                rideFromPersons: [],
+                membershipId: null
             };
         },
 
         async openEditBooking(b) {
-            const res = await fetch(`${this.BASE_URL}/guests/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
-            this.guests = await res.json();
-
+            await this._loadBookingDeps();
             this.newGuestToggle = false;
-
             const guestId = b.guest?.id || b.guest;
-
+            const companions = Array.isArray(b.companions) ? b.companions.filter(c => typeof c === 'string') : [];
+            const compBookings = (b._compBookings || []).map(cb => ({
+                id: cb.id,
+                guestName: cb.guest?.name || '',
+                membershipId: cb.membershipId || null,
+                hasMembership: cb.hasMembership
+            }));
             this.editingBooking = {
                 ...b,
                 checkIn: b.checkIn.split('T')[0],
                 checkOut: b.checkOut.split('T')[0],
                 guest: guestId,
-                feedback: b.feedback || ''
+                guestName: b.guest?.name || '',
+                feedback: b.feedback || '',
+                companions,
+                rideToPersons: Array.isArray(b.rideToPersons) ? [...b.rideToPersons] : (b.needsRideTo ? ['Ospite principale'] : []),
+                rideFromPersons: Array.isArray(b.rideFromPersons) ? [...b.rideFromPersons] : (b.needsRideFrom ? ['Ospite principale'] : []),
+                membershipId: b.membershipId || null,
+                _compBookings: compBookings,
+                _invoice: null
             };
+            if (b.id && b.checkIn && b.checkOut) {
+                try {
+                    const invRes = await fetch(`${this.BASE_URL}/bookings/${b.id}/invoice`, {
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    if (invRes.ok) {
+                        const inv = await invRes.json();
+                        this.editingBooking._invoice = {
+                            id: inv.id || null,
+                            totalAmount: inv.totalAmount,
+                            foodAmount: inv.foodAmount,
+                            preview: !!inv.preview
+                        };
+                    }
+                } catch (_) {}
+            }
         },
 
         async startResidencyApproval(r) {
@@ -1222,23 +1426,28 @@ document.addEventListener('alpine:init', () => {
                 const allBookings = await resB.json();
                 const { subject: emailSubject, body: emailBody } = await resT.json();
                 const allRooms = ['monolocale', 'ex poni', 'ex ronco', 'cameratina', 'secondo piano', 'camerata'];
+                const sharedRooms = ['camerata', 'cameratina'];
                 const from = new Date(r.fromDate);
                 const to = new Date(r.toDate);
-                const availableRooms = allRooms.filter(room =>
-                    !allBookings.some(b =>
-                        b.room === room &&
+                const roomOptions = allRooms.map(name => {
+                    if (sharedRooms.includes(name)) return { name, available: true, label: name + ' (condivisa)' };
+                    const occupied = allBookings.some(b =>
+                        b.room === name &&
                         new Date(b.checkIn) < to &&
                         new Date(b.checkOut) > from
-                    )
-                );
-                const roomOptions = allRooms.map(name => ({
-                    name,
-                    available: availableRooms.includes(name),
-                    label: availableRooms.includes(name) ? name : name + ' (occupata)'
-                }));
+                    );
+                    return { name, available: !occupied, label: occupied ? name + ' (occupata)' : name };
+                });
+                const companions = Array.isArray(r.companions) ? r.companions.filter(Boolean) : [];
+                const personRooms = [
+                    { name: r.name, room: '' },
+                    ...companions.map(c => ({ name: c, room: '' }))
+                ];
                 this.residencyApproval = {
                     residency: r,
-                    room: '',
+                    fromDate: r.fromDate,
+                    toDate: r.toDate,
+                    personRooms,
                     emailSubject,
                     emailBody,
                     roomOptions,
@@ -1248,19 +1457,41 @@ document.addEventListener('alpine:init', () => {
         },
 
         async confirmResidency() {
-            const { residency, room, emailSubject, emailBody, sendEmail } = this.residencyApproval;
-            if (!room) {
-                alert('Seleziona una stanza prima di confermare');
+            const a = this.residencyApproval;
+            const assignments = a.personRooms.map(p => ({ name: p.name.trim(), room: p.room })).filter(p => p.name);
+            if (assignments.some(p => !p.room)) {
+                alert('Assegna una stanza a ogni persona prima di confermare');
                 return;
             }
             try {
-                const res = await fetch(`${this.BASE_URL}/residency/${residency.id}/approve`, {
+                const res = await fetch(`${this.BASE_URL}/residency/${a.residency.id}/approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({ room, emailSubject: sendEmail ? emailSubject : '', emailBody: sendEmail ? emailBody : '' })
+                    body: JSON.stringify({
+                        roomAssignments: assignments,
+                        fromDate: a.fromDate,
+                        toDate: a.toDate,
+                        emailSubject: a.sendEmail ? a.emailSubject : '',
+                        emailBody: a.sendEmail ? a.emailBody : ''
+                    })
                 });
-                if (!res.ok) throw new Error("Errore approvazione residenza");
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || "Errore approvazione residenza");
+                }
                 this.residencyApproval = null;
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async purgeResidency(r) {
+            if (!await this.showConfirm(`Eliminare definitivamente la richiesta di ${r.name}? Azione irreversibile.`)) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/residency/${r.id}/purge`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione definitiva");
                 await this.fetchData();
             } catch (e) { alert(e.message); }
         },
@@ -1290,7 +1521,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         openCreateResidency() {
-            this.editingResidency = { name: '', email: '', fromDate: '', toDate: '', proposal: '' };
+            this.editingResidency = { name: '', email: '', fromDate: '', toDate: '', proposal: '', companions: [] };
         },
 
         async saveResidency() {
@@ -1372,6 +1603,25 @@ document.addEventListener('alpine:init', () => {
                 if (!res.ok) throw new Error("Errore ripristino");
                 await this.fetchData();
             } catch (e) { alert(e.message); }
+        },
+
+        async purgeBooking(b) {
+            if (!await this.showConfirm(`Eliminare definitivamente la prenotazione di ${b.guest?.name || 'questo ospite'}? Azione irreversibile.`)) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/bookings/${b.id}/purge`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione definitiva");
+                await this.fetchData();
+            } catch (e) { alert(e.message); }
+        },
+
+        toggleRide(field, name) {
+            const arr = this.editingBooking[field];
+            const idx = arr.indexOf(name);
+            if (idx === -1) arr.push(name);
+            else arr.splice(idx, 1);
         },
 
         async restoreResidency(r) {

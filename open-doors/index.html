@@ -495,6 +495,40 @@
                 <input type="email" x-model="form.email"
                     :placeholder="lang === 'it' ? 'La tua email' : 'Your email address'">
 
+                <!-- Gruppo o solo -->
+                <label x-text="lang === 'it' ? 'Venite in più persone?' : 'Coming as a group?'"></label>
+                <div style="display:flex; gap:10px; margin-top:5px;">
+                    <button type="button"
+                        @click="form.isGroup = false; form.companions = []"
+                        :style="!form.isGroup ? 'background:#000;color:#fff;border:2px solid #000;padding:10px 20px;font-family:inherit;font-weight:bold;cursor:pointer;' : 'background:#fff;color:#000;border:2px solid #000;padding:10px 20px;font-family:inherit;font-weight:bold;cursor:pointer;'"
+                        x-text="lang === 'it' ? 'Solo/a' : 'Just me'"></button>
+                    <button type="button"
+                        @click="form.isGroup = true; form.companions.length === 0 && form.companions.push('')"
+                        :style="form.isGroup ? 'background:#000;color:#fff;border:2px solid #000;padding:10px 20px;font-family:inherit;font-weight:bold;cursor:pointer;' : 'background:#fff;color:#000;border:2px solid #000;padding:10px 20px;font-family:inherit;font-weight:bold;cursor:pointer;'"
+                        x-text="lang === 'it' ? 'Siamo in più' : 'We\'re a group'"></button>
+                </div>
+
+                <template x-if="form.isGroup">
+                    <div style="margin-top:15px; border:2px solid #000; padding:15px;">
+                        <label style="margin-top:0;" x-text="lang === 'it' ? 'Nomi degli altri partecipanti' : 'Names of the other participants'"></label>
+                        <template x-for="(name, idx) in form.companions" :key="idx">
+                            <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+                                <input type="text"
+                                    :value="form.companions[idx]"
+                                    @input="form.companions[idx] = $event.target.value"
+                                    :placeholder="(lang === 'it' ? 'Persona ' : 'Person ') + (idx + 2)"
+                                    style="margin-top:0; flex:1;">
+                                <button type="button" @click="form.companions.splice(idx, 1)"
+                                    style="background:none;border:2px solid #000;padding:8px 12px;cursor:pointer;font-family:inherit;font-weight:bold;flex-shrink:0;">✕</button>
+                            </div>
+                        </template>
+                        <button type="button"
+                            @click="form.companions.push('')"
+                            style="margin-top:10px;background:none;border:2px solid #000;padding:8px 15px;cursor:pointer;font-family:inherit;font-weight:bold;width:100%;"
+                            x-text="lang === 'it' ? '+ Aggiungi persona' : '+ Add person'"></button>
+                    </div>
+                </template>
+
                 <div style="display: flex; gap: 15px;">
                     <div style="flex: 1;">
                         <label x-text="lang === 'it' ? 'Da' : 'From'"></label>
@@ -509,6 +543,8 @@
                 <label x-text="lang === 'it' ? 'Proposta' : 'Proposal'"></label>
                 <textarea x-model="form.presentation" rows="4"
                     :placeholder="lang === 'it' ? 'Dicci tutto...' : 'Tell us everything...'"></textarea>
+
+                <div x-show="errorMessage" class="error-banner" x-text="errorMessage" style="margin-top:15px;"></div>
 
                 <button class="btn-send" @click="sendRequest()" :disabled="loading"
                     x-text="loading ? (lang === 'it' ? 'INVIO...' : 'SENDING...') : (lang === 'it' ? 'INVIA RICHIESTA' : 'SEND REQUEST')">
@@ -547,6 +583,8 @@
                 form: {
                     guestName: '',
                     email: '',
+                    isGroup: false,
+                    companions: [],
                     checkIn: new Date().toISOString().split('T')[0],
                     checkOut: '',
                     presentation: ''
@@ -567,13 +605,17 @@
                     this.errorMessage = '';
 
                     try {
+                        const companions = this.form.isGroup
+                            ? this.form.companions.map(n => n.trim()).filter(Boolean)
+                            : [];
                         const payload = {
                             name: this.form.guestName,
                             email: this.form.email,
                             fromDate: this.form.checkIn,
                             toDate: this.form.checkOut,
                             proposal: this.form.presentation,
-                            language: this.lang
+                            language: this.lang,
+                            companions
                         };
                         const res = await fetch(`${this.BASE_URL}/residency/`, {
                             method: 'POST',
@@ -607,6 +649,8 @@
                     this.form = {
                         guestName: '',
                         email: '',
+                        isGroup: false,
+                        companions: [],
                         checkIn: this.today,
                         checkOut: '',
                         presentation: ''
