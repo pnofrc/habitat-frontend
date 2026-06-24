@@ -1493,26 +1493,26 @@
                             <tbody>
                                 <template x-for="b in primaryBookings(['standby', 'in_progress'])" :key="b.id">
                                     <tr :class="(b.room === 'da assegnare' ||
-                                        (b.guestStatus === 'standby' && (!b.hasMembership || b._compBookings?.some(cb => !cb.hasMembership)))) && 'alert-red'">
+                                        (!b.hasMembership || b._compBookings?.some(cb => !cb.hasMembership))) && 'alert-red'">
                                         <td @click="canWrite && openEditBooking(b)"
                                             :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
-                                            <!-- Camera doppia con gruppo: mostra tutti i nomi in fila -->
+                                            <!-- Gruppo: mostra tutti i nomi con relativa stanza -->
                                             <template x-if="b._compBookings?.length > 0">
                                                 <span>
-                                                    <span x-text="b.guest?.name || 'N/A'"></span>
+                                                    <span x-text="(b.guest?.name || 'N/A') + ' (' + b.room + ')'"></span>
                                                     <template x-for="cb in b._compBookings" :key="cb.id">
-                                                        <span> + <span x-text="cb.guest?.name"></span></span>
+                                                        <span> + <span x-text="cb.guest?.name + ' (' + cb.room + ')'"></span></span>
                                                     </template>
                                                     <span x-show="!b.hasMembership || b._compBookings?.some(cb => !cb.hasMembership)"
                                                         title="Tessera mancante per almeno una persona"
                                                         style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
                                                 </span>
                                             </template>
-                                            <!-- Stanza condivisa o ospite singolo -->
+                                            <!-- Ospite singolo -->
                                             <template x-if="!b._compBookings?.length">
                                                 <span>
                                                     <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
-                                                    <span x-show="!b.hasMembership && b.guestStatus === 'standby'"
+                                                    <span x-show="!b.hasMembership"
                                                         title="Tessera associativa mancante"
                                                         style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
                                                 </span>
@@ -1575,9 +1575,9 @@
                                             :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
                                             <template x-if="b._compBookings?.length > 0">
                                                 <span>
-                                                    <span x-text="b.guest?.name || 'N/A'"></span>
+                                                    <span x-text="(b.guest?.name || 'N/A') + ' (' + b.room + ')'"></span>
                                                     <template x-for="cb in b._compBookings" :key="cb.id">
-                                                        <span> + <span x-text="cb.guest?.name"></span></span>
+                                                        <span> + <span x-text="cb.guest?.name + ' (' + cb.room + ')'"></span></span>
                                                     </template>
                                                 </span>
                                             </template>
@@ -2755,21 +2755,7 @@
             <template x-if="editingBooking">
                 <div class="sidebar">
                     <h3>RESIDENZA</h3>
-                    <template x-if="!editingBooking.id">
-                        <label><input type="checkbox" x-model="newGuestToggle" style="width:auto"> Nuovo Ospite?</label>
-                    </template>
-                    <template x-if="!newGuestToggle">
-                        <select x-model="editingBooking.guest" style="margin-top:5px">
-                            <option value="">Scegli...</option>
-                            <template x-for="g in guests" :key="g.id">
-                                <option :value="g.id" x-text="g.name" :selected="editingBooking.guest === g.id">
-                                </option>
-                            </template>
-                        </select>
-                    </template>
-                    <template x-if="newGuestToggle">
-                        <input type="text" x-model="newGuestName" placeholder="Nome completo">
-                    </template>
+                    <input type="text" x-model="editingBooking.guestName" placeholder="Nome ospite" style="margin-top:5px">
                     <label>In</label><input type="date" x-model="editingBooking.checkIn">
                     <label>Out</label><input type="date" x-model="editingBooking.checkOut">
                     <label>Stanza</label>
@@ -2793,10 +2779,10 @@
                                     TESSERA ASSOCIAZIONE — <span x-text="editingBooking.guestName"></span>
                                     <span x-show="!editingBooking.membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
                                 </label>
-                                <select x-model="editingBooking.membershipId" style="margin-top:5px;">
-                                    <option :value="null">Nessuno</option>
+                                <select @change="editingBooking.membershipId = $event.target.value ? parseInt($event.target.value) : null" style="margin-top:5px;">
+                                    <option value="" :selected="!editingBooking.membershipId">Nessuno</option>
                                     <template x-for="m in memberships" :key="m.id">
-                                        <option :value="m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
+                                        <option :value="m.id" :selected="editingBooking.membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
                                     </template>
                                 </select>
                             </div>
@@ -2825,10 +2811,10 @@
                         <div>
                             <div class="sub-box" style="margin-top:10px;">
                                 <label style="font-weight:bold; font-size:11px;">SOCIO TESSERATO</label>
-                                <select x-model="editingBooking.membershipId" style="margin-top:5px;">
-                                    <option :value="null">Nessuno</option>
+                                <select @change="editingBooking.membershipId = $event.target.value ? parseInt($event.target.value) : null" style="margin-top:5px;">
+                                    <option value="" :selected="!editingBooking.membershipId">Nessuno</option>
                                     <template x-for="m in memberships" :key="m.id">
-                                        <option :value="m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
+                                        <option :value="m.id" :selected="editingBooking.membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
                                     </template>
                                 </select>
                             </div>
@@ -3289,16 +3275,16 @@
                         </div>
 
                         <label style="margin-bottom:8px;">Assegnazione stanze</label>
-                        <template x-for="(person, idx) in residencyApproval.personRooms" :key="idx">
+                        <template x-for="(person, idx) in residencyApproval.personRooms" :key="person.name + '_' + idx">
                             <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
                                 <input type="text"
-                                    :value="residencyApproval.personRooms[idx].name"
-                                    @input="residencyApproval.personRooms[idx].name = $event.target.value"
+                                    :value="person.name"
+                                    @input="person.name = $event.target.value"
                                     style="width:130px; font-size:12px; padding:6px 8px;"
                                     placeholder="Nome">
                                 <select
-                                    :value="residencyApproval.personRooms[idx].room"
-                                    @change="residencyApproval.personRooms[idx].room = $event.target.value"
+                                    :value="person.room"
+                                    @change="person.room = $event.target.value"
                                     style="flex:1;">
                                     <option value="">Scegli...</option>
                                     <template x-for="opt in residencyApproval.roomOptions" :key="opt.name">

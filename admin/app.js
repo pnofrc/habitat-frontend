@@ -1215,12 +1215,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         async saveBooking() {
-            if (!this.newGuestToggle && !this.editingBooking.guest) {
-                alert('Seleziona un ospite');
-                return;
-            }
-            if (this.newGuestToggle && !this.newGuestName?.trim()) {
-                alert('Inserisci il nome del nuovo ospite');
+            if (!this.editingBooking.guestName?.trim()) {
+                alert('Inserisci il nome dell\'ospite');
                 return;
             }
             if (!this.editingBooking.checkIn || !this.editingBooking.checkOut) {
@@ -1228,19 +1224,26 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
             try {
+                const isUpdate = !!this.editingBooking.id;
                 let guestId = this.editingBooking.guest;
-                if (this.newGuestToggle && this.newGuestName) {
+                if (isUpdate && guestId) {
+                    await fetch(`${this.BASE_URL}/guests/${guestId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                        body: JSON.stringify({ name: this.editingBooking.guestName.trim() })
+                    });
+                } else {
                     const resG = await fetch(`${this.BASE_URL}/guests/`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                        body: JSON.stringify({ name: this.newGuestName, isConfirmed: false })
+                        body: JSON.stringify({ name: this.editingBooking.guestName.trim(), isConfirmed: false })
                     });
                     if (!resG.ok) throw new Error("Errore creazione ospite");
                     const newG = await resG.json();
                     guestId = newG.id;
                 }
-                const isUpdate = !!this.editingBooking.id;
                 const { _compBookings, _invoice, guestName, hasMembership, guest: _g, residency: _r, ...payload } = this.editingBooking;
+                payload.membershipId = payload.membershipId ? parseInt(payload.membershipId) : null;
                 const res = await fetch(isUpdate ? `${this.BASE_URL}/bookings/${this.editingBooking.id}` : `${this.BASE_URL}/bookings/`, {
                     method: isUpdate ? 'PATCH' : 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
@@ -1256,7 +1259,7 @@ document.addEventListener('alpine:init', () => {
                         })
                     ));
                 }
-                if (_invoice && !_invoice.preview && isUpdate) {
+                if (_invoice && isUpdate) {
                     const invRes = await fetch(`${this.BASE_URL}/bookings/${this.editingBooking.id}/invoice`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
@@ -1316,24 +1319,22 @@ document.addEventListener('alpine:init', () => {
         },
 
         primaryBookings(statuses) {
-            const sharedRooms = ['camerata', 'cameratina'];
             const pool = this.items.filter(b => statuses.includes(b.guestStatus));
             const secondaryIds = new Set();
             for (const b of pool) {
-                if (sharedRooms.includes(b.room) || !b.companions?.length) continue;
+                if (!b.companions?.length) continue;
                 for (const other of pool) {
                     if (other.id !== b.id && other.id > b.id &&
-                        b.companions.includes(other.guest?.name) && other.room === b.room) {
+                        b.companions.includes(other.guest?.name)) {
                         secondaryIds.add(other.id);
                     }
                 }
             }
             return pool.filter(b => !secondaryIds.has(b.id)).map(b => {
-                if (!sharedRooms.includes(b.room) && b.companions?.length > 0) {
+                if (b.companions?.length > 0) {
                     const comps = pool.filter(other =>
                         other.id !== b.id &&
-                        b.companions.includes(other.guest?.name) &&
-                        other.room === b.room
+                        b.companions.includes(other.guest?.name)
                     );
                     return Object.assign({}, b, { _compBookings: comps });
                 }
@@ -1356,9 +1357,9 @@ document.addEventListener('alpine:init', () => {
 
         async openCreateBooking() {
             await this._loadBookingDeps();
-            this.newGuestToggle = false;
             this.editingBooking = {
                 guest: '',
+                guestName: '',
                 checkIn: new Date().toISOString().split('T')[0],
                 checkOut: new Date().toISOString().split('T')[0],
                 feedback: '',
@@ -1366,13 +1367,12 @@ document.addEventListener('alpine:init', () => {
                 companions: [],
                 rideToPersons: [],
                 rideFromPersons: [],
-                membershipId: null
+                membershipId: ""
             };
         },
 
         async openEditBooking(b) {
             await this._loadBookingDeps();
-            this.newGuestToggle = false;
             const guestId = b.guest?.id || b.guest;
             const companions = Array.isArray(b.companions) ? b.companions.filter(c => typeof c === 'string') : [];
             const compBookings = (b._compBookings || []).map(cb => ({
@@ -1391,7 +1391,7 @@ document.addEventListener('alpine:init', () => {
                 companions,
                 rideToPersons: Array.isArray(b.rideToPersons) ? [...b.rideToPersons] : (b.needsRideTo ? ['Ospite principale'] : []),
                 rideFromPersons: Array.isArray(b.rideFromPersons) ? [...b.rideFromPersons] : (b.needsRideFrom ? ['Ospite principale'] : []),
-                membershipId: b.membershipId || null,
+                membershipId: b.membershipId || "",
                 _compBookings: compBookings,
                 _invoice: null
             };
