@@ -13,6 +13,12 @@
       box-sizing: border-box;
     }
 
+    .con {
+   font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  letter-spacing: normal;
+}
+
     body {
       min-height: 100vh;
       display: flex;
@@ -184,6 +190,10 @@
     .artists-list {
       margin-bottom: 30px;
       text-align: center;
+      display: flex;
+  flex-direction: column;
+  gap: 12px;
+
     }
 
 
@@ -194,9 +204,14 @@
       letter-spacing: -10px;
       color: #333;
     }
+    
+    .ws{
+      display: block;
+  padding-top: .5rem;
+    }
 
-    .live {
-      font-family: 'Courier New', Courier, monospace;
+    .live{
+      font-family: 'Hababo', 'Courier New', Courier, monospace;
       font-size: 0.85rem;
       letter-spacing: normal;
       white-space: nowrap;
@@ -205,6 +220,7 @@
     }
 
     .details {
+       font-family: 'Courier New', Courier, monospace;
       display: block;
       font-size: 0.9rem;
       letter-spacing: normal;
@@ -289,37 +305,49 @@
     </h2> -->
 
     <div class="artists-list">
+      
       <br>
-      <div class="artist-name">amphibia<span class="details"> (dj torpedo, rrrapido, rally k, herbalife, padre
-          bio)</span></div>
-      <div class="artist-name">bassi&nbsp;&nbsp;gradassi<span class="details">(di late, dj trombetta)</span></div>
-      <div class="artist-name">bruised&nbsp;&nbsp;&nbsp;&nbsp;SpringsTeen<span class="live">(live)</span></div>
-      <div class="artist-name">chantssss <span class="live">(live)</span></div>
-      <div class="artist-name">Classical&nbsp;&nbsp;hooligans</div>
-      <div class="artist-name">carl&nbsp;&nbsp;ahnebrink<span class="details">(FLEE Project)</span></div>
-      <div class="artist-name">enrico&nbsp;&nbsp;malatesta<span class="live">(live)</span></div>
+      <div class="artist-name">alessandro&nbsp;&nbsp;gambato<span class="details">pres. Learn to Linger</span></div>
+      <div class="artist-name">alimah&nbsp;&nbsp;grasso<span class="details">pres. Tuttosiballa </span><span class="live ws">{workshop}</span></div>
+      <div class="artist-name">amphibia<span class="details">torpedo, rrrapido, rally k, herbalife, padre bio</span></div>
+      <div class="artist-name">ardeide<span class="details">pres. Sheltering</span> <span class="live ws">{workshop}</span></div>
+      <div class="artist-name">bassi&nbsp;&nbsp;gradassi<span class="details">di late, dj trombetta</span></div>
+      <div class="artist-name">benedetta&nbsp;&nbsp;fioravanti<span class="details">pres. After the storm - con F. Poni e J. Lega</span><span class="live ws">{workshop}</span></div>
+      <div class="artist-name">bruised&nbsp;&nbsp;SpringsTeen<span class="live">{live}</span></div>
+      <div class="artist-name">chantssss<span class="live">{live}</span></div>
+      <div class="artist-name">chiara&nbsp;&nbsp;pavolucci<span class="details">pres. Practice of Care</span><span class="live ws">{workshop}</span></div>
+      <div class="artist-name">classical&nbsp;&nbsp;hooligans</div>
+      <div class="artist-name">carl&nbsp;&nbsp;ahnebrink<span class="details">Flee Project</span></div>
+      <div class="artist-name">elena&nbsp;&nbsp;braida<span class="details">pres. Termo Press </span><span class="live ws">{workshop}</span></div>
+      <div class="artist-name">enrico&nbsp;&nbsp;malatesta<span class="details">pres. LoBest</span></div>
       <div class="artist-name">flaviana</div>
-      <div class="artist-name">flux&nbsp;&nbsp;by&nbsp;&nbsp;   uchina<span class="details">(VENA)</span></div>
+      <div class="artist-name">flux&nbsp;&nbsp;by&nbsp;&nbsp;uchiha<span class="details">from Vena</span></div>
+      <div class="artist-name">foa</div><span class="details">pres. a nomadic performance</span></div>
       <div class="artist-name">giesse</div>
-      <div class="artist-name">habitat t.p.U.</div>
-      <div class="artist-name">jungla <span class="live">(live)</span></div>
-      <div class="artist-name">Kuthi&nbsp;&nbsp;Jin<span class="live">(live)</span></div>
-      <div class="artist-name">lorenzo&nbsp;&nbsp;travaglini<span class="live">(live)</span></div>
-      <div class="artist-name">la&nbsp;&nbsp;messinscena<span class="details">(tundra, nini)</span></div>
-      <div class="artist-name">lemethi<span class="details">(rumore b)</span></div>
-      <div class="artist-name">proxy&nbsp;&nbsp;bar<span class="details">(marKK b2b poni)</span></div>
-      <div class="artist-name">mira<span class="live">(live)</span></div>
-      <div class="artist-name">mizuna<span class="details">(erta, oleno)</span></div>
-          <div class="artist-name">nicolas&nbsp;&nbsp;gaunin<span class="live">(live)</span></div>
+      <div class="artist-name">habitat&nbsp;&nbsp;t.p.U.<span class="details">Tramissioni Postali Uniche</span> <span class="live ws">{workshop}</span></div>
+      <div class="artist-name">jungla<span class="live">{live}</span></div>
+      <div class="artist-name">Kuthi&nbsp;&nbsp;Jin</div>
+      <div class="artist-name">lorenzo&nbsp;&nbsp;travaglini<span class="live">{live}</span></div>
+      <div class="artist-name">la&nbsp;&nbsp;messinscena<span class="details">tundra, nini</span></div>
+      <div class="artist-name">lavanda<span class="details">Raccolta e distillazione - con Matteo Bucci</span> <span class="live ws">{workshop}</span></div>
+      <div class="artist-name">lemethi<span class="details">from rumore b</span></div>
+      <div class="artist-name">proxy&nbsp;&nbsp;bar<span class="details">mark + poni</span></div>
+      <div class="artist-name">mira<span class="live">{live}</span></div>
+      <div class="artist-name">mizuna<span class="details">erta, oleno</span></div>
+      <div class="artist-name">nicolas&nbsp;&nbsp;gaunin<span class="live">{live}</span></div>
       <div class="artist-name">privato</div>
-      <div class="artist-name">ramzi<span class="live">(live)</span></div>
+      <div class="artist-name">ramzi<span class="live">{live}</span></div>
       <div class="artist-name">reptilian&nbsp;&nbsp;expo</div>
       <div class="artist-name">sister&nbsp;&nbsp;effect</div>
-      <div class="artist-name">trampa<span class="live">(live)</span></div>
+      <div class="artist-name">tabula&nbsp;&nbsp;fabula<span class="live">{live}</span></div>
+      <div class="artist-name">trampa<span class="live">{live}</span></div>
       <div class="artist-name">Yulia&nbsp;&nbsp;kachan</div>
       <br>
+          <br>
+              <br>
+
       <div class="next">
-        <span data-en="& soon announced juicy" data-it="& presto annunciati">& presto annunciati</span>
+        <span data-en="And then: musics," data-it="Quindi: musiche,">Quindi: musiche,</span>
         <span data-en="workshops" data-it="laboratori," class="hababo">laboratori,</span>
         <span data-en=", convivial" data-it="atti">atti</span>
         <span data-en="acts" data-it="conviviali" class="hababo">conviviali</span>
