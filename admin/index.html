@@ -2350,6 +2350,7 @@
                                         <th>Email</th>
                                         <th>Intolleranze</th>
                                         <th>Data</th>
+                                        <th x-show="canWrite"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -2360,10 +2361,13 @@
                                             <td x-text="d.email"></td>
                                             <td x-text="d.notes || '—'"></td>
                                             <td x-text="new Date(d.createdAt).toLocaleDateString('it-IT')"></td>
+                                            <td x-show="canWrite">
+                                                <button @click="openEditDinner(d)">modifica</button>
+                                            </td>
                                         </tr>
                                     </template>
                                     <tr x-show="dinnerParticipants.length === 0">
-                                        <td colspan="5" style="color:#999; text-align:center; padding:20px;">Nessuna prenotazione</td>
+                                        <td colspan="6" style="color:#999; text-align:center; padding:20px;">Nessuna prenotazione</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -3800,6 +3804,33 @@
                         <button x-show="editingVolunteer.id" @click="deleteVolunteer(editingVolunteer.id)"
                             style="width:100%; margin-top:8px; border:1px solid #000; background:none; cursor:pointer;">ELIMINA</button>
                         <button @click="editingVolunteer = null"
+                            style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Dinner -->
+            <template x-if="editingDinner">
+                <div class="modal-overlay" @click.self="editingDinner = null">
+                    <div class="modal-box" style="text-align:left; min-width:420px;">
+                        <h3 style="margin:0 0 10px">Prenotazione cena</h3>
+
+                        <label>Nome</label>
+                        <input type="text" x-model="editingDinner.name">
+
+                        <label>Cognome</label>
+                        <input type="text" x-model="editingDinner.surname">
+
+                        <label>Email</label>
+                        <input type="text" x-model="editingDinner.email">
+
+                        <label>Intolleranze</label>
+                        <textarea x-model="editingDinner.notes" rows="3"></textarea>
+
+                        <button class="btn-blk" @click="saveDinner()">SALVA</button>
+                        <button @click="deleteDinner(editingDinner.id); editingDinner = null"
+                            style="width:100%; margin-top:8px; border:1px solid #000; background:none; cursor:pointer;">ELIMINA</button>
+                        <button @click="editingDinner = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>
                 </div>

@@ -47,6 +47,7 @@ document.addEventListener('alpine:init', () => {
         volunteers: [],
         dinnerParticipants: [],
         dinnerCount: 0,
+        editingDinner: null,
         editingVolunteer: null,
         timelineDeadlines: [],
         editingDeadline: null,
@@ -1691,6 +1692,44 @@ document.addEventListener('alpine:init', () => {
                 this.dinnerParticipants = await res.json();
                 this.dinnerCount = this.dinnerParticipants.length;
             } catch (e) { console.error(e); }
+        },
+
+        openEditDinner(d) {
+            this.editingDinner = { ...d };
+        },
+
+        async saveDinner() {
+            if (!this.editingDinner?.name?.trim() || !this.editingDinner?.surname?.trim() || !this.editingDinner?.email?.trim()) {
+                alert('Nome, cognome ed email sono obbligatori');
+                return;
+            }
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival-dinner/${this.editingDinner.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({
+                        name: this.editingDinner.name,
+                        surname: this.editingDinner.surname,
+                        email: this.editingDinner.email,
+                        notes: this.editingDinner.notes || null,
+                    })
+                });
+                if (!res.ok) throw new Error("Errore salvataggio");
+                this.editingDinner = null;
+                await this.fetchDinners();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteDinner(id) {
+            if (!await this.showConfirm("Eliminare questa prenotazione?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival-dinner/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore eliminazione");
+                await this.fetchDinners();
+            } catch (e) { alert(e.message); }
         },
 
         hasPaypalMatch(ticket) {
