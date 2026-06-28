@@ -93,17 +93,9 @@
             margin-right: 5px;
         }
 
-        .saving {
-            background: orange;
-        }
-
-        .saved {
-            background: green;
-        }
-
-        .error {
-            background: red;
-        }
+        .saving { background: orange; }
+        .saved { background: green; }
+        .error { background: red; }
 
         .btn-export {
             background: #fff;
@@ -115,27 +107,41 @@
             font-weight: bold;
         }
 
-        /* Colori dinamici */
-        .txt-red {
-            color: #ff0000 !important;
-            font-weight: bold;
-        }
-
-        .txt-green {
-            color: #008000 !important;
-            font-weight: bold;
-        }
+        .txt-red { color: #ff0000 !important; font-weight: bold; }
+        .txt-green { color: #008000 !important; font-weight: bold; }
+        .row-black td { background: #f5f0f0 !important; }
     </style>
 </head>
 
 <body x-data="fullSheet" x-init="initSheet()" x-cloak>
 
     <div class="toolbar">
-        <div>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
             <span class="status-dot" :class="status"></span>
             <b x-text="statusMsg"></b>
-            <span style="margin-left: 15px; font-size: 9px; color: #ccc;"
-                x-text="`FILTRO: ${filter} | PAYER: ${habitante} | TIPO: ${typeFilter}`"></span>
+            <select @change="filter = $event.target.value; syncUrl()" style="background:#222; color:#fff; border:1px solid #555; font-family:inherit; font-size:9px; padding:2px 4px;">
+                <option value="all" :selected="filter==='all'">Tutti</option>
+                <option value="in"  :selected="filter==='in'">Entrate</option>
+                <option value="out" :selected="filter==='out'">Uscite</option>
+            </select>
+            <select @change="habitante = $event.target.value; syncUrl()" style="background:#222; color:#fff; border:1px solid #555; font-family:inherit; font-size:9px; padding:2px 4px;">
+                <option value="all" :selected="habitante==='all'">Tutti i pagatori</option>
+                <option value="habitat" :selected="habitante==='habitat'">Habitat</option>
+                <template x-for="h in habitanti" :key="h">
+                    <option :value="h" :selected="habitante === h" x-text="h.charAt(0).toUpperCase() + h.slice(1)"></option>
+                </template>
+            </select>
+            <select @change="typeFilter = $event.target.value; syncUrl()" style="background:#222; color:#fff; border:1px solid #555; font-family:inherit; font-size:9px; padding:2px 4px;">
+                <option value="all" :selected="typeFilter==='all'">Tutti i tipi</option>
+                <template x-for="cat in uniqueCategories" :key="cat">
+                    <option :value="cat" :selected="typeFilter === cat" x-text="cat.charAt(0).toUpperCase() + cat.slice(1)"></option>
+                </template>
+            </select>
+            <span style="font-size:9px; color:#aaa;">DA</span>
+            <input type="date" x-model="dateFrom" @change="syncUrl()" style="background:#222; color:#fff; border:1px solid #555; font-family:inherit; font-size:9px; padding:2px 4px;">
+            <span style="font-size:9px; color:#aaa;">A</span>
+            <input type="date" x-model="dateTo" @change="syncUrl()" style="background:#222; color:#fff; border:1px solid #555; font-family:inherit; font-size:9px; padding:2px 4px;">
+            <button x-show="dateFrom || dateTo" @click="dateFrom=''; dateTo=''; syncUrl()" style="background:#555; color:#fff; border:none; font-size:9px; padding:2px 6px; cursor:pointer;">✕</button>
         </div>
         <div>
             <button class="btn-export" @click="exportCSV()">EXPORT CSV</button>
@@ -151,51 +157,83 @@
                     <th>Data</th>
                     <th style="width:250px">Titolo</th>
                     <th>Importo (€)</th>
-                    <th>isExit (true/false)</th>
-                    <th>Payer Type</th>
-                    <th>Specific Habitante</th>
+                    <th>Pagatore</th>
                     <th>Payment Method</th>
                     <th>Receipt Type</th>
                     <th>Type</th>
-                    <!-- <th>Paid Activity</th> -->
                     <th style="width:300px">Description</th>
-                    <!-- <th>isRepeatable</th> -->
-                    <!-- <th>Repeat Interval</th> -->
-                    <!-- <th>Repeat Until (DD/MM/YYYY)</th> -->
                     <th>Category</th>
+                    <th style="width:80px">Doc</th>
+                    <th style="width:60px">Rimb.</th>
                 </tr>
             </thead>
             <tbody>
-                <template x-for="(item, index) in filteredItems" :key="item.id">
+                <template x-for="(item, index) in normalItems" :key="'n'+item.id">
                     <tr>
                         <td class="row-num" x-text="index + 1"></td>
-                        <td contenteditable="true" @blur="saveDate(item.id, 'date', $event.target.innerText)"
-                            x-text="formatDate(item.date)"></td>
-                        <td contenteditable="true" @blur="save(item.id, 'title', $event.target.innerText)"
-                            x-text="item.title"></td>
-                        <td contenteditable="true" @blur="save(item.id, 'amount', $event.target.innerText)"
-                            x-text="item.amount" :class="String(item.isExit) === 'true' ? 'txt-red' : 'txt-green'"></td>
+                        <td contenteditable="true" @blur="saveDate(item.id, 'date', $event.target.innerText)" x-text="formatDate(item.date)"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'title', $event.target.innerText)" x-text="item.title"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'amount', $event.target.innerText)" x-text="item.amount" :class="String(item.isExit) === 'true' ? 'txt-red' : 'txt-green'"></td>
+                        <td x-text="item.payerType === 'habitante' ? (item.specificHabitante || 'habitante') : item.payerType" style="text-transform:capitalize;"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'paymentMethod', $event.target.innerText)" x-text="item.paymentMethod"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'receiptType', $event.target.innerText)" x-text="item.receiptType"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'expenseType', $event.target.innerText)" x-text="item.expenseType"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'description', $event.target.innerText)" x-text="item.description"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'category', $event.target.innerText)" x-text="item.category"></td>
+                        <td style="text-align:center;">
+                            <a x-show="item.receiptImagePath" :href="BASE_URL + item.receiptImagePath" target="_blank" style="font-size:10px; color:#2b6cb0; text-decoration:none;">📎</a>
+                        </td>
+                        <td style="text-align:center;">
+                            <input type="checkbox" :checked="!!item.isRimborsato" @change="save(item.id, 'isRimborsato', $event.target.checked); item.isRimborsato = $event.target.checked" style="cursor:pointer;">
+                        </td>
+                    </tr>
+                </template>
 
-                        <td contenteditable="true" @blur="save(item.id, 'isExit', $event.target.innerText)"
-                            x-text="item.isExit"></td>
-                        <td contenteditable="true" @blur="save(item.id, 'payerType', $event.target.innerText)"
-                            x-text="item.payerType"></td>
-                        <td contenteditable="true" @blur="save(item.id, 'specificHabitante', $event.target.innerText)"
-                            x-text="item.specificHabitante"></td>
-                        <td contenteditable="true" @blur="save(item.id, 'paymentMethod', $event.target.innerText)"
-                            x-text="item.paymentMethod"></td>
-                        <td contenteditable="true" @blur="save(item.id, 'receiptType', $event.target.innerText)"
-                            x-text="item.receiptType"></td>
-                        <td contenteditable="true" @blur="save(item.id, 'expenseType', $event.target.innerText)"
-                            x-text="item.expenseType"></td>
-                        <!-- <td contenteditable="true" @blur="save(item.id, 'paidActivity', $event.target.innerText)" x-text="item.paidActivity"></td> -->
-                        <td contenteditable="true" @blur="save(item.id, 'description', $event.target.innerText)"
-                            x-text="item.description"></td>
-                        <!-- <td contenteditable="true" @blur="save(item.id, 'isRepeatable', $event.target.innerText)" x-text="item.isRepeatable"></td> -->
-                        <!-- <td contenteditable="true" @blur="save(item.id, 'repeatInterval', $event.target.innerText)" x-text="item.repeatInterval"></td> -->
-                        <!-- <td contenteditable="true" @blur="saveDate(item.id, 'repeatUntil', $event.target.innerText)" x-text="formatDate(item.repeatUntil)"></td> -->
-                        <td contenteditable="true" @blur="save(item.id, 'category', $event.target.innerText)"
-                            x-text="item.category"></td>
+                <tr style="background:#e8f5e9; font-weight:bold; font-size:10px;">
+                    <td colspan="3" style="text-align:right; padding-right:8px; border-right:2px solid #ccc;">SUBTOTALE</td>
+                    <td x-text="'€' + normalTotals.saldo.toFixed(2)" :style="normalTotals.saldo >= 0 ? 'color:green' : 'color:red'"></td>
+                    <td colspan="8"></td>
+                </tr>
+
+                <template x-if="blackItems.length > 0">
+                    <tr><td colspan="12" style="background:#000; height:3px; border:none; padding:0;"></td></tr>
+                </template>
+                <template x-if="blackItems.length > 0">
+                    <tr><td colspan="12" style="background:#222; color:#fff; font-weight:bold; text-align:center; font-size:9px; padding:5px; letter-spacing:3px; border:none;">— BLACK —</td></tr>
+                </template>
+
+                <template x-for="(item, index) in blackItems" :key="'b'+item.id">
+                    <tr class="row-black">
+                        <td class="row-num" x-text="index + 1"></td>
+                        <td contenteditable="true" @blur="saveDate(item.id, 'date', $event.target.innerText)" x-text="formatDate(item.date)"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'title', $event.target.innerText)" x-text="item.title"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'amount', $event.target.innerText)" x-text="item.amount" :class="String(item.isExit) === 'true' ? 'txt-red' : 'txt-green'"></td>
+                        <td x-text="item.payerType === 'habitante' ? (item.specificHabitante || 'habitante') : item.payerType" style="text-transform:capitalize;"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'paymentMethod', $event.target.innerText)" x-text="item.paymentMethod"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'receiptType', $event.target.innerText)" x-text="item.receiptType"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'expenseType', $event.target.innerText)" x-text="item.expenseType"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'description', $event.target.innerText)" x-text="item.description"></td>
+                        <td contenteditable="true" @blur="save(item.id, 'category', $event.target.innerText)" x-text="item.category"></td>
+                        <td style="text-align:center;">
+                            <a x-show="item.receiptImagePath" :href="BASE_URL + item.receiptImagePath" target="_blank" style="font-size:10px; color:#2b6cb0; text-decoration:none;">📎</a>
+                        </td>
+                        <td style="text-align:center;">
+                            <input type="checkbox" :checked="!!item.isRimborsato" @change="save(item.id, 'isRimborsato', $event.target.checked); item.isRimborsato = $event.target.checked" style="cursor:pointer;">
+                        </td>
+                    </tr>
+                </template>
+                <template x-if="blackItems.length > 0">
+                    <tr style="background:#f5e8e8; font-weight:bold; font-size:10px;">
+                        <td colspan="3" style="text-align:right; padding-right:8px; border-right:2px solid #ccc;">SUBTOTALE BLACK</td>
+                        <td x-text="'€' + blackTotals.saldo.toFixed(2)" :style="blackTotals.saldo >= 0 ? 'color:green' : 'color:red'"></td>
+                        <td colspan="8"></td>
+                    </tr>
+                </template>
+                <template x-if="blackItems.length > 0">
+                    <tr style="background:#000; color:#fff; font-weight:bold; font-size:10px;">
+                        <td colspan="3" style="text-align:right; padding-right:8px; border-right:2px solid #444; color:#fff;">TOTALE</td>
+                        <td x-text="'€' + grandTotals.saldo.toFixed(2)" :style="grandTotals.saldo >= 0 ? 'color:#90ee90' : 'color:#ff6b6b'"></td>
+                        <td colspan="8"></td>
                     </tr>
                 </template>
             </tbody>
@@ -212,14 +250,21 @@
                 filter: 'all',
                 habitante: 'all',
                 typeFilter: 'all',
+                dateFrom: '',
+                dateTo: '',
+                habitanti: [],
                 status: 'idle',
                 statusMsg: 'READY',
 
                 async initSheet() {
+                    const stored = localStorage.getItem('habitanti');
+                    this.habitanti = stored ? JSON.parse(stored) : ['beppe', 'chiara', 'enri', 'marco', 'pongie', 'poni'];
                     const params = new URLSearchParams(window.location.search);
-                    this.filter = params.get('filter') || 'all';
-                    this.habitante = params.get('habitante') || 'all';
-                    this.typeFilter = params.get('type') || 'all';
+                    this.filter     = params.get('filter')    || 'all';
+                    this.habitante  = params.get('habitante') || 'all';
+                    this.typeFilter = params.get('type')      || 'all';
+                    this.dateFrom   = params.get('from')      || '';
+                    this.dateTo     = params.get('to')        || '';
 
                     if (!this.token) return window.close();
                     await this.fetchData();
@@ -234,17 +279,50 @@
                     } catch (e) { this.status = 'error'; }
                 },
 
-                get filteredItems() {
+                get allFiltered() {
                     return this.items.filter(i => {
                         const isExit = String(i.isExit) === 'true';
-                        let matchType = (this.filter === 'all') || (this.filter === 'out' ? isExit : !isExit);
-                        let matchExpenseType = this.typeFilter === 'all' || i.expenseType === this.typeFilter;
-                        if (this.filter !== 'out') return matchType && matchExpenseType;
-                        let matchHabitante = (this.habitante === 'all') ||
-                            (this.habitante === 'habitat' ? i.payerType === 'habitat' : (i.payerType === 'habitante' && i.specificHabitante === this.habitante));
-                        return matchType && matchHabitante && matchExpenseType;
+                        const matchType = this.filter === 'all' || (this.filter === 'out' ? isExit : !isExit);
+                        const matchExpenseType = this.typeFilter === 'all' || i.expenseType === this.typeFilter;
+                        const d = new Date(i.date);
+                        const matchFrom = !this.dateFrom || d >= new Date(this.dateFrom);
+                        const matchTo   = !this.dateTo   || d <= new Date(this.dateTo + 'T23:59:59');
+                        const effectivePayer = i.isRimborsato ? 'habitat' : i.payerType;
+                        const effectiveHabitante = i.isRimborsato ? '' : i.specificHabitante;
+                        const matchHabitante = this.habitante === 'all' ||
+                            (this.habitante === 'habitat'
+                                ? effectivePayer === 'habitat'
+                                : effectivePayer === 'habitante' && effectiveHabitante === this.habitante);
+                        return matchType && matchExpenseType && matchHabitante && matchFrom && matchTo;
                     }).sort((a, b) => new Date(b.date) - new Date(a.date));
                 },
+
+                get normalItems() { return this.allFiltered.filter(i => !i.isBlack); },
+                get blackItems()  { return this.allFiltered.filter(i =>  i.isBlack); },
+
+                get uniqueCategories() {
+                    const cats = new Set(this.items.map(i => i.expenseType).filter(Boolean));
+                    return Array.from(cats).sort();
+                },
+
+                syncUrl() {
+                    const u = new URL(window.location.href);
+                    u.searchParams.set('filter', this.filter);
+                    u.searchParams.set('habitante', this.habitante);
+                    u.searchParams.set('type', this.typeFilter);
+                    this.dateFrom ? u.searchParams.set('from', this.dateFrom) : u.searchParams.delete('from');
+                    this.dateTo   ? u.searchParams.set('to',   this.dateTo)   : u.searchParams.delete('to');
+                    window.history.replaceState(null, '', u.toString());
+                },
+
+                calcTotals(list) {
+                    const entrate = list.filter(i => String(i.isExit) !== 'true').reduce((s, i) => s + (i.amount || 0), 0);
+                    const uscite  = list.filter(i => String(i.isExit) === 'true').reduce((s, i) => s + (i.amount || 0), 0);
+                    return { entrate, uscite, saldo: entrate - uscite };
+                },
+                get normalTotals() { return this.calcTotals(this.normalItems); },
+                get blackTotals()  { return this.calcTotals(this.blackItems); },
+                get grandTotals()  { return this.calcTotals(this.allFiltered); },
 
                 formatDate(dateStr) {
                     if (!dateStr) return '';
@@ -263,9 +341,14 @@
                 async save(id, field, value) {
                     this.status = 'saving';
                     this.statusMsg = 'SAVING...';
-                    let val = value.trim();
-                    if (field === 'amount') val = parseFloat(val.replace(',', '.'));
-                    if (['isExit', 'isRepeatable'].includes(field)) val = (val.toLowerCase() === 'true');
+                    let val;
+                    if (typeof value === 'boolean') {
+                        val = value;
+                    } else {
+                        val = value.trim();
+                        if (field === 'amount') val = parseFloat(val.replace(',', '.'));
+                        if (['isExit', 'isRepeatable'].includes(field)) val = (val.toLowerCase() === 'true');
+                    }
 
                     try {
                         const res = await fetch(`${this.BASE_URL}/expenses/${id}`, {
@@ -274,11 +357,8 @@
                             body: JSON.stringify({ [field]: val })
                         });
                         if (!res.ok) throw new Error();
-
-                        // Aggiorna localmente l'item per riflettere i colori se isExit cambia
                         const item = this.items.find(i => i.id === id);
                         if (item) item[field] = val;
-
                         this.status = 'saved';
                         this.statusMsg = 'SAVED';
                     } catch (e) {
@@ -288,8 +368,9 @@
                 },
 
                 exportCSV() {
-                    const headers = "Data,Titolo,Importo,Uscita,Pagatore,Metodo\n";
-                    const rows = this.filteredItems.map(i => `${this.formatDate(i.date)},${i.title},${i.amount},${i.isExit},${i.specificHabitante},${i.paymentMethod}`).join("\n");
+                    const all = [...this.normalItems, ...this.blackItems];
+                    const headers = "Data,Titolo,Importo,Uscita,Pagatore,Metodo,Black\n";
+                    const rows = all.map(i => `${this.formatDate(i.date)},${i.title},${i.amount},${i.isExit},${i.specificHabitante || i.payerType},${i.paymentMethod},${i.isBlack || false}`).join("\n");
                     const blob = new Blob([headers + rows], { type: 'text/csv' });
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);

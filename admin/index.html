@@ -968,15 +968,12 @@
                                 </select>
 
                                 <div x-transition>
-                                    <select x-model="habitanteFilter" style="width: auto; margin:0">
+                                    <select :value="habitanteFilter" @change="habitanteFilter = $event.target.value" style="width: auto; margin:0">
                                         <option value="all">Tutti i pagatori</option>
                                         <option value="habitat">Habitat (Cassa)</option>
-                                        <option value="beppe">Beppe</option>
-                                        <option value="chiara">Chiara</option>
-                                        <option value="enri">Enri</option>
-                                        <option value="marco">Marco</option>
-                                        <option value="pongie">Pongie</option>
-                                        <option value="poni">Poni</option>
+                                        <template x-for="h in habitanti" :key="h">
+                                            <option :value="h" :selected="habitanteFilter === h" x-text="h.charAt(0).toUpperCase() + h.slice(1)"></option>
+                                        </template>
                                     </select>
                                 </div>
                                 <select x-model="typeFilter" style="width: auto; margin:0">
@@ -998,6 +995,9 @@
                             <button x-show="canWrite && currentUser?.role === 'admin'" @click="openFlowCassaCategoryManager()"
                                 style="padding: 4px 10px; cursor: pointer; background: #666; color:#fff; border:none; margin-left: 8px;">
                                 Gestisci Categorie</button>
+                            <button x-show="canWrite && currentUser?.role === 'admin'" @click="openHabitantiManager()"
+                                style="padding: 4px 10px; cursor: pointer; background: #444; color:#fff; border:none; margin-left: 8px;">
+                                Gestisci Habitanti</button>
                         </div>
 
                         <table>
@@ -2634,110 +2634,175 @@
             <!-- SIDEBAR: Edit Expense -->
             <template x-if="editingItem">
                 <div class="sidebar">
-                    <h3 x-text="editingItem.id ? 'Modifica Voce' : 'Nuova Voce'"></h3>
-                    <label>Titolo</label><input type="text" x-model="editingItem.title">
-                    <label>Descrizione</label><textarea x-model="editingItem.description" rows="2"></textarea>
-                    <label>Importo (&#x20AC;)</label><input type="number" x-model.number="editingItem.amount">
-                    <label>Data</label><input type="date" x-model="editingItem.date">
-                    <label>Tipo</label>
-                    <select :value="editingItem.isExit.toString()"
-                        @change="editingItem.isExit = ($event.target.value === 'true')">
-                        <option value="false">Entrata</option>
-                        <option value="true">Uscita</option>
-                    </select>
-                    <label>Categoria</label>
-                    <select x-model="editingItem.expenseType">
-                        <option value="">Nessuna</option>
+                    <h3 x-text="editingItem.id ? 'Modifica Voce' : 'Nuova Voce'" style="margin-bottom:14px;"></h3>
+
+                    <!-- TIPO toggle -->
+                    <div style="display:flex; margin-bottom:14px;">
+                        <button @click="editingItem.isExit = false"
+                            :style="!editingItem.isExit ? 'flex:1;padding:7px;background:#2c7a7b;color:#fff;border:1px solid #2c7a7b;cursor:pointer;font-family:inherit;font-weight:bold;font-size:12px;' : 'flex:1;padding:7px;background:#fff;color:#999;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:12px;'">
+                            ↓ ENTRATA
+                        </button>
+                        <button @click="editingItem.isExit = true"
+                            :style="editingItem.isExit ? 'flex:1;padding:7px;background:#c0392b;color:#fff;border:1px solid #c0392b;cursor:pointer;font-family:inherit;font-weight:bold;font-size:12px;' : 'flex:1;padding:7px;background:#fff;color:#999;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:12px;'">
+                            ↑ USCITA
+                        </button>
+                    </div>
+
+                    <!-- Titolo -->
+                    <label>Titolo</label>
+                    <input type="text" x-model="editingItem.title">
+
+                    <!-- Note collassabili -->
+                    <details style="margin-top:10px;">
+                        <summary style="cursor:pointer; font-size:11px; color:#888; user-select:none;">Descrizione</summary>
+                        <textarea x-model="editingItem.description" rows="2" style="margin-top:6px;"></textarea>
+                    </details>
+
+                    <br>
+
+                    <!-- Importo + Data inline -->
+                    <div style="display:flex; gap:8px; margin-top:6px;">
+                        <div style="flex:1;">
+                            <label>Importo (€)</label>
+                            <input type="number" step="0.01" x-model.number="editingItem.amount">
+                        </div>
+                        <div style="flex:1;">
+                            <label>Data</label>
+                            <input type="date" x-model="editingItem.date">
+                        </div>
+                    </div>
+
+                    <!-- USCITA: Chi ha pagato? (prima di tutto) -->
+                    <div x-show="editingItem.isExit" style="margin-top:12px; padding:10px; background:#fafafa; border:1px solid #eee;">
+                        <label style="font-size:11px; color:#666; display:block; margin-bottom:6px;">CHI HA PAGATO?</label>
+                        <div style="display:flex; margin-bottom:8px;">
+                            <button @click="editingItem.payerType='habitat'; editingItem.specificHabitante=''"
+                                :style="editingItem.payerType==='habitat' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                Habitat
+                            </button>
+                            <button @click="editingItem.payerType='habitante'"
+                                :style="editingItem.payerType==='habitante' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                Habitante
+                            </button>
+                        </div>
+                        <div x-show="editingItem.payerType === 'habitante'">
+                            <select :value="editingItem.specificHabitante" @change="editingItem.specificHabitante = $event.target.value" style="margin-bottom:8px;">
+                                <option value="">Scegli...</option>
+                                <template x-for="h in habitanti" :key="h">
+                                    <option :value="h" :selected="editingItem.specificHabitante === h" x-text="h.charAt(0).toUpperCase() + h.slice(1)"></option>
+                                </template>
+                            </select>
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:12px;">
+                                <input type="checkbox" x-model="editingItem.isRimborsato" style="width:auto; margin:0;">
+                                Rimborsato? <span style="color:#888; font-size:10px;">(conta come Habitat)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Categoria -->
+                    <label style="margin-top:12px;">Categoria</label>
+                    <select @change="editingItem.expenseType = $event.target.value">
+                        <option value="" :selected="!editingItem.expenseType">Nessuna</option>
                         <template x-for="cat in flowCassaCategories" :key="cat.id">
-                            <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
+                            <option :value="cat.name" :selected="editingItem.expenseType === cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
                         </template>
                     </select>
-                    <template x-if="String(editingItem.isExit) === 'false'">
-                        <div class="sub-box" style="margin-bottom:8px;">
-                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:12px;">
-                                <input type="checkbox" x-model="editingItem.isOspitalita" style="width:auto; margin:0;">
-                                Ospitalità
-                            </label>
-                            <template x-if="editingItem.isOspitalita">
-                                <div style="display:flex; align-items:center; gap:6px; margin-top:8px;">
-                                    <label style="font-size:11px; color:#666; white-space:nowrap;">di cui cibo €</label>
-                                    <input type="number" min="0" step="0.01" x-model.number="editingItem.foodAmount" style="flex:1;">
-                                </div>
-                            </template>
-                        </div>
-                    </template>
 
-                    <template x-if="String(editingItem.isExit) === 'true'">
-                        <div class="sub-box">
-                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                                <input type="checkbox" x-model="editingItem.isFood" style="width:auto; margin:0;">
-                                <span>Spesa cibo 🥦 (scala budget virtuale)</span>
-                            </label>
-                            <br>
-                            <label>Attivita pagata</label><input type="text" x-model="editingItem.paidActivity">
-                            <label>Documento</label>
-                            <select x-model="editingItem.receiptType">
-                                <option value="nessuno">Nessuno</option>
-                                <option value="scontrino">Scontrino</option>
-                                <option value="fattura">Fattura</option>
-                            </select>
-                            <template x-if="editingItem.receiptType !== 'nessuno'">
-                                <div style="margin-top:8px;">
-                                    <label>Immagine scontrino/fattura</label>
-                                    <input type="file" accept="image/*,application/pdf"
-                                           @change="receiptFile = $event.target.files[0]"
-                                           style="font-size:12px; padding:4px;">
-                                    <div x-show="editingItem.receiptImagePath" style="margin-top:4px;">
-                                        <a :href="BASE_URL + editingItem.receiptImagePath" target="_blank"
-                                           style="font-size:11px; color:#2b6cb0;">📎 Vedi allegato attuale</a>
-                                    </div>
-                                </div>
-                            </template>
-                            <label style="margin-top:10px;">Chi ha pagato?</label>
-                            <select x-model="editingItem.payerType">
-                                <option value="habitat">Habitat (Cassa comune)</option>
-                                <option value="habitante">Un Habitante</option>
-                            </select>
-                            <template x-if="editingItem.payerType === 'habitante'">
-                                <div style="margin-top: 10px;">
-                                    <label>Seleziona Habitante</label>
-                                    <select x-model="editingItem.specificHabitante">
-                                        <option value="">Scegli...</option>
-                                        <option value="beppe">Beppe</option>
-                                        <option value="chiara">Chiara</option>
-                                        <option value="enri">Enri</option>
-                                        <option value="marco">Marco</option>
-                                        <option value="pongie">Pongie</option>
-                                        <option value="poni">Poni</option>
-                                    </select>
-                                </div>
-                            </template>
+                    <!-- ENTRATA: Ospitalità -->
+                    <div x-show="!editingItem.isExit" style="margin-top:10px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                            <input type="checkbox" x-model="editingItem.isOspitalita" style="width:auto; margin:0;">
+                            Ospitalità
+                        </label>
+                        <div x-show="editingItem.isOspitalita" style="display:flex; align-items:center; gap:6px; margin-top:8px;">
+                            <label style="font-size:11px; color:#666; white-space:nowrap;">di cui cibo €</label>
+                            <input type="number" min="0" step="0.01" x-model.number="editingItem.foodAmount" style="flex:1;">
                         </div>
-                    </template>
-                    <br>
-                    <label>Modalita di pagamento</label>
-                    <select x-model="editingItem.paymentMethod">
-                        <option value="cash">Cash</option>
-                        <option value="iban">IBAN</option>
-                        <option value="paypal">PayPal</option>
-                    </select>
+                    </div>
+
+                    <!-- USCITA: dettagli -->
+                    <div x-show="editingItem.isExit" style="margin-top:10px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-bottom:10px;">
+                            <input type="checkbox" x-model="editingItem.isFood" style="width:auto; margin:0;">
+                            Spesa cibo? <span style="font-size:10px; color:#888;">(scala budget virtuale)</span>
+                        </label>
+
+                        <label>Attività pagata</label>
+                        <input type="text" x-model="editingItem.paidActivity">
+
+                        <!-- Modalità pagamento toggle (solo habitat) -->
+                        <div x-show="editingItem.payerType !== 'habitante'" style="margin-top:10px;">
+                            <label>Modalità pagamento</label>
+                            <div style="display:flex;">
+                                <button @click="editingItem.paymentMethod='cash'"
+                                    :style="editingItem.paymentMethod==='cash' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                    CASH
+                                </button>
+                                <button @click="editingItem.paymentMethod='iban'"
+                                    :style="editingItem.paymentMethod==='iban' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                    IBAN
+                                </button>
+                                <button @click="editingItem.paymentMethod='paypal'"
+                                    :style="editingItem.paymentMethod==='paypal' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                    PAYPAL
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Documento toggle -->
+                        <label style="margin-top:10px;">Documento</label>
+                        <div style="display:flex;">
+                            <button @click="editingItem.receiptType='nessuno'"
+                                :style="editingItem.receiptType==='nessuno' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                Nessuno
+                            </button>
+                            <button @click="editingItem.receiptType='scontrino'"
+                                :style="editingItem.receiptType==='scontrino' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                Scontrino
+                            </button>
+                            <button @click="editingItem.receiptType='fattura'"
+                                :style="editingItem.receiptType==='fattura' ? 'flex:1;padding:6px;background:#000;color:#fff;border:1px solid #000;cursor:pointer;font-family:inherit;font-size:11px;' : 'flex:1;padding:6px;background:#fff;color:#666;border:1px solid #ccc;cursor:pointer;font-family:inherit;font-size:11px;'">
+                                Fattura
+                            </button>
+                        </div>
+                        <div x-show="editingItem.receiptType !== 'nessuno'" style="margin-top:8px;">
+                            <input type="file" accept="image/*,application/pdf"
+                                   @change="receiptFile = $event.target.files[0]"
+                                   style="font-size:12px; padding:4px;">
+                            <div x-show="editingItem.receiptImagePath" style="margin-top:4px;">
+                                <a :href="BASE_URL + editingItem.receiptImagePath" target="_blank"
+                                   style="font-size:11px; color:#2b6cb0;">📎 Vedi allegato attuale</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Black -->
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-top:12px;">
+                        <input type="checkbox" x-model="editingItem.isBlack" style="width:auto; margin:0;">
+                        Black?
+                    </label>
+
                     <hr>
-                    <label><input type="checkbox" x-model="editingItem.isRepeatable" style="width:auto">
-                        Ripetibile?</label>
-                    <template x-if="editingItem.isRepeatable">
-                        <div class="sub-box">
-                            <label>Frequenza</label>
-                            <select x-model="editingItem.repeatInterval">
-                                <option value="weekly">Settimanale</option>
-                                <option value="monthly">Mensile</option>
-                                <option value="yearly">Annuale</option>
-                            </select>
-                            <label>Fino al</label><input type="date" x-model="editingItem.repeatUntil">
-                        </div>
-                    </template>
-                    <button class="btn-blk" @click="saveData()">SALVA</button>
+
+                    <!-- Ripetibile (entrata e uscita) -->
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                        <input type="checkbox" x-model="editingItem.isRepeatable" style="width:auto; margin:0;">
+                        Ripetibile?
+                    </label>
+                    <div x-show="editingItem.isRepeatable" style="margin-top:8px; padding:10px; background:#fafafa; border:1px solid #eee;">
+                        <label>Frequenza</label>
+                        <select x-model="editingItem.repeatInterval">
+                            <option value="weekly">Settimanale</option>
+                            <option value="monthly">Mensile</option>
+                            <option value="yearly">Annuale</option>
+                        </select>
+                        <label>Fino al</label>
+                        <input type="date" x-model="editingItem.repeatUntil">
+                    </div>
+
+                    <button class="btn-blk" @click="saveData()" style="margin-top:16px;">SALVA</button>
                     <button @click="editingItem = null"
-                        style="width:100%; border:none; background:none; cursor:pointer; margin-top:10px;">Annulla</button>
+                        style="width:100%; border:none; background:none; cursor:pointer; margin-top:10px; color:#666;">Annulla</button>
                 </div>
             </template>
 
@@ -3211,6 +3276,64 @@
                             Chiudi
                         </button>
                     </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Habitanti Manager -->
+            <template x-if="showHabitantiManager">
+                <div class="modal-overlay" @click.self="closeHabitantiManager()">
+                    <div class="modal-box" style="text-align:left; min-width:400px; max-width:600px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h3 style="margin:0;">Gestione Habitanti</h3>
+                            <button @click="openCreateHabitante()"
+                                style="padding: 6px 12px; cursor: pointer; background: #000; color:#fff; border:none;">
+                                + Nuovo
+                            </button>
+                        </div>
+                        <table style="width:100%; border-collapse: collapse; font-size:13px;">
+                            <thead>
+                                <tr style="background:#f5f5f5; border-bottom:2px solid #ddd;">
+                                    <th style="padding:8px; text-align:left;">Nome</th>
+                                    <th style="padding:8px; text-align:right;">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="h in habitanti" :key="h">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:8px;" x-text="h.charAt(0).toUpperCase() + h.slice(1)"></td>
+                                        <td style="padding:8px; text-align:right;">
+                                            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                                                <button @click="openEditHabitante(h)"
+                                                    style="padding:4px 8px; cursor:pointer; background:#666; color:#fff; border:none; font-size:11px;">
+                                                    Modifica
+                                                </button>
+                                                <button @click="deleteHabitante(h)"
+                                                    style="padding:4px 8px; cursor:pointer; background:#d32f2f; color:#fff; border:none; font-size:11px;">
+                                                    Elimina
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                        <button @click="closeHabitantiManager()"
+                            style="width:100%; margin-top:20px; padding:8px; border:1px solid #000; background:none; cursor:pointer;">
+                            Chiudi
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- SIDEBAR: Edit Habitante -->
+            <template x-if="editingHabitante">
+                <div class="sidebar">
+                    <h3 x-text="editingHabitante.original ? 'Modifica Habitante' : 'Nuovo Habitante'"></h3>
+                    <label>Nome (minuscolo)</label>
+                    <input type="text" x-model="editingHabitante.name" @keyup.enter="saveHabitante()">
+                    <button class="btn-blk" @click="saveHabitante()">SALVA</button>
+                    <button @click="editingHabitante = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                 </div>
             </template>
 

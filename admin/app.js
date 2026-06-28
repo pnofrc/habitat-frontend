@@ -121,6 +121,9 @@ document.addEventListener('alpine:init', () => {
         editingFlowCassaCategory: null,
         editingBookingFinance: null,
         showFlowCassaCategoryManager: false,
+        habitanti: [],
+        showHabitantiManager: false,
+        editingHabitante: null,
 
         canWriteTab(tab) {
             if (!this.currentUser) return false;
@@ -278,6 +281,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async init() {
+            this.loadHabitanti();
             const hash = window.location.hash.slice(1);
             if (hash) this.view = hash;
             if (this.token) {
@@ -1075,6 +1079,34 @@ document.addEventListener('alpine:init', () => {
             return expenseCount + financeCount;
         },
 
+        loadHabitanti() {
+            const stored = localStorage.getItem('habitanti');
+            this.habitanti = stored ? JSON.parse(stored) : ['beppe', 'chiara', 'enri', 'marco', 'pongie', 'poni'];
+        },
+        saveHabitantiToStorage() {
+            localStorage.setItem('habitanti', JSON.stringify(this.habitanti));
+        },
+        openHabitantiManager() { this.showHabitantiManager = true; },
+        closeHabitantiManager() { this.showHabitantiManager = false; this.editingHabitante = null; },
+        openCreateHabitante() { this.editingHabitante = { original: null, name: '' }; },
+        openEditHabitante(name) { this.editingHabitante = { original: name, name }; },
+        saveHabitante() {
+            const trimmed = this.editingHabitante.name.trim().toLowerCase();
+            if (!trimmed) return;
+            if (this.editingHabitante.original === null) {
+                if (!this.habitanti.includes(trimmed)) this.habitanti.push(trimmed);
+            } else {
+                const idx = this.habitanti.indexOf(this.editingHabitante.original);
+                if (idx !== -1) this.habitanti[idx] = trimmed;
+            }
+            this.saveHabitantiToStorage();
+            this.editingHabitante = null;
+        },
+        deleteHabitante(name) {
+            this.habitanti = this.habitanti.filter(h => h !== name);
+            this.saveHabitantiToStorage();
+        },
+
         selectGuest(guest) {
             this.selectedGuest = guest;
             this.guestHistory = this.allBookings.filter(b => (b.guest?.id || b.guest) === guest.id);
@@ -1211,7 +1243,10 @@ document.addEventListener('alpine:init', () => {
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
                     body: JSON.stringify(payload)
                 });
-                if (!res.ok) throw new Error("Errore salvataggio spesa");
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(`Errore ${res.status}: ${err.message || err.error || JSON.stringify(err)}`);
+                }
                 const saved = await res.json();
                 if (this.receiptFile) await this.uploadReceipt(saved.id || this.editingItem.id);
                 this.receiptFile = null;
@@ -1309,7 +1344,7 @@ document.addEventListener('alpine:init', () => {
                 title: '', description: '', amount: 0, date: new Date().toISOString().split('T')[0],
                 isExit: true, receiptType: 'nessuno', payerType: 'habitat', paymentMethod: 'cash',
                 isRepeatable: false, repeatInterval: 'monthly', expenseType: '', isFood: false,
-                isOspitalita: false, foodAmount: 0
+                isOspitalita: false, foodAmount: 0, isBlack: false, isRimborsato: false
             };
         },
 
@@ -1320,7 +1355,9 @@ document.addEventListener('alpine:init', () => {
                 isExit: String(item.isExit) === 'true',
                 date: item.date.split('T')[0],
                 isOspitalita: !!item.isOspitalita,
-                foodAmount: item.foodAmount || 0
+                foodAmount: item.foodAmount || 0,
+                isBlack: !!item.isBlack,
+                isRimborsato: !!item.isRimborsato
             };
         },
 
