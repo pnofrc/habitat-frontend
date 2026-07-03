@@ -392,6 +392,34 @@
 
                 <label x-text="lang === 'it' ? `(Prima procedi al pagamento, poi clicca su 'INVIA DOMANDA')` : `(First, complete the payment, then click 'SUBMIT')`"></label>
 
+                <div x-show="isFestival" style="margin-top:30px; padding-top:20px; border-top:2px solid #000;">
+                    <h2>5. FESTIVAL</h2>
+
+                    <label class="checkbox-group">
+                        <input type="checkbox" x-model="form.festivalAllergy">
+                        <span x-text="lang === 'it' ? 'Ho intolleranze o allergie alimentari' : 'I have food intolerances or allergies'"></span>
+                    </label>
+
+                    <div x-show="form.festivalAllergy" style="margin-top:10px;">
+                        <label x-text="lang === 'it' ? 'Note intolleranze/allergie' : 'Intolerance/allergy notes'"></label>
+                        <textarea x-model="form.festivalAllergyNotes" rows="3"></textarea>
+                    </div>
+
+                    <div style="margin-top:15px;">
+                        <label x-text="lang === 'it' ? 'Giorno di arrivo previsto' : 'Expected arrival day'"></label>
+                        <select x-model="form.festivalCheckinDay">
+                            <option value="" x-text="lang === 'it' ? '— Seleziona giorno —' : '— Select day —'"></option>
+                            <option value="venerdi" x-text="lang === 'it' ? 'Venerdì' : 'Friday'"></option>
+                            <option value="sabato" x-text="lang === 'it' ? 'Sabato' : 'Saturday'"></option>
+                            <option value="domenica" x-text="lang === 'it' ? 'Domenica' : 'Sunday'"></option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top:15px;">
+                        <label x-text="lang === 'it' ? 'Orario di arrivo previsto' : 'Expected arrival time'"></label>
+                        <input type="time" x-model="form.festivalCheckinTime">
+                    </div>
+                </div>
 
                 <h2 x-text="lang === 'it' ? 'CONDIZIONI' : 'CONDITIONS'"></h2>
                 <label class="checkbox-group">
@@ -431,10 +459,12 @@
                 errorMessage: '',
                 lang: 'it',
                 interessiOpts: ['Habitat - Cà De Monti', 'Distretto A', 'Quazar - Coworking'],
+                isFestival: false,
                 form: {
                     email: '', cognome: '', nome: '', dataNascita: '', luogoNascita: '', provNascita: '', paeseNascita: '', codiceFiscale: '',
                     indirizzo: '', cap: '', cittaResidenza: '', provResidenza: '', paeseResidenza: '', telefono: '',
-                    interesse: '', metodoPagamento: '', privacy: false, adesione: false
+                    interesse: '', metodoPagamento: '', privacy: false, adesione: false,
+                    festivalAllergy: false, festivalAllergyNotes: '', festivalCheckinDay: '', festivalCheckinTime: ''
                 },
                 init() {
                     // Parse query parameters for pre-selection
@@ -451,6 +481,11 @@
                     // Pre-select if valid param provided
                     if (interestParam && interestMap[interestParam.toLowerCase()]) {
                         this.form.interesse = interestMap[interestParam.toLowerCase()];
+                    }
+
+                    const festivalParam = params.get('isFestival');
+                    if (festivalParam === 'true') {
+                        this.isFestival = true;
                     }
 
                     // Watch for interest changes and clear incompatible payment methods
@@ -485,6 +520,12 @@
                         this.errorMessage = this.lang === 'it'
                             ? "Seleziona un interesse"
                             : "Please select an interest";
+                        return;
+                    }
+                    if (this.isFestival && (!this.form.festivalCheckinDay || !this.form.festivalCheckinTime)) {
+                        this.errorMessage = this.lang === 'it'
+                            ? "Indica il giorno e l'orario di arrivo previsto"
+                            : "Please provide your expected arrival day and time";
                         return;
                     }
                     if (!this.form.privacy || !this.form.adesione) {
@@ -534,7 +575,11 @@
                         paymentMethod: this.form.metodoPagamento,
                         acceptPrivacy: this.form.privacy,
                         acceptStatute: this.form.adesione,
-                        language: this.lang
+                        language: this.lang,
+                        festivalAllergy: this.isFestival ? this.form.festivalAllergy : undefined,
+                        festivalAllergyNotes: (this.isFestival && this.form.festivalAllergy) ? this.form.festivalAllergyNotes || null : undefined,
+                        festivalCheckinDay: this.isFestival ? (this.form.festivalCheckinDay || null) : undefined,
+                        festivalCheckinTime: this.isFestival ? (this.form.festivalCheckinTime || null) : undefined,
                     };
 
                     try {

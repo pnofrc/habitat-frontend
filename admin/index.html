@@ -2427,6 +2427,15 @@
                                                       style="padding:2px 6px; background:#fef3c7; color:#92400e; border:1px solid #fbbf24; border-radius:3px; font-size:10px; font-weight:bold;">
                                                     MEMBER
                                                 </span>
+                                                <span x-show="festivalMembership(t.email)?.festivalAllergy"
+                                                      style="margin-left:4px; padding:2px 6px; background:#fee2e2; color:#991b1b; border:1px solid #f87171; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                    ALLERGIE
+                                                </span>
+                                                <button x-show="isMember(t.email)"
+                                                        @click="festivalInfoMembership = festivalMembership(t.email)"
+                                                        style="margin-left:4px; padding:2px 6px; background:#f3f4f6; color:#374151; border:1px solid #d1d5db; border-radius:3px; font-size:10px; cursor:pointer; font-family:inherit;">
+                                                    Info
+                                                </button>
                                                 <span x-show="!isMember(t.email)" style="color:#999; font-size:12px;">—</span>
                                             </td>
                                             <td>
@@ -2452,6 +2461,43 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- MODAL: Festival Info -->
+                <template x-if="festivalInfoMembership">
+                    <div class="modal-overlay" @click.self="festivalInfoMembership = null">
+                        <div class="modal-box" style="text-align:left; min-width:380px; max-width:500px;">
+                            <h3 style="margin:0 0 15px; font-size:18px;"
+                                x-text="festivalInfoMembership.name + ' ' + festivalInfoMembership.surname"></h3>
+                            <div style="display:grid; grid-template-columns:150px 1fr; gap:10px; font-size:14px;">
+                                <span style="color:#666;">Email:</span>
+                                <span x-text="festivalInfoMembership.email"></span>
+
+                                <span style="color:#666;">Allergie:</span>
+                                <span x-text="festivalInfoMembership.festivalAllergy ? 'Sì' : 'No'"
+                                      :style="festivalInfoMembership.festivalAllergy ? 'color:#991b1b; font-weight:bold;' : ''"></span>
+
+                                <template x-if="festivalInfoMembership.festivalAllergyNotes">
+                                    <span style="color:#666;">Note allergie:</span>
+                                    <span x-text="festivalInfoMembership.festivalAllergyNotes" style="white-space:pre-wrap;"></span>
+                                </template>
+
+                                <span style="color:#666;">Giorno arrivo:</span>
+                                <span x-text="festivalInfoMembership.festivalCheckinDay
+                                    ? ({venerdi:'Venerdì', sabato:'Sabato', domenica:'Domenica'}[festivalInfoMembership.festivalCheckinDay] || festivalInfoMembership.festivalCheckinDay)
+                                    : '—'"></span>
+
+                                <span style="color:#666;">Orario arrivo:</span>
+                                <span x-text="festivalInfoMembership.festivalCheckinTime || '—'"></span>
+                            </div>
+                            <div style="margin-top:20px; text-align:right;">
+                                <button @click="festivalInfoMembership = null"
+                                        style="padding:6px 16px; background:#000; color:#fff; border:none; cursor:pointer; font-family:inherit;">
+                                    Chiudi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
 
                 <!-- CALENDAR -->
                 <div x-show="view === 'calendar'">
@@ -3729,6 +3775,32 @@
                                 <span x-text="editingMembership.language === 'it' ? 'Italiano' : 'English'"></span>
                             </div>
                         </div>
+
+                        <!-- Festival -->
+                        <template x-if="editingMembership.festivalCheckinDay || editingMembership.festivalAllergyNotes || editingMembership.festivalAllergy">
+                            <div style="margin-bottom:20px;">
+                                <h4 style="margin:0 0 10px; font-size:14px; color:#666; text-transform:uppercase;">Festival</h4>
+                                <div style="display:grid; grid-template-columns:150px 1fr; gap:8px; font-size:14px;">
+                                    <span style="color:#666;">Allergie/Intolleranze:</span>
+                                    <span x-text="editingMembership.festivalAllergy ? 'Sì' : 'No'"></span>
+
+                                    <template x-if="editingMembership.festivalAllergyNotes">
+                                        <span style="color:#666;">Note allergie:</span>
+                                        <span x-text="editingMembership.festivalAllergyNotes" style="white-space:pre-wrap;"></span>
+                                    </template>
+
+                                    <template x-if="editingMembership.festivalCheckinDay">
+                                        <span style="color:#666;">Giorno arrivo:</span>
+                                        <span x-text="{venerdi:'Venerdì', sabato:'Sabato', domenica:'Domenica'}[editingMembership.festivalCheckinDay] || editingMembership.festivalCheckinDay"></span>
+                                    </template>
+
+                                    <template x-if="editingMembership.festivalCheckinTime">
+                                        <span style="color:#666;">Orario arrivo:</span>
+                                        <span x-text="editingMembership.festivalCheckinTime"></span>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
 
                         <!-- Timestamps -->
                         <div style="margin-bottom:20px; padding-top:15px; border-top:1px solid #eee;">

@@ -26,6 +26,8 @@ document.addEventListener('alpine:init', () => {
         festivalTicketCount: 0,
         festivalConfirmedCount: 0,
         confirmedMemberEmails: [],
+        membershipsByEmail: {},
+        festivalInfoMembership: null,
         checkinSearch: '',
         festivalApproval: null,
         editingFestivalTicket: null,
@@ -406,9 +408,10 @@ document.addEventListener('alpine:init', () => {
                     this.festivalTickets = await ticketsRes.json();
                     this.deletedFestivalTickets = await binRes.json();
                     const memberships = await membershipsRes.json();
-                    this.confirmedMemberEmails = Array.isArray(memberships)
-                        ? memberships.filter(m => m.confirmed).map(m => m.email.toLowerCase())
-                        : [];
+                    const confirmedMemberships = Array.isArray(memberships) ? memberships.filter(m => m.confirmed) : [];
+                    this.confirmedMemberEmails = confirmedMemberships.map(m => m.email.toLowerCase());
+                    this.membershipsByEmail = {};
+                    confirmedMemberships.forEach(m => { this.membershipsByEmail[m.email.toLowerCase()] = m; });
                     // Auto-fetch PayPal transactions when on festival tickets subtab
                     if (this.festivalTab === 'tickets') {
                         await this.fetchPaypalTransactions();
@@ -1744,6 +1747,11 @@ document.addEventListener('alpine:init', () => {
         isMember(email) {
             if (!email) return false;
             return this.confirmedMemberEmails.includes(email.toLowerCase());
+        },
+
+        festivalMembership(email) {
+            if (!email) return null;
+            return this.membershipsByEmail[email.toLowerCase()] || null;
         },
 
         async checkinTicket(id) {
