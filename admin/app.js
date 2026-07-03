@@ -1754,6 +1754,26 @@ document.addEventListener('alpine:init', () => {
             return this.membershipsByEmail[email.toLowerCase()] || null;
         },
 
+        async saveFestivalInfo() {
+            const m = this.festivalInfoMembership;
+            try {
+                const res = await fetch(`${this.BASE_URL}/membership/${m.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({
+                        festivalAllergy: m.festivalAllergy,
+                        festivalAllergyNotes: m.festivalAllergyNotes || null,
+                        festivalCheckinDay: m.festivalCheckinDay || null,
+                        festivalCheckinTime: m.festivalCheckinTime || null,
+                    })
+                });
+                if (!res.ok) { alert('Errore durante il salvataggio'); return; }
+                const updated = await res.json();
+                this.membershipsByEmail[updated.email.toLowerCase()] = updated;
+                this.festivalInfoMembership = { ...updated };
+            } catch (e) { alert('Errore durante il salvataggio'); }
+        },
+
         async checkinTicket(id) {
             try {
                 const res = await fetch(`${this.BASE_URL}/festival/${id}/checkin`, {

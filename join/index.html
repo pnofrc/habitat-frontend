@@ -296,14 +296,16 @@
                 <label x-text="lang === 'it' ? 'Cellulare / Tel. *' : 'Phone *'"></label>
                 <input type="text" x-model="form.telefono">
 
-                <h2 x-text="lang === 'it' ? '3. INTERESSI' : '3. INTERESTS'"></h2>
-                <label x-text="lang === 'it' ? 'Sono interessato/a a... *' : 'I\'m interested in... *'"></label>
-                <template x-for="opt in interessiOpts">
-                    <label class="checkbox-group">
-                        <input type="radio" name="interesse" :value="opt" x-model="form.interesse"> <span
-                            x-text="opt"></span>
-                    </label>
-                </template>
+                <div x-show="!isFestival">
+                    <h2 x-text="lang === 'it' ? '3. INTERESSI' : '3. INTERESTS'"></h2>
+                    <label x-text="lang === 'it' ? 'Sono interessato/a a... *' : 'I\'m interested in... *'"></label>
+                    <template x-for="opt in interessiOpts">
+                        <label class="checkbox-group">
+                            <input type="radio" name="interesse" :value="opt" x-model="form.interesse"> <span
+                                x-text="opt"></span>
+                        </label>
+                    </template>
+                </div>
 
                 <h2 x-text="lang === 'it' ? '4. PAGAMENTO' : '4. PAYMENT'"></h2>
                 <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
@@ -486,6 +488,7 @@
                     const festivalParam = params.get('isFestival');
                     if (festivalParam === 'true') {
                         this.isFestival = true;
+                        this.form.interesse = 'Habitat - Cà De Monti';
                     }
 
                     // Watch for interest changes and clear incompatible payment methods

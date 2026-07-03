@@ -2432,7 +2432,7 @@
                                                     ALLERGIE
                                                 </span>
                                                 <button x-show="isMember(t.email)"
-                                                        @click="festivalInfoMembership = festivalMembership(t.email)"
+                                                        @click="festivalInfoMembership = {...festivalMembership(t.email)}"
                                                         style="margin-left:4px; padding:2px 6px; background:#f3f4f6; color:#374151; border:1px solid #d1d5db; border-radius:3px; font-size:10px; cursor:pointer; font-family:inherit;">
                                                     Info
                                                 </button>
@@ -2465,34 +2465,48 @@
                 <!-- MODAL: Festival Info -->
                 <template x-if="festivalInfoMembership">
                     <div class="modal-overlay" @click.self="festivalInfoMembership = null">
-                        <div class="modal-box" style="text-align:left; min-width:380px; max-width:500px;">
-                            <h3 style="margin:0 0 15px; font-size:18px;"
+                        <div class="modal-box" style="text-align:left; min-width:400px; max-width:520px;">
+                            <h3 style="margin:0 0 5px; font-size:18px;"
                                 x-text="festivalInfoMembership.name + ' ' + festivalInfoMembership.surname"></h3>
-                            <div style="display:grid; grid-template-columns:150px 1fr; gap:10px; font-size:14px;">
-                                <span style="color:#666;">Email:</span>
-                                <span x-text="festivalInfoMembership.email"></span>
+                            <p style="margin:0 0 20px; color:#666; font-size:13px;" x-text="festivalInfoMembership.email"></p>
 
-                                <span style="color:#666;">Allergie:</span>
-                                <span x-text="festivalInfoMembership.festivalAllergy ? 'Sì' : 'No'"
-                                      :style="festivalInfoMembership.festivalAllergy ? 'color:#991b1b; font-weight:bold;' : ''"></span>
+                            <div style="display:grid; grid-template-columns:150px 1fr; gap:10px; align-items:start; font-size:14px;">
+                                <span style="color:#666; padding-top:6px;">Allergie:</span>
+                                <label style="display:flex; align-items:center; gap:8px; padding-top:4px;">
+                                    <input type="checkbox" x-model="festivalInfoMembership.festivalAllergy" style="width:auto;">
+                                    <span x-text="festivalInfoMembership.festivalAllergy ? 'Sì' : 'No'"
+                                          :style="festivalInfoMembership.festivalAllergy ? 'color:#991b1b; font-weight:bold;' : 'color:#666;'"></span>
+                                </label>
 
-                                <template x-if="festivalInfoMembership.festivalAllergyNotes">
-                                    <span style="color:#666;">Note allergie:</span>
-                                    <span x-text="festivalInfoMembership.festivalAllergyNotes" style="white-space:pre-wrap;"></span>
+                                <template x-if="festivalInfoMembership.festivalAllergy">
+                                    <span style="color:#666; padding-top:6px;">Note allergie:</span>
+                                    <textarea x-model="festivalInfoMembership.festivalAllergyNotes"
+                                              rows="3"
+                                              style="font-family:inherit; font-size:13px; padding:6px; border:1px solid #000; resize:vertical;"></textarea>
                                 </template>
 
-                                <span style="color:#666;">Giorno arrivo:</span>
-                                <span x-text="festivalInfoMembership.festivalCheckinDay
-                                    ? ({venerdi:'Venerdì', sabato:'Sabato', domenica:'Domenica'}[festivalInfoMembership.festivalCheckinDay] || festivalInfoMembership.festivalCheckinDay)
-                                    : '—'"></span>
+                                <span style="color:#666; padding-top:6px;">Giorno arrivo:</span>
+                                <select x-model="festivalInfoMembership.festivalCheckinDay"
+                                        style="font-family:inherit; font-size:13px; padding:5px; border:1px solid #000;">
+                                    <option value="">— Seleziona —</option>
+                                    <option value="venerdi">Venerdì</option>
+                                    <option value="sabato">Sabato</option>
+                                    <option value="domenica">Domenica</option>
+                                </select>
 
-                                <span style="color:#666;">Orario arrivo:</span>
-                                <span x-text="festivalInfoMembership.festivalCheckinTime || '—'"></span>
+                                <span style="color:#666; padding-top:6px;">Orario arrivo:</span>
+                                <input type="time" x-model="festivalInfoMembership.festivalCheckinTime"
+                                       style="font-family:inherit; font-size:13px; padding:5px; border:1px solid #000;">
                             </div>
-                            <div style="margin-top:20px; text-align:right;">
+
+                            <div style="margin-top:20px; display:flex; gap:8px; justify-content:flex-end;">
                                 <button @click="festivalInfoMembership = null"
+                                        style="padding:6px 16px; background:#fff; color:#000; border:1px solid #000; cursor:pointer; font-family:inherit;">
+                                    Annulla
+                                </button>
+                                <button @click="saveFestivalInfo()"
                                         style="padding:6px 16px; background:#000; color:#fff; border:none; cursor:pointer; font-family:inherit;">
-                                    Chiudi
+                                    Salva
                                 </button>
                             </div>
                         </div>
