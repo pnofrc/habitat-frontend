@@ -29,6 +29,8 @@ document.addEventListener('alpine:init', () => {
         membershipsByEmail: {},
         festivalInfoMembership: null,
         checkinSearch: '',
+        linkingTicket: null,
+        memberSearch: '',
         festivalApproval: null,
         editingFestivalTicket: null,
         festivalTab: 'tickets',
@@ -1752,6 +1754,36 @@ document.addEventListener('alpine:init', () => {
         festivalMembership(email) {
             if (!email) return null;
             return this.membershipsByEmail[email.toLowerCase()] || null;
+        },
+
+        // Ticket-level helpers: a ticket counts as member via its own email
+        // or via a manually linked membership (membershipEmail)
+        ticketIsMember(t) {
+            return this.isMember(t.membershipEmail) || this.isMember(t.email);
+        },
+
+        ticketMembership(t) {
+            return this.festivalMembership(t.membershipEmail) || this.festivalMembership(t.email);
+        },
+
+        openLinkMember(t) {
+            this.linkingTicket = t;
+            this.memberSearch = '';
+        },
+
+        async linkMembership(ticket, membershipEmail) {
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/${ticket.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ membershipEmail })
+                });
+                if (!res.ok) throw new Error('Errore durante l\'associazione della tessera');
+                const updated = await res.json();
+                const idx = this.festivalTickets.findIndex(t => t.id === ticket.id);
+                if (idx !== -1) this.festivalTickets[idx] = updated;
+                this.linkingTicket = null;
+            } catch (e) { alert(e.message); }
         },
 
         async saveFestivalInfo() {
