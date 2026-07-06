@@ -309,10 +309,12 @@
 
                 <h2 x-text="lang === 'it' ? '4. PAGAMENTO' : '4. PAYMENT'"></h2>
                 <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
-                <u><label x-text="lang === 'it' ? 'Assicurati che il pagamento selezionato corrisponda a quello effettivamente utilizzato, grazie!' : 'Please make sure the payment method you selected matches the one you actually used. Thank you!'"></label></u>
 
                 <select x-model="form.metodoPagamento">
-                    <option value="" x-text="lang === 'it' ? 'Scegli...' : 'Choose...'"></option>
+                    <option value=""
+                        x-text="!form.interesse
+                            ? (lang === 'it' ? 'Seleziona prima un interesse (sezione 3)' : 'Select an interest first (section 3)')
+                            : (lang === 'it' ? 'Scegli...' : 'Choose...')"></option>
                     <template x-if="form.interesse === 'Habitat - Cà De Monti'">
                         <option value="CashHabitat">HABITAT >> CONTANTI / CASH</option>
                     </template>
@@ -332,67 +334,8 @@
                         <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
                     </template>
                 </select>
-                <div class="payment-box" x-show="form.metodoPagamento">
-                    <template x-if="form.metodoPagamento === 'HabitatIban'">
-                        <div>
-                            <p>IBAN: IT88Q0623023704000030225469</p>
-                            <p x-text="lang === 'it'
-                                ? 'Beneficiario: Distretto A APS'
-                                : 'Beneficiary: Distretto A APS'"></p>
-                            <p x-text="lang === 'it'
-                                ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
-                                : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
-                        </div>
-                    </template>
-                    <template x-if="form.metodoPagamento === 'DistrettoIban'">
-                        <div>
-                            <p>IBAN: IT80B0303223701010000636901</p>
-                            <p x-text="lang === 'it'
-                                ? 'Beneficiario: Distretto A APS'
-                                : 'Beneficiary: Distretto A APS'"></p>
-                            <p x-text="lang === 'it'
-                                ? 'Causale: &quot;Quota associativa [Tuo Nome]&quot;'
-                                : 'Reference: &quot;Membership fee [Your Name]&quot;'"></p>
-                        </div>
-                    </template>
-                    <template x-if="form.metodoPagamento === 'HabitatPaypal'">
-                        <div>
-                            <p x-text="lang === 'it'
-                                ? 'Invia il pagamento tramite PayPal a Habitat'
-                                : 'Send payment via PayPal to Habitat'"></p>
-                            <a href="https://www.paypal.com/ncp/payment/5E4P5CFASVLMA" target="_blank"
-                                style="display:inline-block; margin-top:8px; background:#000; color:#fff; padding:10px 20px; text-decoration:none; font-weight:bold;"
-                                x-text="lang === 'it' ? 'PAGA CON PAYPAL' : 'PAY WITH PAYPAL'"></a>
-                            <p style="font-size:0.8em; color:#666; margin-top:8px;" x-text="lang === 'it'
-                                ? 'Puoi pagare anche con Apple Pay e Carta'
-                                : 'You can also pay with Apple Pay and Card'"></p>
-                        </div>
-                    </template>
-                    <template x-if="form.metodoPagamento === 'DistrettoPaypal'">
-                        <div>
-                            <p x-text="lang === 'it'
-                                ? 'Invia il pagamento tramite PayPal a Distretto A'
-                                : 'Send payment via PayPal to Distretto A'"></p>
-                            <a href="https://paypal.me/distrettoa" target="_blank"
-                                style="display:inline-block; margin-top:8px; background:#000; color:#fff; padding:10px 20px; text-decoration:none; font-weight:bold;"
-                                x-text="lang === 'it' ? 'PAGA CON PAYPAL' : 'PAY WITH PAYPAL'"></a>
-                        </div>
-                    </template>
-                    <template x-if="form.metodoPagamento === 'CashHabitat'">
-                        <p x-text="lang === 'it'
-                            ? 'Pagamento in contanti presso la sede'
-                            : 'Cash payment at the venue'"></p>
-                    </template>
-                    <template x-if="form.metodoPagamento === 'CashDistrettoA'">
-                        <p x-text="lang === 'it'
-                            ? 'Pagamento in contanti presso la sede'
-                            : 'Cash payment at the venue'"></p>
-                    </template>
 
-
-                </div>
-
-                <label x-text="lang === 'it' ? `(Prima procedi al pagamento, poi clicca su 'INVIA DOMANDA')` : `(First, complete the payment, then click 'SUBMIT')`"></label>
+                <label x-text="lang === 'it' ? `(Riceverai le istruzioni di pagamento dopo l'invio della domanda)` : `(You will receive payment instructions after submitting your application)`"></label>
 
                 <div x-show="isFestival" style="margin-top:30px; padding-top:20px; border-top:2px solid #000;">
                     <h2>5. FESTIVAL</h2>
@@ -445,6 +388,37 @@
             <div style="text-align: center; padding: 40px;">
                 <h1 x-text="lang === 'it' ? 'DOMANDA RICEVUTA' : 'APPLICATION RECEIVED'"></h1>
                 <p x-text="lang === 'it' ? 'Grazie per esserti unito a noi.' : 'Thank you for joining us.'"></p>
+
+                <template x-if="form.metodoPagamento === 'HabitatPaypal' || form.metodoPagamento === 'DistrettoPaypal'">
+                    <div class="payment-box" style="margin:20px auto; text-align:center;">
+                        <p style="font-weight:bold;"
+                            x-text="lang === 'it' ? 'Ultimo passo: completa il pagamento della quota (€ 10,00)' : 'Last step: complete the membership fee payment (€ 10.00)'"></p>
+                        <a :href="form.metodoPagamento === 'HabitatPaypal' ? 'https://www.paypal.com/ncp/payment/5E4P5CFASVLMA' : 'https://paypal.me/distrettoa'"
+                            target="_blank"
+                            style="display:inline-block; margin-top:8px; background:#000; color:#fff; padding:12px 30px; text-decoration:none; font-weight:bold;"
+                            x-text="lang === 'it' ? 'PAGA CON PAYPAL' : 'PAY WITH PAYPAL'"></a>
+                        <template x-if="form.metodoPagamento === 'HabitatPaypal'">
+                            <p style="font-size:0.8em; color:#666; margin-top:8px;" x-text="lang === 'it'
+                                ? 'Puoi pagare anche con Apple Pay e Carta'
+                                : 'You can also pay with Apple Pay and Card'"></p>
+                        </template>
+                    </div>
+                </template>
+
+                <template x-if="form.metodoPagamento === 'HabitatIban' || form.metodoPagamento === 'DistrettoIban'">
+                    <div class="payment-box" style="margin:20px auto; text-align:left;">
+                        <p style="font-weight:bold;"
+                            x-text="lang === 'it' ? 'Ultimo passo: completa il bonifico della quota (€ 10,00)' : 'Last step: complete the bank transfer of the membership fee (€ 10.00)'"></p>
+                        <p x-text="'IBAN: ' + (form.metodoPagamento === 'HabitatIban' ? 'IT88Q0623023704000030225469' : 'IT80B0303223701010000636901')"></p>
+                        <p x-text="lang === 'it' ? 'Beneficiario: Distretto A APS' : 'Beneficiary: Distretto A APS'"></p>
+                        <p x-text="(lang === 'it' ? 'Causale: ' : 'Reference: ') + '&quot;' + (lang === 'it' ? 'Quota associativa ' : 'Membership fee ') + form.nome + ' ' + form.cognome + '&quot;'"></p>
+                    </div>
+                </template>
+
+                <template x-if="form.metodoPagamento === 'CashHabitat' || form.metodoPagamento === 'CashDistrettoA'">
+                    <p x-text="lang === 'it' ? 'Potrai pagare la quota in contanti presso la sede.' : 'You can pay the membership fee in cash at the venue.'"></p>
+                </template>
+
                 <button class="btn-send" style="width:auto; padding:10px 30px" @click="location.reload()"
                     x-text="lang === 'it' ? 'Invia un\'altra' : 'Send another'"></button>
             </div>

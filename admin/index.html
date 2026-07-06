@@ -2394,6 +2394,24 @@
                         </div>
                     </div>
                     <div x-show="festivalTab === 'checkin'">
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
+                            <div class="card" style="flex:1">
+                                <small>ENTRATI</small><br>
+                                <b x-text="festivalTickets.filter(t => t.confirmed && t.checkedInAt).reduce((s,t) => s + (t.quantity||1), 0)" style="color:green"></b>
+                            </div>
+                            <div class="card" style="flex:1">
+                                <small>DA ENTRARE</small><br>
+                                <b x-text="festivalTickets.filter(t => t.confirmed && !t.checkedInAt).reduce((s,t) => s + (t.quantity||1), 0)" style="color:orange"></b>
+                            </div>
+                            <div class="card" style="flex:1">
+                                <small>TESSERATI</small><br>
+                                <b x-text="festivalTickets.filter(t => t.confirmed && isMember(t.email)).reduce((s,t) => s + (t.quantity||1), 0)" style="color:green"></b>
+                            </div>
+                            <div class="card" style="flex:1">
+                                <small>NON TESSERATI</small><br>
+                                <b x-text="festivalTickets.filter(t => t.confirmed && !isMember(t.email)).reduce((s,t) => s + (t.quantity||1), 0)" style="color:#c00"></b>
+                            </div>
+                        </div>
                         <div class="card">
                             <h3 style="margin:0 0 15px">Check-in — biglietti confermati</h3>
                             <input type="text" x-model="checkinSearch"
