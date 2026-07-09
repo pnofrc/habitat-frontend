@@ -1849,25 +1849,62 @@ document.addEventListener('alpine:init', () => {
             } catch (e) { alert('Errore durante il salvataggio'); }
         },
 
-        async saveMembershipPayment() {
+        async saveMembershipEdits() {
             const m = this.editingMembership;
             const original = this.memberships.find(x => x.id === m.id);
             const oldMethod = original?.paymentMethod;
-            if (oldMethod === m.paymentMethod) { this.editingMembership = null; return; }
+            const oldEmail = original?.email;
+            const newEmail = (m.email || '').trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { alert('Email non valida'); return; }
+            const emailChanged = !!oldEmail && oldEmail !== newEmail;
+            if (oldMethod === m.paymentMethod && !emailChanged) { this.editingMembership = null; return; }
             try {
                 const res = await fetch(`${this.BASE_URL}/membership/${m.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({ paymentMethod: m.paymentMethod })
+                    body: JSON.stringify({ paymentMethod: m.paymentMethod, email: newEmail })
                 });
                 if (!res.ok) { alert('Errore durante il salvataggio'); return; }
                 const updated = await res.json();
-                if (original) original.paymentMethod = updated.paymentMethod;
-                const emailKey = updated.email?.toLowerCase();
-                if (emailKey && this.membershipsByEmail[emailKey]) this.membershipsByEmail[emailKey] = updated;
+                if (original) {
+                    original.paymentMethod = updated.paymentMethod;
+                    original.email = updated.email;
+                }
+                const oldKey = oldEmail?.toLowerCase();
+                const newKey = updated.email?.toLowerCase();
+                if (oldKey && this.membershipsByEmail[oldKey]) {
+                    delete this.membershipsByEmail[oldKey];
+                    this.membershipsByEmail[newKey] = updated;
+                }
+                const emailIdx = oldKey ? this.confirmedMemberEmails.indexOf(oldKey) : -1;
+                if (emailIdx !== -1) this.confirmedMemberEmails[emailIdx] = newKey;
+                if (emailChanged) await this.relinkTicketsAfterEmailChange(oldEmail, updated.email);
                 if (oldMethod) await this.syncTesseraExpense(updated, oldMethod);
                 this.editingMembership = null;
             } catch (e) { alert('Errore durante il salvataggio'); }
+        },
+
+        async relinkTicketsAfterEmailChange(oldEmail, newEmail) {
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
+                if (!res.ok) throw new Error();
+                const tickets = await res.json();
+                const linked = (Array.isArray(tickets) ? tickets : [])
+                    .filter(t => t.membershipEmail && t.membershipEmail.toLowerCase() === oldEmail.toLowerCase());
+                for (const t of linked) {
+                    const resP = await fetch(`${this.BASE_URL}/festival/${t.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                        body: JSON.stringify({ membershipEmail: newEmail })
+                    });
+                    if (!resP.ok) throw new Error();
+                    const updated = await resP.json();
+                    const idx = this.festivalTickets.findIndex(x => x.id === t.id);
+                    if (idx !== -1) this.festivalTickets[idx] = updated;
+                }
+            } catch (e) {
+                alert('Email aggiornata, ma non è stato possibile aggiornare i biglietti festival associati alla vecchia email: controlla le associazioni tessera nel tab Festival.');
+            }
         },
 
         async checkinTicket(id) {
