@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5Y Radio</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" type="image/x-icon" href="../5.svg">
+
+    <style>
+        .red {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 1em;
+        }
+
+        .head {
+            display: flex;
+            font-size: 40px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .head img {
+            width: 50px;
+        }
+
+        #stage {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        @font-face {
+            font-family: 'Hababo';
+            src: url('../Hababo/Hababo-Regular.woff2') format('woff2'),
+                url('../Hababo/Hababo-Regular.woff') format('woff'),
+                url('../Hababo/Hababo-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        .hababo {
+            font-family: 'Hababo';
+            letter-spacing: -5px;
+        }
+
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: min(90vw, 420px);
+        }
+
+        #playPauseBtn {
+            width: 40vh;
+            height: 40vh;
+            flex: 0 0 auto;
+            border: none;
+            border-radius: 50%;
+            background-color: black;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #playPauseBtn svg {
+            width: 10vw;
+            height: 10vw;
+        }
+
+        #playPauseBtn #iconPause {
+            display: none;
+        }
+
+        #playPauseBtn.playing #iconPlay {
+            display: none;
+        }
+
+        #playPauseBtn.playing #iconPause {
+            display: block;
+        }
+
+        .progress {
+            flex: 1 1 auto;
+            height: 8px;
+            border-radius: 4px;
+            background-color: #ccc;
+            cursor: pointer;
+
+            opacity: 0;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            border-radius: 4px;
+            background-color: black;
+        }
+
+        #timing {
+            flex: 0 0 auto;
+            font-size: 14px;
+            white-space: nowrap;
+
+            opacity: 0;
+        }
+
+        /* @media  (min-width: 500px) {
+            #playPauseBtn {
+            width: 80vw;
+            height: 80vw;}
+        } */
+
+                @media  (max-width: 5000px) {
+        #playPauseBtn svg {
+            width: 80vw;
+            height: 80vw;
+        }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="stage">
+
+        <div class="head hababo">
+            <!-- <span>HabiTat</span> -->
+            <img src="../5.svg" alt="5years logo">
+            <span>Years</span>
+            <span>rA<span style="letter-spacing: -15px;"> </span>dio</span>
+
+
+
+        </div>
+
+        <button id="playPauseBtn" aria-label="Play">
+            <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+            </svg>
+            <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+            </svg>
+        </button>
+
+
+        <!-- <div id="wrap">
+    <svg id="S" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+     -->
+
+        <div class="flex">
+
+            <div style="text-align: center;">
+
+                <div style="display: flex;
+                    align-items: center;
+                    gap: 7px;   justify-content: center;
+                    ">
+                    <div class="red"></div> On air NOW: <span id="song-title"></span>
+                </div>
+<br>
+                <div style="text-align: center;">
+                     Live streaming  <br>
+                    from Cà de Monti,
+                    Tredozio (FC)
+                     <br> 47019 - Italia
+                </div>
+
+            </div>
+
+
+            <div class="audio-player">
+
+
+
+
+                <div class="progress" id="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div id="timing">
+                    <span id="current-time">0:00</span>
+                </div>
+
+            </div>
+            <audio id="audio" src="https://habitattt.it:8000/5years" preload="none"></audio>
+        </div>
+
+
+    </div>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeDisplay = document.getElementById('current-time');
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play().catch(err => console.error('playback error', err));
+            } else {
+                audio.pause();
+            }
+        });
+
+        audio.addEventListener('play', () => {
+            playPauseBtn.classList.add('playing');
+            playPauseBtn.setAttribute('aria-label', 'Pause');
+        });
+
+        audio.addEventListener('pause', () => {
+            playPauseBtn.classList.remove('playing');
+            playPauseBtn.setAttribute('aria-label', 'Play');
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+
+            if (isFinite(audio.duration)) {
+                progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+            }
+        });
+
+        function scrub(e) {
+            if (!isFinite(audio.duration)) return;
+            const rect = progressContainer.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const percentage = Math.max(0, Math.min(1, x / rect.width));
+            audio.currentTime = percentage * audio.duration;
+        }
+
+        progressContainer.addEventListener('click', scrub);
+        progressContainer.addEventListener('touchstart', scrub, { passive: true });
+
+        const songTitleEl = document.getElementById('song-title');
+        const MOUNT = '/5years';
+
+        async function updateSongTitle() {
+            try {
+                const res = await fetch('https://habitattt.it:8000/status-json.xsl');
+                const raw = await res.text();
+                const sanitized = raw.split('').filter(ch => { const c = ch.charCodeAt(0); return c > 31 && c !== 127; }).join('');
+                const data = JSON.parse(sanitized);
+                let sources = data.icestats.source;
+                if (!sources) return;
+                if (!Array.isArray(sources)) sources = [sources];
+                const source = sources.find(s => s.listenurl && s.listenurl.endsWith(MOUNT));
+                if (source && source.title) {
+                    songTitleEl.textContent = source.title;
+                }
+            } catch (err) {
+                console.error('metadata fetch failed', err);
+            }
+        }
+
+        updateSongTitle();
+        setInterval(updateSongTitle, 15000);
+    </script>
+</body>
+
+</html>
