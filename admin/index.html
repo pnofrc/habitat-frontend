@@ -849,6 +849,10 @@
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <h3 style="margin:0"
                                 x-text="membershipTab === 'requests' ? 'Richieste Iscrizione' : 'Soci Tesserati'"></h3>
+                            <span x-show="memberships.filter(m => m.confirmed && m.isArtist).length > 0"
+                                  title="Tessere artista confermate: quote a carico Habitat da versare"
+                                  style="padding:4px 10px; background:#eef2ff; color:#3730a3; border:1px solid #818cf8; border-radius:3px; font-size:12px; font-weight:bold;"
+                                  x-text="'QUOTE ARTISTI DA VERSARE: ' + memberships.filter(m => m.confirmed && m.isArtist).length"></span>
                             <button @click="window.open('sheet-associati.html', '_blank')"
                                 style="border:1px solid #000; padding:5px 10px;">APRI FOGLIO CALCOLO</button>
                         </div>
@@ -872,6 +876,10 @@
                                         <td x-text="m.email"></td>
                                         <td x-text="m.city"></td>
                                         <td>
+                                            <span x-show="m.isArtist"
+                                                  style="margin-right:4px; padding:1px 5px; background:#eef2ff; color:#3730a3; border:1px solid #818cf8; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                ARTISTA
+                                            </span>
                                             <small
                                                 x-text="[m.interestHabitat && 'Habitat', m.interestDistrettoA && 'Distretto A', m.interestQuazar && 'Quazar'].filter(Boolean).join(', ')"></small>
                                         </td>

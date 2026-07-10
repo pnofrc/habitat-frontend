@@ -1618,9 +1618,9 @@ document.addEventListener('alpine:init', () => {
                     body: JSON.stringify({ confirmed: true })
                 });
                 if (!res.ok) throw new Error("Errore conferma tesseramento");
-                const habitatMethods = ['HabitatPaypal', 'HabitatIban', 'CashHabitat'];
-                if (habitatMethods.includes(m.paymentMethod)) {
-                    const paymentMap = { HabitatPaypal: 'paypal', HabitatIban: 'iban', CashHabitat: 'cash' };
+                const habitatMethods = ['HabitatPaypal', 'HabitatIban', 'CashHabitat', 'HabitatCard'];
+                if (habitatMethods.includes(m.paymentMethod) && !m.isArtist) {
+                    const paymentMap = { HabitatPaypal: 'paypal', HabitatIban: 'iban', CashHabitat: 'cash', HabitatCard: 'card' };
                     const resE = await fetch(`${this.BASE_URL}/expenses/`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
