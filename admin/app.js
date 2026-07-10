@@ -414,8 +414,10 @@ document.addEventListener('alpine:init', () => {
                     const confirmedMemberships = Array.isArray(memberships) ? memberships.filter(m => m.confirmed) : [];
                     this.confirmedMemberEmails = confirmedMemberships.map(m => m.email.toLowerCase());
                     this.pendingMemberEmails = (Array.isArray(memberships) ? memberships.filter(m => !m.confirmed) : []).map(m => m.email.toLowerCase());
+                    // Include pending memberships too: allergy info and manual linking
+                    // must work also for people still waiting for approval
                     this.membershipsByEmail = {};
-                    confirmedMemberships.forEach(m => { this.membershipsByEmail[m.email.toLowerCase()] = m; });
+                    (Array.isArray(memberships) ? memberships : []).forEach(m => { this.membershipsByEmail[m.email.toLowerCase()] = m; });
                     // Auto-fetch PayPal transactions when on festival tickets subtab
                     if (this.festivalTab === 'tickets') {
                         await this.fetchPaypalTransactions();
