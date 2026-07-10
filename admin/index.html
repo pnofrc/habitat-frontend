@@ -2658,7 +2658,11 @@
                                                         style="padding:3px 8px; background:#000; color:#fff; border:none; cursor:pointer; font-family:inherit; font-size:11px;">
                                                     Segna entrato
                                                 </button>
-                                                <span x-show="!v.checkedInAt && !volunteerMembership(v)?.confirmed"
+                                                <span x-show="!v.checkedInAt && volunteerMembership(v) && !volunteerMembership(v).confirmed"
+                                                      style="color:#c2410c; font-size:11px; font-weight:bold;">
+                                                    Tessera in attesa
+                                                </span>
+                                                <span x-show="!v.checkedInAt && !volunteerMembership(v)"
                                                       style="color:#c00; font-size:11px; font-weight:bold;">
                                                     Non tesserato
                                                 </span>

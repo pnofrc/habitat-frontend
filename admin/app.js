@@ -1825,6 +1825,8 @@ document.addEventListener('alpine:init', () => {
 
         async syncTesseraExpense(membership, oldMethod) {
             const habitatMap = { HabitatPaypal: 'paypal', HabitatIban: 'iban', CashHabitat: 'cash', HabitatCard: 'card' };
+            // Gli artisti non generano voci flow cassa: niente da sincronizzare
+            if (membership.isArtist) return;
             if (!membership.confirmed) return;
             if (!(oldMethod in habitatMap) || !(membership.paymentMethod in habitatMap)) return;
             if (oldMethod === membership.paymentMethod) return;
