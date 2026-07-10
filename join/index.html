@@ -307,35 +307,37 @@
                     </template>
                 </div>
 
-                <h2 x-text="lang === 'it' ? '4. PAGAMENTO' : '4. PAYMENT'"></h2>
-                <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
+                <div x-show="!isArtist">
+                    <h2 x-text="lang === 'it' ? '4. PAGAMENTO' : '4. PAYMENT'"></h2>
+                    <label x-text="lang === 'it' ? 'Metodo di pagamento *' : 'Payment method *'"></label>
 
-                <select x-model="form.metodoPagamento">
-                    <option value=""
-                        x-text="!form.interesse
-                            ? (lang === 'it' ? 'Seleziona prima un interesse (sezione 3)' : 'Select an interest first (section 3)')
-                            : (lang === 'it' ? 'Scegli...' : 'Choose...')"></option>
-                    <template x-if="form.interesse === 'Habitat - Cà De Monti'">
-                        <option value="CashHabitat">HABITAT >> CONTANTI / CASH</option>
-                    </template>
-                    <template x-if="form.interesse === 'Habitat - Cà De Monti'">
-                        <option value="HabitatPaypal">HABITAT >> PAYPAL / APPLE PAY / CARD</option>
-                    </template>
-                    <template x-if="form.interesse === 'Habitat - Cà De Monti'">
-                        <option value="HabitatIban">HABITAT >> IBAN</option>
-                    </template>
-                    <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
-                        <option value="CashDistrettoA">DISTRETTO A >> CONTANTI / CASH</option>
-                    </template>
-                    <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
-                        <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
-                    </template>
-                    <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
-                        <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
-                    </template>
-                </select>
+                    <select x-model="form.metodoPagamento">
+                        <option value=""
+                            x-text="!form.interesse
+                                ? (lang === 'it' ? 'Seleziona prima un interesse (sezione 3)' : 'Select an interest first (section 3)')
+                                : (lang === 'it' ? 'Scegli...' : 'Choose...')"></option>
+                        <template x-if="form.interesse === 'Habitat - Cà De Monti'">
+                            <option value="CashHabitat">HABITAT >> CONTANTI / CASH</option>
+                        </template>
+                        <template x-if="form.interesse === 'Habitat - Cà De Monti'">
+                            <option value="HabitatPaypal">HABITAT >> PAYPAL / APPLE PAY / CARD</option>
+                        </template>
+                        <template x-if="form.interesse === 'Habitat - Cà De Monti'">
+                            <option value="HabitatIban">HABITAT >> IBAN</option>
+                        </template>
+                        <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
+                            <option value="CashDistrettoA">DISTRETTO A >> CONTANTI / CASH</option>
+                        </template>
+                        <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
+                            <option value="DistrettoPaypal">DISTRETTO A >> PAYPAL</option>
+                        </template>
+                        <template x-if="form.interesse === 'Distretto A' || form.interesse === 'Quazar - Coworking'">
+                            <option value="DistrettoIban">DISTRETTO A >> IBAN</option>
+                        </template>
+                    </select>
 
-                <label x-text="lang === 'it' ? `(Riceverai le istruzioni di pagamento dopo l'invio della domanda)` : `(You will receive payment instructions after submitting your application)`"></label>
+                    <label x-text="lang === 'it' ? `(Riceverai le istruzioni di pagamento dopo l'invio della domanda)` : `(You will receive payment instructions after submitting your application)`"></label>
+                </div>
 
                 <div x-show="isFestival" style="margin-top:30px; padding-top:20px; border-top:2px solid #000;">
                     <h2>5. FESTIVAL</h2>
@@ -415,8 +417,14 @@
                     </div>
                 </template>
 
-                <template x-if="form.metodoPagamento === 'CashHabitat' || form.metodoPagamento === 'CashDistrettoA'">
+                <template x-if="!isArtist && (form.metodoPagamento === 'CashHabitat' || form.metodoPagamento === 'CashDistrettoA')">
                     <p x-text="lang === 'it' ? 'Potrai pagare la quota in contanti presso la sede.' : 'You can pay the membership fee in cash at the venue.'"></p>
+                </template>
+
+                <template x-if="isArtist">
+                    <p x-text="lang === 'it'
+                        ? 'La quota associativa è a carico di Habitat: non devi versare nulla.'
+                        : 'The membership fee is covered by Habitat: you do not need to pay anything.'"></p>
                 </template>
 
                 <button class="btn-send" style="width:auto; padding:10px 30px" @click="location.reload()"
@@ -436,6 +444,7 @@
                 lang: 'it',
                 interessiOpts: ['Habitat - Cà De Monti', 'Distretto A', 'Quazar - Coworking'],
                 isFestival: false,
+                isArtist: false,
                 form: {
                     email: '', cognome: '', nome: '', dataNascita: '', luogoNascita: '', provNascita: '', paeseNascita: '', codiceFiscale: '',
                     indirizzo: '', cap: '', cittaResidenza: '', provResidenza: '', paeseResidenza: '', telefono: '',
@@ -463,6 +472,14 @@
                     if (festivalParam === 'true') {
                         this.isFestival = true;
                         this.form.interesse = 'Habitat - Cà De Monti';
+                    }
+
+                    const artistParam = params.get('artist');
+                    if (artistParam === 'true') {
+                        this.isArtist = true;
+                        this.isFestival = true;
+                        this.form.interesse = 'Habitat - Cà De Monti';
+                        this.form.metodoPagamento = 'CashHabitat';
                     }
 
                     // Watch for interest changes and clear incompatible payment methods
@@ -557,6 +574,7 @@
                         festivalAllergyNotes: (this.isFestival && this.form.festivalAllergy) ? this.form.festivalAllergyNotes || null : undefined,
                         festivalCheckinDay: this.isFestival ? (this.form.festivalCheckinDay || null) : undefined,
                         festivalCheckinTime: this.isFestival ? (this.form.festivalCheckinTime || null) : undefined,
+                        isArtist: this.isArtist ? true : undefined,
                     };
 
                     try {
