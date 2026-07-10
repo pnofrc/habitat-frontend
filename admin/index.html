@@ -2516,6 +2516,82 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="card" style="margin-top:20px;">
+                            <h3 style="margin:0 0 15px">Check-in — artisti
+                                <small style="color:#666; font-weight:normal;"
+                                       x-text="'(' + artistMemberships().filter(m => m.festivalCheckedInAt).length + ' / ' + artistMemberships().length + ' entrati)'"></small>
+                            </h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Email</th>
+                                        <th>Tessera</th>
+                                        <th>Entrato</th>
+                                        <th x-show="canWrite"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="m in artistMemberships().filter(m =>
+                                        checkinSearch === '' ||
+                                        m.name.toLowerCase().includes(checkinSearch.toLowerCase()) ||
+                                        m.surname.toLowerCase().includes(checkinSearch.toLowerCase()) ||
+                                        m.email.toLowerCase().includes(checkinSearch.toLowerCase())
+                                    )" :key="m.id">
+                                        <tr :style="m.festivalCheckedInAt ? 'background:rgba(0,200,0,0.08)' : ''">
+                                            <td x-text="m.name"></td>
+                                            <td x-text="m.surname"></td>
+                                            <td x-text="m.email"></td>
+                                            <td>
+                                                <span x-show="m.confirmed"
+                                                      style="padding:2px 6px; background:#fef3c7; color:#92400e; border:1px solid #fbbf24; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                    MEMBER
+                                                </span>
+                                                <span x-show="!m.confirmed"
+                                                      style="padding:2px 6px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                    IN ATTESA
+                                                </span>
+                                                <span x-show="m.festivalAllergy"
+                                                      style="margin-left:4px; padding:2px 6px; background:#fee2e2; color:#991b1b; border:1px solid #f87171; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                    ALLERGIE
+                                                </span>
+                                                <button @click="festivalInfoMembership = {...m}"
+                                                        style="margin-left:4px; padding:2px 6px; background:#f3f4f6; color:#374151; border:1px solid #d1d5db; border-radius:3px; font-size:10px; cursor:pointer; font-family:inherit;">
+                                                    Info
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <span x-show="m.festivalCheckedInAt" style="color:green; font-weight:bold;"
+                                                      x-text="'✓ ' + new Date(m.festivalCheckedInAt).toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})">
+                                                </span>
+                                                <span x-show="!m.festivalCheckedInAt" style="color:#999; font-size:12px;">—</span>
+                                            </td>
+                                            <td x-show="canWrite">
+                                                <button x-show="!m.festivalCheckedInAt && m.confirmed"
+                                                        @click="checkinArtist(m.id)"
+                                                        style="padding:3px 8px; background:#000; color:#fff; border:none; cursor:pointer; font-family:inherit; font-size:11px;">
+                                                    Segna entrato
+                                                </button>
+                                                <span x-show="!m.festivalCheckedInAt && !m.confirmed"
+                                                      style="color:#c2410c; font-size:11px; font-weight:bold;">
+                                                    Tessera in attesa
+                                                </span>
+                                                <button x-show="m.festivalCheckedInAt"
+                                                        @click="undoCheckinArtist(m.id)"
+                                                        title="Annulla check-in"
+                                                        style="padding:3px 8px; background:#fff; color:#c00; border:1px solid #c00; cursor:pointer; font-family:inherit; font-size:11px;">
+                                                    Annulla
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="artistMemberships().length === 0">
+                                        <td colspan="6" style="color:#999; text-align:center; padding:20px;">Nessun artista censito</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
