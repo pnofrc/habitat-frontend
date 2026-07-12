@@ -2727,6 +2727,10 @@
                                 <select x-model="festivalInfoMembership.festivalCheckinDay"
                                         style="font-family:inherit; font-size:13px; padding:5px; border:1px solid #000;">
                                     <option value="">— Seleziona —</option>
+                                    <option value="lunedi">Lunedì</option>
+                                    <option value="martedi">Martedì</option>
+                                    <option value="mercoledi">Mercoledì</option>
+                                    <option value="giovedi">Giovedì</option>
                                     <option value="venerdi">Venerdì</option>
                                     <option value="sabato">Sabato</option>
                                     <option value="domenica">Domenica</option>
@@ -4116,7 +4120,7 @@
 
                                     <span x-show="editingMembership.festivalCheckinDay" style="color:#666;">Giorno arrivo:</span>
                                     <span x-show="editingMembership.festivalCheckinDay"
-                                          x-text="{venerdi:'Venerdì', sabato:'Sabato', domenica:'Domenica'}[editingMembership.festivalCheckinDay] || editingMembership.festivalCheckinDay"></span>
+                                          x-text="{lunedi:'Lunedì', martedi:'Martedì', mercoledi:'Mercoledì', giovedi:'Giovedì', venerdi:'Venerdì', sabato:'Sabato', domenica:'Domenica'}[editingMembership.festivalCheckinDay] || editingMembership.festivalCheckinDay"></span>
 
                                     <span x-show="editingMembership.festivalCheckinTime" style="color:#666;">Orario arrivo:</span>
                                     <span x-show="editingMembership.festivalCheckinTime"

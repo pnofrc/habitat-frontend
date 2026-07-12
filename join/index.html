@@ -356,6 +356,18 @@
                         <label x-text="lang === 'it' ? 'Giorno di arrivo previsto' : 'Expected arrival day'"></label>
                         <select x-model="form.festivalCheckinDay">
                             <option value="" x-text="lang === 'it' ? '— Seleziona giorno —' : '— Select day —'"></option>
+                            <template x-if="isArtist">
+                                <option value="lunedi" x-text="lang === 'it' ? 'Lunedì' : 'Monday'"></option>
+                            </template>
+                            <template x-if="isArtist">
+                                <option value="martedi" x-text="lang === 'it' ? 'Martedì' : 'Tuesday'"></option>
+                            </template>
+                            <template x-if="isArtist">
+                                <option value="mercoledi" x-text="lang === 'it' ? 'Mercoledì' : 'Wednesday'"></option>
+                            </template>
+                            <template x-if="isArtist">
+                                <option value="giovedi" x-text="lang === 'it' ? 'Giovedì' : 'Thursday'"></option>
+                            </template>
                             <option value="venerdi" x-text="lang === 'it' ? 'Venerdì' : 'Friday'"></option>
                             <option value="sabato" x-text="lang === 'it' ? 'Sabato' : 'Saturday'"></option>
                             <option value="domenica" x-text="lang === 'it' ? 'Domenica' : 'Sunday'"></option>
