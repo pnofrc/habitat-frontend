@@ -258,7 +258,7 @@
     }
 
     .ws-section-title {
-      font-size: 0.72rem;
+      font-size: 0.95rem;
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 3px;
@@ -266,20 +266,17 @@
     }
 
     .ws-item {
-      margin-bottom: 6px;
+      border-bottom: 1px solid #eee;
     }
 
     .ws-item summary {
       cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: bold;
-      padding: 8px 0;
       list-style: none;
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      border-bottom: 1px solid #eee;
-      gap: 8px;
+      align-items: flex-start;
+      padding: 12px 0;
+      gap: 12px;
     }
 
     .ws-item summary::-webkit-details-marker {
@@ -287,31 +284,52 @@
     }
 
     .ws-item summary::after {
-      content: '+';
-      font-weight: normal;
-      font-size: 1rem;
-      color: #999;
+      content: 'info';
+      font-size: 0.65rem;
+      font-family: 'Courier New', Courier, monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #000;
+      border: 1px solid #000;
+      padding: 2px 7px;
       flex-shrink: 0;
+      line-height: 1.8;
+      white-space: nowrap;
     }
 
     .ws-item[open] summary::after {
-      content: '−';
+      background: #000;
+      color: #fff;
     }
 
-    .ws-item summary .ws-day {
+    .ws-summary-body {
+      flex: 1;
+    }
+
+    .ws-artist {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .ws-title {
+      font-size: 0.8rem;
+      color: #444;
+      margin-top: 2px;
+    }
+
+    .ws-day {
       font-size: 0.65rem;
       color: #999;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-weight: normal;
-      white-space: nowrap;
+      margin-top: 4px;
     }
 
     .ws-item .ws-desc {
       font-size: 0.8rem;
       line-height: 1.7;
       color: #333;
-      padding: 12px 0 8px 0;
+      padding: 4px 0 14px 0;
     }
 
     .ws-item .ws-desc p + p {
@@ -769,8 +787,11 @@
 
       <details class="ws-item">
         <summary>
-          Enrico Malatesta <span style="font-weight:normal">pres. LoBest [soundwalk]</span>
-          <span class="ws-day" data-it="Ven 17 · 18.30–19.00 · Tredozio" data-en="Fri 17 · 18.30–19.00 · Tredozio">Ven 17 · 18.30–19.00 · Tredozio</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist">Enrico Malatesta</div>
+            <div class="ws-title">pres. LoBest [soundwalk]</div>
+            <div class="ws-day" data-it="Ven 17 · 18.30–19.00 · Tredozio" data-en="Fri 17 · 18.30–19.00 · Tredozio">Ven 17 · 18.30–19.00 · Tredozio</div>
+          </div>
         </summary>
         <div class="ws-desc">
           <p>LoBest è una performance urbana, un cammino collettivo che volgendosi alle strade del paese e alle sue piazze produce screziature di suono, transienti per Tredozio realizzati con le mani, con dispositivi portatili di riproduzione del suono, found-sounds e materiali poveri.</p>
@@ -780,8 +801,11 @@
 
       <details class="ws-item">
         <summary>
-          Ardeide <span style="font-weight:normal">pres. Sheltering</span>
-          <span class="ws-day" data-it="Sab 18 · 10.00–13.00" data-en="Sat 18 · 10.00–13.00">Sab 18 · 10.00–13.00</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist">Ardeide</div>
+            <div class="ws-title">pres. Sheltering [#self-construction]</div>
+            <div class="ws-day" data-it="Sab 18 · 10.00–13.00" data-en="Sat 18 · 10.00–13.00">Sab 18 · 10.00–13.00</div>
+          </div>
         </summary>
         <div class="ws-desc">
           <p>Una manciata di teli e lenzuola, qualche metro di cordino e ciò che il contesto ci mette a disposizione. Insieme immagineremo e costruiremo un paesaggio di ombre, un rifugio temporaneo dove sostare nelle ore più calde del festival. All'inizio del laboratorio raccoglieremo parte dei materiali direttamente sul posto. Sarà ciò che troveremo a guidare il progetto: l'architettura come astuta improvvisazione.</p>
@@ -790,8 +814,11 @@
 
       <details class="ws-item">
         <summary>
-          Chiara Pavolucci <span style="font-weight:normal">pres. Practice of Care</span>
-          <span class="ws-day" data-it="Sab 18 · 10.30–12.00" data-en="Sat 18 · 10.30–12.00">Sab 18 · 10.30–12.00</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist">Chiara Pavolucci</div>
+            <div class="ws-title">pres. Practice of Care [#collective-writing]</div>
+            <div class="ws-day" data-it="Sab 18 · 10.30–12.00" data-en="Sat 18 · 10.30–12.00">Sab 18 · 10.30–12.00</div>
+          </div>
         </summary>
         <div class="ws-desc">
           <p>Practice of Care è una pratica collettiva di immaginazione dedicata alla cura come esperienza relazionale, condivisa e situata. Attraverso proposte di scrittura e osservazione del territorio, il laboratorio nasce come uno spazio temporaneo di incontro in cui interrogare le forme della cura che attraversano la vita quotidiana e che legano le persone ai luoghi e agli ecosistemi.</p>
@@ -801,19 +828,25 @@
 
       <details class="ws-item">
         <summary>
-          Benedetta Fioravanti <span style="font-weight:normal">pres. After the storm</span>
-          <span class="ws-day" data-it="Sab 18 · 16.00–18.00" data-en="Sat 18 · 16.00–18.00">Sab 18 · 16.00–18.00</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist">Benedetta Fioravanti</div>
+            <div class="ws-title">pres. After the storm [#moving-images]</div>
+            <div class="ws-day" data-it="Sab 18 · 16.00–18.00 · con F. Poni e J. Lega" data-en="Sat 18 · 16.00–18.00 · with F. Poni & J. Lega">Sab 18 · 16.00–18.00 · con F. Poni e J. Lega</div>
+          </div>
         </summary>
         <div class="ws-desc">
-          <p>con Federico Poni e Jacopo Lega. Il laboratorio è dedicato alla costruzione e alla messa in moto di piccoli dispositivi di registrazione video. After the Storm indaga ciò che accade quando il controllo viene meno. Il lancio diventa un gesto fragile: un'ascesa, una deriva, una caduta. Aquiloni, carrucole, fili, corpi e camere attraversano lo spazio lasciando immagini parziali, instabili, aperte all'imprevisto.</p>
+          <p>Il laboratorio è dedicato alla costruzione e alla messa in moto di piccoli dispositivi di registrazione video. After the Storm indaga ciò che accade quando il controllo viene meno. Il lancio diventa un gesto fragile: un'ascesa, una deriva, una caduta. Aquiloni, carrucole, fili, corpi e camere attraversano lo spazio lasciando immagini parziali, instabili, aperte all'imprevisto.</p>
           <p>Il materiale video raccolto verrà assemblato da Benedetta e restituito in forma live domenica pomeriggio (17.00–18.00).</p>
         </div>
       </details>
 
       <details class="ws-item">
         <summary>
-          Alimah Grasso <span style="font-weight:normal">pres. Tuttosiballa</span>
-          <span class="ws-day" data-it="Dom 19 · 10.30–11.30" data-en="Sun 19 · 10.30–11.30">Dom 19 · 10.30–11.30</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist">Alimah Grasso</div>
+            <div class="ws-title">pres. Tuttosiballa [#body #movement]</div>
+            <div class="ws-day" data-it="Dom 19 · 10.30–11.30" data-en="Sun 19 · 10.30–11.30">Dom 19 · 10.30–11.30</div>
+          </div>
         </summary>
         <div class="ws-desc">
           <p>Esiste una danza per ogni suono, per ogni silenzio, per ogni stato emotivo. In questo laboratorio non si imparano passi da seguire, ma scoprirai il tuo modo di muoverti, libero da regole, pregiudizio e aspettative. Qui non esiste un modo giusto o sbagliato di ballare: esiste solo il tuo corpo, con la sua storia, il suo ritmo e la sua unicità.</p>
@@ -823,8 +856,11 @@
 
       <details class="ws-item">
         <summary>
-          Habitat T.P.U. <span style="font-weight:normal">pres. Trasmissioni Postali Uniche</span>
-          <span class="ws-day" data-it="Dom 19 · dalle 12.00" data-en="Sun 19 · from 12.00">Dom 19 · dalle 12.00</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist">Habitat T.P.U.</div>
+            <div class="ws-title">pres. Trasmissioni Postali Uniche [#publishing]</div>
+            <div class="ws-day" data-it="Dom 19 · dalle 12.00" data-en="Sun 19 · from 12.00">Dom 19 · dalle 12.00</div>
+          </div>
         </summary>
         <div class="ws-desc">
           <p>Da questo angolo di mondo verso gli altri. Il sistema postale come infrastruttura di trasmissione di pensieri e immagini. Utilizzeremo la cartolina come supporto, tramite, e direzione. Le cartoline potranno essere spedite da Cà de Monti verso nuove destinazioni, progettate tanto quanto il loro contenuto. Ogni spedizione è una trasmissione unica.</p>
@@ -833,8 +869,11 @@
 
       <details class="ws-item">
         <summary>
-          Elena Braida <span style="font-weight:normal">pres. Termo Press</span>
-          <span class="ws-day" data-it="Dom 19 · 16.00–18.00" data-en="Sun 19 · 16.00–18.00">Dom 19 · 16.00–18.00</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist">Elena Braida</div>
+            <div class="ws-title">pres. Termo Press [#diy #printing]</div>
+            <div class="ws-day" data-it="Dom 19 · 16.00–18.00" data-en="Sun 19 · 16.00–18.00">Dom 19 · 16.00–18.00</div>
+          </div>
         </summary>
         <div class="ws-desc">
           <p>Termo Press è una stazione, un ritiro DIY, dove i ricordi e le tracce raccolte durante il festival verranno impressi su tessuti per creare toppe, soffici poster, intrecci fotografici e accessori in tela.</p>
@@ -850,12 +889,15 @@
 
       <details class="ws-item">
         <summary>
-          <span data-it="Raccolta e distillazione della lavanda" data-en="Lavender harvest and distillation">Raccolta e distillazione della lavanda</span>
-          <span class="ws-day" data-it="Sab + Dom · 10.00–18.00" data-en="Sat + Sun · 10.00–18.00">Sab + Dom · 10.00–18.00</span>
+          <div class="ws-summary-body">
+            <div class="ws-artist" data-it="Raccolta e distillazione della lavanda" data-en="Lavender harvest and distillation">Raccolta e distillazione della lavanda</div>
+            <div class="ws-title">con Matteo Bucci · Podere Tramonte</div>
+            <div class="ws-day" data-it="Sab + Dom · 10.00–18.00" data-en="Sat + Sun · 10.00–18.00">Sab + Dom · 10.00–18.00</div>
+          </div>
         </summary>
         <div class="ws-desc">
           <p>Incastonato in fondo alla valle, proprio sotto di noi, cresce un profumatissimo campo di lavanda. Matteo e la sua famiglia se ne prendono cura durante tutto l'anno e ci invitano a partecipare alla raccolta. La lavanda raccolta durante la mattinata verrà distillata sul posto per estrarne gli oli essenziali.</p>
-          <p>Partenza a piedi da Cà de Monti, 10 min circa di discesa. Porta qualcosa da condividere da mangiare e non dimenticare la borraccia. Presso il podere ci sarà acqua potabile.</p>
+          <p>Partenza a piedi da Cà de Monti, 10 min circa di discesa. Porta qualcosa da condividere da mangiare e non dimenticare la borraccia.</p>
         </div>
       </details>
     </div>
