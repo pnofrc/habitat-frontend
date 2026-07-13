@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="../5.svg">
+  <title>H5Y — Timetable</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    @font-face {
+      font-family: 'Hababo';
+      src: url('../Hababo/Hababo-Regular.woff2') format('woff2'),
+        url('../Hababo/Hababo-Regular.woff') format('woff'),
+        url('../Hababo/Hababo-Regular.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f4f4f4;
+      color: #000;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+    }
+
+    .card {
+      position: relative;
+      background: #fff;
+      padding: 40px;
+      border: 2px solid #000;
+      box-shadow: 8px 8px 0px #000;
+      max-width: 680px;
+      width: 100%;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header a {
+      text-decoration: none !important;
+      color: black !important;
+      font-size: 3rem;
+    }
+
+    .lang-toggle {
+      height: 40px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .lang-btn {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: transparent;
+      border: 2px solid #000;
+      padding: 4px 12px;
+      cursor: pointer;
+    }
+
+    .lang-btn.active {
+      background: #000;
+      color: #fff;
+    }
+
+    .head {
+      align-items: center;
+      display: flex;
+      flex-direction: row;
+      margin: 16px 0 20px 0;
+      gap: 14px;
+    }
+
+    .head img {
+      height: 2em;
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .head span {
+      letter-spacing: -10px;
+      font-size: 2em;
+      font-family: 'Hababo', 'Courier New', Courier, monospace;
+      flex: 1;
+    }
+
+    .head span:first-child {
+      text-align: right;
+    }
+
+    .head span:last-child {
+      text-align: left;
+    }
+
+    .page-title {
+      font-family: 'Hababo', 'Courier New', Courier, monospace;
+      letter-spacing: -5px;
+      font-size: 3.5em;
+      line-height: 1;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .page-sub {
+      font-size: 0.75rem;
+      color: #666;
+      letter-spacing: 1px;
+      margin-bottom: 36px;
+      text-align: center;
+    }
+
+    /* Day sections */
+    .day {
+      margin-bottom: 40px;
+    }
+
+    .day-title {
+      font-size: 0.72rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+    }
+
+    /* Friday two-column layout */
+    .day-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .venue-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: bold;
+      color: #999;
+      margin-bottom: 14px;
+      padding-bottom: 4px;
+      border-bottom: 1px dotted #ccc;
+    }
+
+    /* Entries */
+    .entry {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .entry-time {
+      font-size: 0.7rem;
+      color: #777;
+      white-space: nowrap;
+      padding-top: 2px;
+      min-width: 80px;
+    }
+
+    .entry-body {
+      flex: 1;
+    }
+
+    .entry-name {
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .entry-sub {
+      display: block;
+      font-size: 0.75rem;
+      color: #555;
+      font-weight: normal;
+      margin-top: 1px;
+    }
+
+    .entry-place {
+      display: block;
+      font-size: 0.68rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    .tag {
+      font-family: 'Hababo', 'Courier New', Courier, monospace;
+      font-size: 0.8rem;
+      letter-spacing: normal;
+      font-weight: normal;
+    }
+
+    .tag-sq {
+      font-size: 0.68rem;
+      color: #666;
+      font-weight: normal;
+    }
+
+    /* LOCANDA APERTA / COLAZIONE banners */
+    .banner {
+      border: 1px dotted #bbb;
+      text-align: center;
+      padding: 6px 10px;
+      margin: 14px 0;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #777;
+    }
+
+    /* Recurring activities (lavanda) */
+    .activity {
+      border-left: 2px solid #000;
+      padding: 6px 10px;
+      margin: 10px 0 16px 0;
+      font-size: 0.78rem;
+    }
+
+    .activity-title {
+      font-weight: bold;
+    }
+
+    .activity-note {
+      font-size: 0.7rem;
+      color: #666;
+      margin-top: 3px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 16px 0;
+    }
+
+    /* Workshop descriptions */
+    .ws-section {
+      border-top: 2px solid #000;
+      padding-top: 24px;
+      margin-top: 10px;
+    }
+
+    .ws-section-title {
+      font-size: 0.72rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
+    }
+
+    .ws-item {
+      margin-bottom: 6px;
+    }
+
+    .ws-item summary {
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: bold;
+      padding: 8px 0;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid #eee;
+      gap: 8px;
+    }
+
+    .ws-item summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .ws-item summary::after {
+      content: '+';
+      font-weight: normal;
+      font-size: 1rem;
+      color: #999;
+      flex-shrink: 0;
+    }
+
+    .ws-item[open] summary::after {
+      content: '−';
+    }
+
+    .ws-item summary .ws-day {
+      font-size: 0.65rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: normal;
+      white-space: nowrap;
+    }
+
+    .ws-item .ws-desc {
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: #333;
+      padding: 12px 0 8px 0;
+    }
+
+    .ws-item .ws-desc p + p {
+      margin-top: 8px;
+    }
+
+    .ws-item .ws-info {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 8px;
+      padding: 8px;
+      background: #f9f9f9;
+      border-left: 2px solid #ccc;
+    }
+
+    .closing {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: #aaa;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        background-color: white;
+        padding: 0;
+      }
+
+      .card {
+        padding: 20px;
+        border: none;
+        box-shadow: none;
+      }
+
+      .day-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .entry-time {
+        min-width: 70px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <div class="header">
+      <a href="../">←</a>
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="it">IT</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <div class="page-title">Timetable</div>
+    <div class="page-sub">17–19 Luglio 2026 · Cà de Monti, Tredozio</div>
+
+
+    <!-- ─── VENERDÌ 17 LUGLIO ─── -->
+    <div class="day">
+      <div class="day-title" data-it="Venerdì 17 Luglio" data-en="Friday 17 July">Venerdì 17 Luglio</div>
+      <div class="day-grid">
+
+        <!-- Tredozio -->
+        <div>
+          <div class="venue-label">Tredozio</div>
+
+          <div class="entry">
+            <div class="entry-time">18.00</div>
+            <div class="entry-body">
+              <div class="entry-name">Presentazione e inizio Festival</div>
+              <span class="entry-sub">con Habitat</span>
+              <span class="entry-place"><span class="tag-sq">[talk]</span> Piazza Vespignani</span>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-time">18.30–19.00</div>
+            <div class="entry-body">
+              <div class="entry-name">Enrico Malatesta <span class="tag-sq">pres.</span> LoBest</div>
+              <span class="entry-place"><span class="tag-sq">[soundwalk]</span></span>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-time">19.00–20.00</div>
+            <div class="entry-body">
+              <div class="entry-name" data-it="Passeggiata aumentata verso Cà de Monti" data-en="Augmented walk to Cà de Monti">Passeggiata aumentata verso Cà de Monti</div>
+              <span class="entry-sub" data-it="Arrivo: 19.30 · ~45 min · +350 m" data-en="Arrival: 19.30 · ~45 min · +350 m">Arrivo: 19.30 · ~45 min · +350 m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cà de Monti -->
+        <div>
+          <div class="venue-label">Cà de Monti</div>
+
+          <div class="entry">
+            <div class="entry-time">17.00</div>
+            <div class="entry-body">
+              <div class="entry-name" data-it="Apertura Check-in" data-en="Check-in opens">Apertura Check-in</div>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-time">19.30–20.00</div>
+            <div class="entry-body">
+              <div class="entry-name">Lorenzo Travaglini <span class="tag">{live}</span></div>
+              <span class="entry-place">Terrazza</span>
+            </div>
+          </div>
+
+          <div class="banner" data-it="Locanda Aperta (du-buffet) · 20.00–22.00" data-en="Locanda Aperta (du-buffet) · 20.00–22.00">Locanda Aperta (du-buffet) · 20.00–22.00</div>
+
+          <div class="entry">
+            <div class="entry-time">20.00–21.30</div>
+            <div class="entry-body">
+              <div class="entry-name">Classical Hooligans</div>
+              <span class="entry-place">Terrazza</span>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-time">21.30–23.00</div>
+            <div class="entry-body">
+              <div class="entry-name">Carl Ahnebrink</div>
+              <span class="entry-sub">Flee Project</span>
+              <span class="entry-place">Terrazza</span>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-time">23.00–00.30</div>
+            <div class="entry-body">
+              <div class="entry-name">Yulia Kachan</div>
+              <span class="entry-place">Terrazza</span>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-time">00.30–01.30</div>
+            <div class="entry-body">
+              <div class="entry-name">Trampa <span class="tag">{live}</span></div>
+              <span class="entry-place">Terrazza</span>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-time">01.30–02.30</div>
+            <div class="entry-body">
+              <div class="entry-name">Flaviana</div>
+              <span class="entry-place">Terrazza</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ─── SABATO 18 LUGLIO ─── -->
+    <div class="day">
+      <div class="day-title" data-it="Sabato 18 Luglio — Cà de Monti" data-en="Saturday 18 July — Cà de Monti">Sabato 18 Luglio — Cà de Monti</div>
+
+      <div class="entry">
+        <div class="entry-time">07.00–08.00</div>
+        <div class="entry-body">
+          <div class="entry-name" data-it="Risveglio e Asana con Chiara" data-en="Morning yoga with Chiara">Risveglio e Asana con Chiara</div>
+        </div>
+      </div>
+
+      <div class="banner" data-it="Colazione · 08.00–11.00" data-en="Breakfast · 08.00–11.00">Colazione · 08.00–11.00</div>
+
+      <div class="activity">
+        <div class="activity-title" data-it="▸ Raccolta e distillazione della lavanda" data-en="▸ Lavender harvest and distillation">▸ Raccolta e distillazione della lavanda</div>
+        <div class="activity-note" data-it="10.00–18.00 · Podere Tramonte · ~10 min a piedi da Cà de Monti" data-en="10.00–18.00 · Podere Tramonte · ~10 min walk from Cà de Monti">10.00–18.00 · Podere Tramonte · ~10 min a piedi da Cà de Monti</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">10.00–13.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Ardeide <span class="tag-sq">pres.</span> Sheltering</div>
+          <span class="entry-place"><span class="tag-sq">[workshop]</span> #self-construction</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">10.30–12.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Chiara Pavolucci <span class="tag-sq">pres.</span> Practice of Care</div>
+          <span class="entry-place"><span class="tag-sq">[workshop]</span> #collective-writing</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">11.00–13.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Parole e Taralli con Habitat</div>
+          <span class="entry-sub">DJ Privato</span>
+          <span class="entry-place">Habitat Radio</span>
+        </div>
+      </div>
+
+      <div class="banner" data-it="Locanda Aperta · 13.00–15.00" data-en="Locanda Aperta · 13.00–15.00">Locanda Aperta · 13.00–15.00</div>
+
+      <div class="entry">
+        <div class="entry-time">13.00–14.30</div>
+        <div class="entry-body">
+          <div class="entry-name">La Messinscena</div>
+          <span class="entry-place">Habitat Radio</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">14.30–17.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Tavola Rotondissima</div>
+          <span class="entry-place"><span class="tag-sq">[talk]</span> Habitat Radio</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">16.00–18.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Benedetta Fioravanti <span class="tag-sq">pres.</span> After the storm</div>
+          <span class="entry-sub">con Federico Poni e Jacopo Lega</span>
+          <span class="entry-place"><span class="tag-sq">[workshop]</span> #moving-images</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">17.00–18.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Lemethi</div>
+          <span class="entry-place">Habitat Radio</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="entry">
+        <div class="entry-time">18.30–19.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Mira <span class="tag">{live}</span></div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">19.30–20.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Bruised Springsteen <span class="tag">{live}</span></div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="banner" data-it="Locanda Aperta · 20.00–22.00" data-en="Locanda Aperta · 20.00–22.00">Locanda Aperta · 20.00–22.00</div>
+
+      <div class="entry">
+        <div class="entry-time">20.30–22.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Reptilian Expo</div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">22.30–23.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Nicholas Gaunin <span class="tag">{live}</span></div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">23.30–02.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Amphibia</div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">02.30–04.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Giesse</div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">04.30–05.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Chantssss <span class="tag">{live}</span></div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ─── DOMENICA 19 LUGLIO ─── -->
+    <div class="day">
+      <div class="day-title" data-it="Domenica 19 Luglio — Cà de Monti" data-en="Sunday 19 July — Cà de Monti">Domenica 19 Luglio — Cà de Monti</div>
+
+      <div class="entry">
+        <div class="entry-time">07.00–08.00</div>
+        <div class="entry-body">
+          <div class="entry-name" data-it="Risveglio e Asana con Chiara" data-en="Morning yoga with Chiara">Risveglio e Asana con Chiara</div>
+        </div>
+      </div>
+
+      <div class="banner" data-it="Colazione · 08.00–11.00" data-en="Breakfast · 08.00–11.00">Colazione · 08.00–11.00</div>
+
+      <div class="activity">
+        <div class="activity-title" data-it="▸ Raccolta e distillazione della lavanda" data-en="▸ Lavender harvest and distillation">▸ Raccolta e distillazione della lavanda</div>
+        <div class="activity-note" data-it="10.00–18.00 · Podere Tramonte · ~10 min a piedi da Cà de Monti" data-en="10.00–18.00 · Podere Tramonte · ~10 min walk from Cà de Monti">10.00–18.00 · Podere Tramonte · ~10 min a piedi da Cà de Monti</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">10.30–11.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Alimah Grasso <span class="tag-sq">pres.</span> Tuttosiballa</div>
+          <span class="entry-place"><span class="tag-sq">[workshop]</span> #body #movement</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">dalle 12.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Habitat T.P.U. <span class="tag-sq">pres.</span> Trasmissioni Postali Uniche</div>
+          <span class="entry-place"><span class="tag-sq">[workshop]</span> #publishing</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">12.00–14.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Jungla <span class="tag">{live}</span></div>
+          <span class="entry-place">Habitat Radio</span>
+        </div>
+      </div>
+
+      <div class="banner" data-it="Locanda Aperta · 13.00–15.00" data-en="Locanda Aperta · 13.00–15.00">Locanda Aperta · 13.00–15.00</div>
+
+      <div class="entry">
+        <div class="entry-time">14.00–15.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Flux by Uchiha</div>
+          <span class="entry-place">Habitat Radio</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">15.00–15.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Parole e Taralli — Saluti ed estrazione lotteria</div>
+          <span class="entry-place"><span class="tag-sq">[talk]</span> Habitat Radio</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">15.30–16.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Alessandro Gambato <span class="tag-sq">pres.</span> Learn to linger <span class="tag">{live}</span></div>
+          <span class="entry-place">Habitat Radio</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">16.00–17.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Bassi Gradassi: Di Late</div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">16.00–18.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Elena Braida <span class="tag-sq">pres.</span> Termo Press</div>
+          <span class="entry-place"><span class="tag-sq">[workshop]</span> #diy #printing</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">17.00–18.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Benedetta Fioravanti — After the storm Restituzione <span class="tag">{live}</span></div>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">17.00–18.30</div>
+        <div class="entry-body">
+          <div class="entry-name">SisterEffect</div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">18.30–19.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Bassi Gradassi: Dj Trombetta</div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">19.30–21.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Proxy Bar</div>
+          <span class="entry-sub">Mark + Poni</span>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="banner" data-it="Locanda Aperta · 20.00–22.00" data-en="Locanda Aperta · 20.00–22.00">Locanda Aperta · 20.00–22.00</div>
+
+      <div class="entry">
+        <div class="entry-time">21.00–22.30</div>
+        <div class="entry-body">
+          <div class="entry-name">Mizuna</div>
+          <span class="entry-sub">Oleno, Erta</span>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">22.30–23.00</div>
+        <div class="entry-body">
+          <div class="entry-name">Tabula Fabula <span class="tag-sq">(performance)</span></div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-time">23.00–23.45</div>
+        <div class="entry-body">
+          <div class="entry-name">Ramzi <span class="tag">{live}</span></div>
+          <span class="entry-place">Terrazza</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ─── WORKSHOPS ─── -->
+    <div class="ws-section">
+      <div class="ws-section-title" data-it="Workshops" data-en="Workshops">Workshops</div>
+
+      <details class="ws-item">
+        <summary>
+          Enrico Malatesta <span style="font-weight:normal">pres. LoBest [soundwalk]</span>
+          <span class="ws-day" data-it="Ven 17 · 18.30–19.00 · Tredozio" data-en="Fri 17 · 18.30–19.00 · Tredozio">Ven 17 · 18.30–19.00 · Tredozio</span>
+        </summary>
+        <div class="ws-desc">
+          <p>LoBest è una performance urbana, un cammino collettivo che volgendosi alle strade del paese e alle sue piazze produce screziature di suono, transienti per Tredozio realizzati con le mani, con dispositivi portatili di riproduzione del suono, found-sounds e materiali poveri.</p>
+          <p>Il cammino prevede delle apparizioni dei <em>Walking bucketheads</em>, strani personaggi liberamente ispirati a una scena del documentario <em>"Encounters at the end of the world"</em> di W. Herzog.</p>
+        </div>
+      </details>
+
+      <details class="ws-item">
+        <summary>
+          Ardeide <span style="font-weight:normal">pres. Sheltering</span>
+          <span class="ws-day" data-it="Sab 18 · 10.00–13.00" data-en="Sat 18 · 10.00–13.00">Sab 18 · 10.00–13.00</span>
+        </summary>
+        <div class="ws-desc">
+          <p>Una manciata di teli e lenzuola, qualche metro di cordino e ciò che il contesto ci mette a disposizione. Insieme immagineremo e costruiremo un paesaggio di ombre, un rifugio temporaneo dove sostare nelle ore più calde del festival. All'inizio del laboratorio raccoglieremo parte dei materiali direttamente sul posto. Sarà ciò che troveremo a guidare il progetto: l'architettura come astuta improvvisazione.</p>
+        </div>
+      </details>
+
+      <details class="ws-item">
+        <summary>
+          Chiara Pavolucci <span style="font-weight:normal">pres. Practice of Care</span>
+          <span class="ws-day" data-it="Sab 18 · 10.30–12.00" data-en="Sat 18 · 10.30–12.00">Sab 18 · 10.30–12.00</span>
+        </summary>
+        <div class="ws-desc">
+          <p>Practice of Care è una pratica collettiva di immaginazione dedicata alla cura come esperienza relazionale, condivisa e situata. Attraverso proposte di scrittura e osservazione del territorio, il laboratorio nasce come uno spazio temporaneo di incontro in cui interrogare le forme della cura che attraversano la vita quotidiana e che legano le persone ai luoghi e agli ecosistemi.</p>
+          <p>A partire dalle specificità del luogo e dalle esperienze di chi lo attraverserà durante i tre giorni di festa, raccoglieremo appunti e tracce di ciò che sostiene la vita individuale e collettiva.</p>
+        </div>
+      </details>
+
+      <details class="ws-item">
+        <summary>
+          Benedetta Fioravanti <span style="font-weight:normal">pres. After the storm</span>
+          <span class="ws-day" data-it="Sab 18 · 16.00–18.00" data-en="Sat 18 · 16.00–18.00">Sab 18 · 16.00–18.00</span>
+        </summary>
+        <div class="ws-desc">
+          <p>con Federico Poni e Jacopo Lega. Il laboratorio è dedicato alla costruzione e alla messa in moto di piccoli dispositivi di registrazione video. After the Storm indaga ciò che accade quando il controllo viene meno. Il lancio diventa un gesto fragile: un'ascesa, una deriva, una caduta. Aquiloni, carrucole, fili, corpi e camere attraversano lo spazio lasciando immagini parziali, instabili, aperte all'imprevisto.</p>
+          <p>Il materiale video raccolto verrà assemblato da Benedetta e restituito in forma live domenica pomeriggio (17.00–18.00).</p>
+        </div>
+      </details>
+
+      <details class="ws-item">
+        <summary>
+          Alimah Grasso <span style="font-weight:normal">pres. Tuttosiballa</span>
+          <span class="ws-day" data-it="Dom 19 · 10.30–11.30" data-en="Sun 19 · 10.30–11.30">Dom 19 · 10.30–11.30</span>
+        </summary>
+        <div class="ws-desc">
+          <p>Esiste una danza per ogni suono, per ogni silenzio, per ogni stato emotivo. In questo laboratorio non si imparano passi da seguire, ma scoprirai il tuo modo di muoverti, libero da regole, pregiudizio e aspettative. Qui non esiste un modo giusto o sbagliato di ballare: esiste solo il tuo corpo, con la sua storia, il suo ritmo e la sua unicità.</p>
+          <p>Balleremo insieme attraversando musiche di ogni genere e persino il silenzio, lasciando che sia il corpo a parlare.</p>
+        </div>
+      </details>
+
+      <details class="ws-item">
+        <summary>
+          Habitat T.P.U. <span style="font-weight:normal">pres. Trasmissioni Postali Uniche</span>
+          <span class="ws-day" data-it="Dom 19 · dalle 12.00" data-en="Sun 19 · from 12.00">Dom 19 · dalle 12.00</span>
+        </summary>
+        <div class="ws-desc">
+          <p>Da questo angolo di mondo verso gli altri. Il sistema postale come infrastruttura di trasmissione di pensieri e immagini. Utilizzeremo la cartolina come supporto, tramite, e direzione. Le cartoline potranno essere spedite da Cà de Monti verso nuove destinazioni, progettate tanto quanto il loro contenuto. Ogni spedizione è una trasmissione unica.</p>
+        </div>
+      </details>
+
+      <details class="ws-item">
+        <summary>
+          Elena Braida <span style="font-weight:normal">pres. Termo Press</span>
+          <span class="ws-day" data-it="Dom 19 · 16.00–18.00" data-en="Sun 19 · 16.00–18.00">Dom 19 · 16.00–18.00</span>
+        </summary>
+        <div class="ws-desc">
+          <p>Termo Press è una stazione, un ritiro DIY, dove i ricordi e le tracce raccolte durante il festival verranno impressi su tessuti per creare toppe, soffici poster, intrecci fotografici e accessori in tela.</p>
+          <div class="ws-info">
+            <strong>Info pratiche</strong><br>
+            · Porta il telefono per condividere immagini via AirDrop, Telegram, email<br>
+            · Puoi stampare direttamente sui tuoi vestiti purché di colore chiaro<br>
+            · Saranno disponibili tessuti e spille da balia per creare toppe da indossare subito<br>
+            · Puoi partecipare anche senza immagini: saranno disponibili grafiche dall'archivio
+          </div>
+        </div>
+      </details>
+
+      <details class="ws-item">
+        <summary>
+          <span data-it="Raccolta e distillazione della lavanda" data-en="Lavender harvest and distillation">Raccolta e distillazione della lavanda</span>
+          <span class="ws-day" data-it="Sab + Dom · 10.00–18.00" data-en="Sat + Sun · 10.00–18.00">Sab + Dom · 10.00–18.00</span>
+        </summary>
+        <div class="ws-desc">
+          <p>Incastonato in fondo alla valle, proprio sotto di noi, cresce un profumatissimo campo di lavanda. Matteo e la sua famiglia se ne prendono cura durante tutto l'anno e ci invitano a partecipare alla raccolta. La lavanda raccolta durante la mattinata verrà distillata sul posto per estrarne gli oli essenziali.</p>
+          <p>Partenza a piedi da Cà de Monti, 10 min circa di discesa. Porta qualcosa da condividere da mangiare e non dimenticare la borraccia. Presso il podere ci sarà acqua potabile.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="closing">Grazie per essere qui con noi.</div>
+
+  </div>
+
+  <script>
+    let currentLang = 'it';
+    document.querySelectorAll('.lang-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        currentLang = this.dataset.lang;
+        document.querySelectorAll('.lang-btn').forEach(function (b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        document.querySelectorAll('[data-en][data-it]').forEach(function (el) {
+          el.textContent = el.getAttribute('data-' + currentLang);
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
