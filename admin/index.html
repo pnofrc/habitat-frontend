@@ -2465,38 +2465,38 @@
                                             <td x-text="t.email"></td>
                                             <td>
                                                 <span x-show="ticketIsMember(t)"
-                                                      style="padding:2px 6px; background:#fef3c7; color:#92400e; border:1px solid #fbbf24; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                      style="padding:1px 4px; background:#fef3c7; color:#92400e; border:1px solid #fbbf24; border-radius:3px; font-size:9px; font-weight:bold;">
                                                     MEMBER
                                                 </span>
                                                 <span x-show="ticketMembership(t)?.festivalAllergy"
-                                                      style="margin-left:4px; padding:2px 6px; background:#fee2e2; color:#991b1b; border:1px solid #f87171; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                      style="margin-left:3px; padding:1px 4px; background:#fee2e2; color:#991b1b; border:1px solid #f87171; border-radius:3px; font-size:9px; font-weight:bold;">
                                                     ALLERGIE
                                                 </span>
                                                 <button x-show="ticketMembership(t)"
                                                         @click="festivalInfoMembership = {...ticketMembership(t)}"
-                                                        style="margin-left:4px; padding:2px 6px; background:#f3f4f6; color:#374151; border:1px solid #d1d5db; border-radius:3px; font-size:10px; cursor:pointer; font-family:inherit;">
+                                                        style="margin-left:3px; padding:1px 4px; background:#f3f4f6; color:#374151; border:1px solid #d1d5db; border-radius:3px; font-size:9px; cursor:pointer; font-family:inherit;">
                                                     Info
                                                 </button>
                                                 <span x-show="t.membershipEmail && isMember(t.membershipEmail)"
                                                       :title="'Tessera associata a: ' + t.membershipEmail"
-                                                      style="margin-left:4px; color:#666; font-size:11px;"
-                                                      x-text="'↳ ' + t.membershipEmail">
+                                                      style="margin-left:3px; color:#666; font-size:9px;">
+                                                    ↳
                                                 </span>
                                                 <button x-show="t.membershipEmail && canWrite"
                                                         @click="linkMembership(t, null)"
                                                         title="Rimuovi associazione tessera"
-                                                        style="margin-left:2px; padding:2px 5px; background:none; color:#c00; border:1px solid #c00; border-radius:3px; font-size:10px; cursor:pointer; font-family:inherit;">
+                                                        style="margin-left:2px; padding:1px 4px; background:none; color:#c00; border:1px solid #c00; border-radius:3px; font-size:9px; cursor:pointer; font-family:inherit;">
                                                     ✕
                                                 </button>
                                                 <span x-show="ticketHasPendingMembership(t)"
                                                       title="Richiesta tessera in attesa di approvazione (probabile pagamento cash/iban da verificare)"
-                                                      style="margin-right:4px; padding:2px 6px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                      style="margin-right:3px; padding:1px 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold;">
                                                     IN ATTESA
                                                 </span>
                                                 <button x-show="!ticketIsMember(t) && canWrite"
                                                         @click="openLinkMember(t)"
-                                                        style="padding:2px 6px; background:#fff; color:#000; border:1px solid #000; border-radius:3px; font-size:10px; cursor:pointer; font-family:inherit;">
-                                                    Associa tessera
+                                                        style="padding:1px 4px; background:#fff; color:#000; border:1px solid #000; border-radius:3px; font-size:9px; cursor:pointer; font-family:inherit;">
+                                                    Associa
                                                 </button>
                                                 <span x-show="!ticketIsMember(t) && !canWrite" style="color:#999; font-size:12px;">—</span>
                                             </td>
