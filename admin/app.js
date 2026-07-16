@@ -29,10 +29,12 @@ document.addEventListener('alpine:init', () => {
         pendingMemberEmails: [],
         membershipsByEmail: {},
         festivalInfoMembership: null,
+        artistCheckinModal: null,
         checkinSearch: '',
         linkingTicket: null,
         linkingVolunteer: null,
         addingArtist: false,
+        walkinModal: null,
         memberSearch: '',
         festivalApproval: null,
         editingFestivalTicket: null,
@@ -1978,6 +1980,25 @@ document.addEventListener('alpine:init', () => {
             } catch (e) {
                 alert('Email aggiornata, ma non è stato possibile aggiornare i biglietti festival associati alla vecchia email: controlla le associazioni tessera nel tab Festival.');
             }
+        },
+
+        async createWalkinTicket() {
+            const { name, surname, email } = this.walkinModal;
+            if (!name.trim() || !surname.trim() || !email.trim()) {
+                alert('Compila tutti i campi');
+                return;
+            }
+            try {
+                const res = await fetch(`${this.BASE_URL}/festival/walkin`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name.trim(), surname: surname.trim(), email: email.trim() }),
+                });
+                if (!res.ok) throw new Error('Errore creazione biglietto');
+                const ticket = await res.json();
+                this.festivalTickets.push(ticket);
+                this.walkinModal = null;
+            } catch (e) { alert(e.message); }
         },
 
         async checkinTicket(id) {

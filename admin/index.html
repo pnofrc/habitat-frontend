@@ -2429,7 +2429,13 @@
                             </div>
                         </div>
                         <div class="card">
-                            <h3 style="margin:0 0 15px">Check-in — biglietti confermati</h3>
+                            <h3 style="margin:0 0 15px">Check-in — biglietti confermati
+                                <button x-show="canWrite"
+                                        @click="walkinModal = { name: '', surname: '', email: '' }"
+                                        style="float:right; padding:4px 10px; background:#fff; color:#000; border:1px solid #000; cursor:pointer; font-family:inherit; font-size:12px; font-weight:normal;">
+                                    + Aggiungi biglietto
+                                </button>
+                            </h3>
                             <input type="text" x-model="checkinSearch"
                                    placeholder="Cerca per nome, cognome o email..."
                                    style="width:100%; padding:8px; border:1px solid #000; font-family:inherit; margin-bottom:15px;">
@@ -2591,7 +2597,7 @@
                                             </td>
                                             <td x-show="canWrite">
                                                 <button x-show="!m.festivalCheckedInAt && m.confirmed"
-                                                        @click="checkinArtist(m.id)"
+                                                        @click="artistCheckinModal = m"
                                                         style="padding:3px 8px; background:#000; color:#fff; border:none; cursor:pointer; font-family:inherit; font-size:11px;">
                                                     Segna entrato
                                                 </button>
@@ -2718,6 +2724,55 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- MODAL: Artist Check-in -->
+                <template x-if="artistCheckinModal">
+                    <div class="modal-overlay" @click.self="artistCheckinModal = null">
+                        <div class="modal-box" style="text-align:center; max-width:360px;">
+                            <h3 style="margin:0 0 6px; font-size:18px;"
+                                x-text="artistCheckinModal.name + ' ' + artistCheckinModal.surname"></h3>
+                            <p style="margin:0 0 24px; color:#666; font-size:13px;">Artista</p>
+                            <div style="background:#f9f9f9; border:1px solid #e5e7eb; border-radius:6px; padding:16px 20px; margin-bottom:24px; font-size:15px; line-height:1.8;">
+                                <div>🍹 <strong>3 drink</strong></div>
+                                <div>🍽️ <strong>1 pasto</strong></div>
+                            </div>
+                            <p style="font-size:13px; color:#555; margin-bottom:20px;">Consegna i coupon consumazione prima di fare il check-in.</p>
+                            <div style="display:flex; gap:10px; justify-content:center;">
+                                <button @click="artistCheckinModal = null"
+                                        style="padding:8px 20px; background:#fff; border:1px solid #d1d5db; cursor:pointer; font-family:inherit; font-size:13px;">
+                                    Annulla
+                                </button>
+                                <button @click="checkinArtist(artistCheckinModal.id); artistCheckinModal = null"
+                                        style="padding:8px 20px; background:#000; color:#fff; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:bold;">
+                                    Confermo, segna entrato
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- MODAL: Walk-in Ticket -->
+                <template x-if="walkinModal">
+                    <div class="modal-overlay" @click.self="walkinModal = null">
+                        <div class="modal-box" style="text-align:left; min-width:340px;">
+                            <h3 style="margin:0 0 20px;">Aggiungi biglietto walk-in</h3>
+                            <label>Nome *</label>
+                            <input type="text" x-model="walkinModal.name" @keyup.enter="createWalkinTicket()"
+                                   placeholder="Nome" autofocus>
+                            <label>Cognome *</label>
+                            <input type="text" x-model="walkinModal.surname" @keyup.enter="createWalkinTicket()"
+                                   placeholder="Cognome">
+                            <label>Email *</label>
+                            <input type="email" x-model="walkinModal.email" @keyup.enter="createWalkinTicket()"
+                                   placeholder="email@esempio.it">
+                            <button class="btn-blk" @click="createWalkinTicket()">AGGIUNGI</button>
+                            <button @click="walkinModal = null"
+                                    style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">
+                                Annulla
+                            </button>
+                        </div>
+                    </div>
+                </template>
 
                 <!-- MODAL: Festival Info -->
                 <template x-if="festivalInfoMembership">
