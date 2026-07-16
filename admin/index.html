@@ -2505,7 +2505,7 @@
                                                 </span>
                                                 <span x-show="!t.checkedInAt" style="color:#999; font-size:12px;">—</span>
                                             </td>
-                                            <td x-show="canWrite">
+                                            <td x-show="canWrite" style="white-space:nowrap; width:1%;">
                                                 <button x-show="!t.checkedInAt && ticketIsMember(t)"
                                                         @click="checkinTicket(t.id)"
                                                         style="padding:3px 8px; background:#000; color:#fff; border:none; cursor:pointer; font-family:inherit; font-size:11px;">
