@@ -117,13 +117,12 @@
             height: 80vw;}
         } */
 
-                @media  (max-width: 5000px) {
-        #playPauseBtn svg {
-            width: 80vw;
-            height: 80vw;
+        @media (max-width: 5000px) {
+            #playPauseBtn svg {
+                width: 80vw;
+                height: 80vw;
+            }
         }
-        }
-
     </style>
 </head>
 
@@ -166,12 +165,12 @@
                     ">
                     <div class="red"></div> On air NOW: <span id="song-title"></span>
                 </div>
-<br>
+                <br>
                 <div style="text-align: center;">
-                     Live streaming  <br>
+                    Live streaming <br>
                     from Cà de Monti,
                     Tredozio (FC)
-                     <br> 47019 - Italia
+                    <br> 47019 - Italia
                 </div>
 
             </div>
@@ -190,7 +189,7 @@
                 </div>
 
             </div>
-            <audio id="audio" src="https://habitattt.it:8000/5years" preload="none"></audio>
+            <audio id="audio" src="https://habitattt.it:8000/5y" preload="none"></audio>
         </div>
 
 
@@ -247,7 +246,7 @@
         progressContainer.addEventListener('touchstart', scrub, { passive: true });
 
         const songTitleEl = document.getElementById('song-title');
-        const MOUNT = '/5years';
+        const MOUNT = '/5y';
 
         async function updateSongTitle() {
             try {
