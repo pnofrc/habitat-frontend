@@ -619,6 +619,7 @@
             nav .nav-tabs { display: none !important; }
             nav .nav-user { display: none !important; }
             nav .nav-hamburger-area { display: flex !important; }
+            nav .nav-hamburger { display: flex !important; }
 
             /* Mobile drawer */
             .mobile-nav-drawer {
@@ -769,8 +770,11 @@
                     <button x-show="visibleTabs.includes('calendar')" :class="view === 'calendar' && 'active'"
                         @click="setView('calendar')">Calendario</button>
                     <span x-show="visibleTabs.includes('calendar')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('cospend')" :class="view === 'cospend' && 'active'"
+                        @click="setView('cospend')">Cospend</button>
+                    <span x-show="visibleTabs.includes('cospend')" style="color:#ccc; pointer-events:none;">|</span>
                     <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'"
-                        @click="setView('users')">Gestione Utenti</button>
+                        @click="setView('users')">Gestione CDM</button>
                     <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'"
                         @click="setView('telegram')">Telegram Bot</button>
                     <button x-show="visibleTabs.includes('activity')" :class="view === 'activity' && 'active'"
@@ -825,8 +829,11 @@
                 <template x-if="visibleTabs.includes('calendar')">
                     <button :class="view==='calendar'&&'active'" @click="setView('calendar'); mobileNavOpen=false">Calendario</button>
                 </template>
+                <template x-if="visibleTabs.includes('cospend')">
+                    <button :class="view==='cospend'&&'active'" @click="setView('cospend'); mobileNavOpen=false">Cospend</button>
+                </template>
                 <template x-if="visibleTabs.includes('users')">
-                    <button :class="view==='users'&&'active'" @click="setView('users'); mobileNavOpen=false">Gestione Utenti</button>
+                    <button :class="view==='users'&&'active'" @click="setView('users'); mobileNavOpen=false">Gestione CDM</button>
                 </template>
                 <template x-if="visibleTabs.includes('telegram')">
                     <button :class="view==='telegram'&&'active'" @click="setView('telegram'); mobileNavOpen=false">Telegram Bot</button>
@@ -836,7 +843,7 @@
                 </template>
                 <div style="border-top:1px solid #eee; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:12px; color:#666;" x-text="currentUser?.username"></span>
-                    <button class="drawer-logout" @click="logout; mobileNavOpen=false" style="color:red; width:auto; border:none;">LOGOUT</button>
+                    <button class="drawer-logout" @click="logout(); mobileNavOpen=false" style="color:red; width:auto; border:none;">LOGOUT</button>
                 </div>
             </div>
 
@@ -1489,7 +1496,7 @@
                         <table x-show="bookingSubTab === 'active'">
                             <thead>
                                 <tr>
-                                    <th>Ospite</th>
+                                    <th style="width:200px;">Ospite</th>
                                     <th>Stanza</th>
                                     <th>Da</th>
                                     <th>A</th>
@@ -1500,10 +1507,9 @@
                             </thead>
                             <tbody>
                                 <template x-for="b in primaryBookings(['standby', 'in_progress'])" :key="b.id">
-                                    <tr :class="(b.room === 'da assegnare' ||
-                                        (!b.hasMembership || b._compBookings?.some(cb => !cb.hasMembership))) && 'alert-red'">
+                                    <tr :class="(b.room === 'da assegnare' || bookingMissingMembership(b)) && 'alert-red'">
                                         <td @click="canWrite && openEditBooking(b)"
-                                            :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
+                                            :style="(canWrite ? 'cursor:pointer; text-decoration:underline; ' : '') + 'max-width:200px; overflow:hidden; text-overflow:ellipsis;'">
                                             <!-- Gruppo: mostra tutti i nomi con relativa stanza -->
                                             <template x-if="b._compBookings?.length > 0">
                                                 <span>
@@ -1511,7 +1517,7 @@
                                                     <template x-for="cb in b._compBookings" :key="cb.id">
                                                         <span> + <span x-text="cb.guest?.name + ' (' + cb.room + ')'"></span></span>
                                                     </template>
-                                                    <span x-show="!b.hasMembership || b._compBookings?.some(cb => !cb.hasMembership)"
+                                                    <span x-show="bookingMissingMembership(b)"
                                                         title="Tessera mancante per almeno una persona"
                                                         style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
                                                 </span>
@@ -1520,7 +1526,10 @@
                                             <template x-if="!b._compBookings?.length">
                                                 <span>
                                                     <span x-text="b.guest?.name || b.guest || 'N/A'"></span>
-                                                    <span x-show="!b.hasMembership"
+                                                    <template x-if="b.companions?.length">
+                                                        <span x-text="'+' + b.companions.length"></span>
+                                                    </template>
+                                                    <span x-show="bookingMissingMembership(b)"
                                                         title="Tessera associativa mancante"
                                                         style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
                                                 </span>
@@ -1567,7 +1576,7 @@
                         <table x-show="bookingSubTab === 'completed'">
                             <thead>
                                 <tr>
-                                    <th>Ospite</th>
+                                    <th style="width:200px;">Ospite</th>
                                     <th>Stanza</th>
                                     <th>Da</th>
                                     <th>A</th>
@@ -1580,7 +1589,7 @@
                                 <template x-for="b in primaryBookings(['checkout'])" :key="b.id">
                                     <tr>
                                         <td @click="canWrite && openEditBooking(b)"
-                                            :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''">
+                                            :style="(canWrite ? 'cursor:pointer; text-decoration:underline; ' : '') + 'max-width:200px; overflow:hidden; text-overflow:ellipsis;'">
                                             <template x-if="b._compBookings?.length > 0">
                                                 <span>
                                                     <span x-text="(b.guest?.name || 'N/A') + ' (' + b.room + ')'"></span>
@@ -1620,7 +1629,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Ospite</th>
+                                    <th style="width:200px;">Ospite</th>
                                     <th>Stanza</th>
                                     <th>Da</th>
                                     <th>A</th>
@@ -1631,7 +1640,8 @@
                             <tbody>
                                 <template x-for="b in deletedBookings" :key="b.id">
                                     <tr>
-                                        <td x-text="b.guest?.name || 'N/A'"></td>
+                                        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;"
+                                            x-text="b.guest?.name || 'N/A'"></td>
                                         <td x-text="b.room"></td>
                                         <td x-text="formatDate(b.checkIn)"></td>
                                         <td x-text="formatDate(b.checkOut)"></td>
@@ -1657,7 +1667,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Nome</th>
+                                    <th style="width:200px;">Nome</th>
                                     <th>Data Richiesta</th>
                                     <th>Dal</th>
                                     <th>Al</th>
@@ -1668,7 +1678,7 @@
                             <tbody>
                                 <template x-for="r in items" :key="r.id">
                                     <tr>
-                                        <td>
+                                        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">
                                             <span x-text="r.name"></span>
                                             <template x-if="r.companions && r.companions.length > 0">
                                                 <span style="font-size:10px; color:#666; margin-left:5px;"
@@ -1699,7 +1709,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Nome</th>
+                                    <th style="width:200px;">Nome</th>
                                     <th>Email</th>
                                     <th>Dal</th>
                                     <th>Al</th>
@@ -1712,7 +1722,7 @@
                             <tbody>
                                 <template x-for="r in deletedResidencies" :key="r.id">
                                     <tr>
-                                        <td x-text="r.name"></td>
+                                        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;" x-text="r.name"></td>
                                         <td x-text="r.email || '-'"></td>
                                         <td x-text="formatDate(r.fromDate)"></td>
                                         <td x-text="formatDate(r.toDate)"></td>
@@ -2914,6 +2924,78 @@
                     </div>
                 </div>
 
+                <!-- COSPEND -->
+                <div x-show="view === 'cospend'">
+                    <div class="card">
+                        <h3 style="margin:0 0 15px">Saldi</h3>
+                        <table>
+                            <thead>
+                                <tr><th>Utente</th><th>Saldo</th></tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="b in (cospendBalances?.balances || [])" :key="b.userId">
+                                    <tr>
+                                        <td x-text="b.username"></td>
+                                        <td :style="'color:' + (b.balance > 0 ? 'green' : '#cc0000')"
+                                            x-text="(b.balance > 0 ? '+€' : '-€') + Math.abs(b.balance).toFixed(2)"></td>
+                                    </tr>
+                                </template>
+                                <tr x-show="!cospendBalances?.balances?.length">
+                                    <td colspan="2" style="color:#999;">Tutti in pari</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <template x-if="cospendBalances?.settlements?.length">
+                            <div style="margin-top:15px;">
+                                <label style="font-weight:bold; font-size:11px;">DA SISTEMARE</label>
+                                <template x-for="(s, idx) in cospendBalances.settlements" :key="idx">
+                                    <div style="font-size:13px; margin-top:6px; display:flex; align-items:center; gap:10px;">
+                                        <span><b x-text="s.from"></b> deve <b x-text="'€' + s.amount.toFixed(2)"></b> a <b x-text="s.to"></b></span>
+                                        <button x-show="canWrite" @click="settleCospend(s)"
+                                            style="font-size:11px; border:1px solid #000; background:none; padding:2px 8px; cursor:pointer;">SALDATO</button>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="card" style="margin-top:20px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin:0">Spese</h3>
+                            <button x-show="canWrite" @click="openCreateCospendExpense()" class="create">+ NUOVA SPESA</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Titolo</th>
+                                    <th>Pagato da</th>
+                                    <th>Importo</th>
+                                    <th>Persone</th>
+                                    <th x-show="canWrite"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="exp in cospendExpenses" :key="exp.id">
+                                    <tr>
+                                        <td x-text="formatDate(exp.date)"></td>
+                                        <td @click="canWrite && openEditCospendExpense(exp)"
+                                            :style="canWrite ? 'cursor:pointer; text-decoration:underline;' : ''"
+                                            x-text="exp.title"></td>
+                                        <td x-text="exp.paidBy?.username || '-'"></td>
+                                        <td x-text="'€' + exp.amount.toFixed(2)"></td>
+                                        <td x-text="exp.participants.length"></td>
+                                        <td x-show="canWrite">
+                                            <button @click="deleteCospendExpense(exp.id)" class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- ACTIVITY -->
                 <div x-show="view === 'activity'">
                     <div class="card">
@@ -3006,7 +3088,7 @@
                     <div class="card">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <h3 style="margin:0">Gestione Utenti</h3>
+                            <h3 style="margin:0">Habitanti</h3>
                             <button @click="openCreateUser()" class="create">+ NUOVO UTENTE</button>
                         </div>
                         <table>
@@ -3016,6 +3098,7 @@
                                     <th>Email</th>
                                     <th>Ruolo</th>
                                     <th>Tab consentite</th>
+                                    <th>Cospend?</th>
                                     <th>Stato</th>
                                     <th></th>
                                 </tr>
@@ -3041,6 +3124,10 @@
                                                 style="color:#999; font-size:11px;">tutte</span>
                                         </td>
                                         <td>
+                                            <span x-show="u.inCospend" style="color:green;">SI</span>
+                                            <span x-show="!u.inCospend" style="color:#999;">NO</span>
+                                        </td>
+                                        <td>
                                             <span x-show="u.active" class="status-tag"
                                                 style="color:green; border-color:green;">ATTIVO</span>
                                             <span x-show="!u.active" class="status-tag"
@@ -3049,6 +3136,46 @@
                                         <td>
                                             <button x-show="u.id !== currentUser?.id" @click="deleteUser(u.id)"
                                                 class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card" style="margin-top:20px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin:0">Stanze</h3>
+                            <button @click="openCreateRoom()" class="create">+ NUOVA STANZA</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Capienza</th>
+                                    <th>Tariffa</th>
+                                    <th>Tipo</th>
+                                    <th>Stato</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="r in rooms" :key="r.id">
+                                    <tr>
+                                        <td @click="openEditRoom(r)" style="cursor:pointer; text-decoration:underline;"
+                                            x-text="r.name"></td>
+                                        <td x-text="r.capacity"></td>
+                                        <td x-text="'€' + r.roomRate + '/giorno'"></td>
+                                        <td x-text="r.pricingModel === 'linear' ? 'Dormitorio (lineare)' : 'Doppia (1.5x oltre 1 persona)'"></td>
+                                        <td>
+                                            <span x-show="r.active" class="status-tag"
+                                                style="color:green; border-color:green;">ATTIVA</span>
+                                            <span x-show="!r.active" class="status-tag"
+                                                style="color:red; border-color:red;">DISATTIVA</span>
+                                        </td>
+                                        <td>
+                                            <button @click="deleteRoom(r.id)" class="btn-del">X</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -3386,17 +3513,14 @@
                 <div class="sidebar">
                     <h3>RESIDENZA</h3>
                     <input type="text" x-model="editingBooking.guestName" placeholder="Nome ospite" style="margin-top:5px">
-                    <label>In</label><input type="date" x-model="editingBooking.checkIn">
-                    <label>Out</label><input type="date" x-model="editingBooking.checkOut">
+                    <label>In</label><input type="date" x-model="editingBooking.checkIn" @change="recomputeInvoice()">
+                    <label>Out</label><input type="date" x-model="editingBooking.checkOut" @change="recomputeInvoice()">
                     <label>Stanza</label>
-                    <select x-model="editingBooking.room">
+                    <select x-model="editingBooking.room" @change="recomputeInvoice()">
                         <option value="da assegnare">da assegnare</option>
-                        <option value="monolocale">monolocale</option>
-                        <option value="ex poni">ex poni</option>
-                        <option value="ex ronco">ex ronco</option>
-                        <option value="cameratina">cameratina</option>
-                        <option value="secondo piano">secondo piano</option>
-                        <option value="camerata">camerata</option>
+                        <template x-for="r in rooms.filter(r => r.active)" :key="r.id">
+                            <option :value="r.name" x-text="r.name"></option>
+                        </template>
                     </select>
                     <label>Feedback</label>
                     <textarea x-model="editingBooking.feedback" rows="4" placeholder=""></textarea>
@@ -3423,12 +3547,11 @@
                                         <span x-show="!cb.membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
                                     </label>
                                     <select
-                                        :value="editingBooking._compBookings[idx].membershipId"
                                         @change="editingBooking._compBookings[idx].membershipId = $event.target.value ? parseInt($event.target.value) : null"
                                         style="margin-top:5px;">
-                                        <option value="">Nessuno</option>
+                                        <option value="" :selected="!editingBooking._compBookings[idx].membershipId">Nessuno</option>
                                         <template x-for="m in memberships" :key="m.id">
-                                            <option :value="m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
+                                            <option :value="m.id" :selected="editingBooking._compBookings[idx].membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
                                         </template>
                                     </select>
                                 </div>
@@ -3450,19 +3573,44 @@
                             </div>
                             <div class="sub-box" style="margin-top:10px;">
                                 <label style="font-weight:bold; font-size:11px;">GRUPPO (persone che vengono insieme)</label>
-                                <template x-for="(name, idx) in editingBooking.companions" :key="idx">
-                                    <div style="display:flex; gap:6px; margin-top:6px; align-items:center;">
-                                        <input type="text"
-                                            :value="editingBooking.companions[idx]"
-                                            @input="editingBooking.companions[idx] = $event.target.value"
-                                            :placeholder="'Persona ' + (idx + 2)"
-                                            style="flex:1; margin-top:0; font-size:13px; padding:6px 8px;">
-                                        <button type="button" @click="editingBooking.companions.splice(idx, 1)"
-                                            style="border:1px solid #ccc; background:none; padding:4px 8px; cursor:pointer; flex-shrink:0;">✕</button>
+                                <template x-for="(c, idx) in editingBooking.companions" :key="idx">
+                                    <div style="margin-top:8px; padding-top:8px; border-top:1px solid #eee;">
+                                        <div style="display:flex; gap:6px; align-items:center;">
+                                            <input type="text"
+                                                :value="editingBooking.companions[idx].name"
+                                                @input="editingBooking.companions[idx].name = $event.target.value"
+                                                :placeholder="'Persona ' + (idx + 2)"
+                                                style="flex:1; margin-top:0; font-size:13px; padding:6px 8px;">
+                                            <button type="button" @click="editingBooking.companions.splice(idx, 1); recomputeInvoice()"
+                                                style="border:1px solid #ccc; background:none; padding:4px 8px; cursor:pointer; flex-shrink:0;">✕</button>
+                                        </div>
+                                        <label style="font-size:10px; color:#666; margin-top:6px; display:block;">
+                                            TESSERA ASSOCIAZIONE
+                                            <span x-show="!editingBooking.companions[idx].membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
+                                        </label>
+                                        <select
+                                            @change="editingBooking.companions[idx].membershipId = $event.target.value ? parseInt($event.target.value) : null"
+                                            style="margin-top:4px;">
+                                            <option value="" :selected="!editingBooking.companions[idx].membershipId">Nessuno</option>
+                                            <template x-for="m in memberships" :key="m.id">
+                                                <option :value="m.id" :selected="editingBooking.companions[idx].membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
+                                            </template>
+                                        </select>
                                     </div>
                                 </template>
-                                <button type="button" @click="editingBooking.companions.push('')"
-                                    style="margin-top:8px; font-size:11px; border:1px solid #000; background:none; padding:4px 10px; cursor:pointer; width:100%;">+ persona</button>
+                                <template x-if="roomIsDouble(editingBooking.room) && editingBooking.companions.length >= 1">
+                                    <div style="margin-top:8px; font-size:11px; color:#a33;">
+                                        Stanza da 2: max 1 accompagnatore automatico.
+                                        <label style="display:block; font-weight:normal; margin-top:4px;">
+                                            <input type="checkbox" x-model="editingBooking.forceExtraGuests" @change="recomputeInvoice()" style="width:auto">
+                                            Forzo oltre 2 persone (costo da inserire manualmente)
+                                        </label>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editingBooking.companions.push({ name: '', membershipId: null }); recomputeInvoice()"
+                                    :disabled="roomIsDouble(editingBooking.room) && editingBooking.companions.length >= 1 && !editingBooking.forceExtraGuests"
+                                    style="margin-top:8px; font-size:11px; border:1px solid #000; background:none; padding:4px 10px; cursor:pointer; width:100%;"
+                                    :style="(roomIsDouble(editingBooking.room) && editingBooking.companions.length >= 1 && !editingBooking.forceExtraGuests) ? 'opacity:0.4; cursor:not-allowed;' : ''">+ persona</button>
                             </div>
                         </div>
                     </template>
@@ -3484,15 +3632,15 @@
                                     :checked="editingBooking.rideFromPersons.includes(editingBooking.guestName || 'Ospite principale')"
                                     @change="toggleRide('rideFromPersons', editingBooking.guestName || 'Ospite principale')">
                             </div>
-                            <template x-for="name in editingBooking.companions.filter(Boolean)" :key="name">
+                            <template x-for="c in editingBooking.companions.filter(Boolean)" :key="companionName(c)">
                                 <div style="display:flex; gap:8px; align-items:center;">
-                                    <span style="flex:1; font-size:12px;" x-text="name"></span>
+                                    <span style="flex:1; font-size:12px;" x-text="companionName(c)"></span>
                                     <input type="checkbox" style="width:36px; margin:0;"
-                                        :checked="editingBooking.rideToPersons.includes(name)"
-                                        @change="toggleRide('rideToPersons', name)">
+                                        :checked="editingBooking.rideToPersons.includes(companionName(c))"
+                                        @change="toggleRide('rideToPersons', companionName(c))">
                                     <input type="checkbox" style="width:36px; margin:0;"
-                                        :checked="editingBooking.rideFromPersons.includes(name)"
-                                        @change="toggleRide('rideFromPersons', name)">
+                                        :checked="editingBooking.rideFromPersons.includes(companionName(c))"
+                                        @change="toggleRide('rideFromPersons', companionName(c))">
                                 </div>
                             </template>
                         </div>
@@ -3503,6 +3651,9 @@
                     <template x-if="editingBooking._invoice">
                         <div class="sub-box" style="margin-top:10px;">
                             <label style="font-weight:bold; font-size:11px;">IMPORTO</label>
+                            <div x-show="editingBooking._invoice.manualRequired" style="font-size:11px; color:#a33; margin-top:6px;">
+                                Oltre 2 persone: nessun calcolo automatico, inserisci l'importo manualmente.
+                            </div>
                             <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
                                 <label style="font-size:11px; color:#666; flex:1;">Totale</label>
                                 <div style="display:flex; align-items:center; gap:3px;">
@@ -3550,7 +3701,7 @@
                             <label>Tab consentite</label>
                             <div style="margin-top:5px;">
                                 <template
-                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']"
+                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend']"
                                     :key="tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
@@ -3566,7 +3717,7 @@
                             <label>Permessi Scrittura</label>
                             <div style="margin-top:5px;">
                                 <template
-                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar']"
+                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend']"
                                     :key="'write-' + tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
@@ -3581,8 +3732,96 @@
                     <label style="margin-top:10px;">
                         <input type="checkbox" x-model="editingUser.active" style="width:auto"> Attivo
                     </label>
+                    <label style="margin-top:6px;">
+                        <input type="checkbox" x-model="editingUser.inCospend" style="width:auto"> In Cospend?
+                    </label>
                     <button class="btn-blk" @click="saveUser()">SALVA</button>
                     <button @click="editingUser = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
+
+            <template x-if="editingRoom">
+                <div class="sidebar">
+                    <h3 x-text="editingRoom.id ? 'MODIFICA STANZA' : 'NUOVA STANZA'"></h3>
+                    <label>Nome</label><input type="text" x-model="editingRoom.name">
+                    <label>Capienza (persone)</label>
+                    <input type="number" min="1" x-model.number="editingRoom.capacity">
+                    <label>Tipo tariffa</label>
+                    <select x-model="editingRoom.pricingModel">
+                        <option value="double">Doppia (1 persona = tariffa piena, 2 persone = tariffa ×1.5, oltre 2 richiede importo manuale)</option>
+                        <option value="linear">Dormitorio (tariffa × numero persone, nessuno sconto, nessun limite)</option>
+                    </select>
+                    <label>Tariffa stanza (€/giorno, escluso cibo)</label>
+                    <input type="number" min="0" step="0.01" x-model.number="editingRoom.roomRate">
+                    <label style="margin-top:10px;">
+                        <input type="checkbox" x-model="editingRoom.active" style="width:auto"> Attiva (visibile nel form prenotazione)
+                    </label>
+                    <button class="btn-blk" @click="saveRoom()">SALVA</button>
+                    <button @click="editingRoom = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
+
+            <template x-if="editingCospendExpense">
+                <div class="sidebar">
+                    <h3 x-text="editingCospendExpense.id ? 'MODIFICA SPESA' : 'NUOVA SPESA'"></h3>
+                    <label>Titolo</label><input type="text" x-model="editingCospendExpense.title">
+                    <label>Importo totale (€)</label>
+                    <input type="number" min="0" step="0.01" x-model.number="editingCospendExpense.amount"
+                        @input="recomputeCospendSplit()">
+                    <label>Data</label><input type="date" x-model="editingCospendExpense.date">
+                    <label>Pagato da</label>
+                    <select x-model="editingCospendExpense.paidByUserId">
+                        <option value="">Seleziona...</option>
+                        <template x-for="u in cospendParticipants" :key="u.id">
+                            <option :value="u.id" x-text="u.username"></option>
+                        </template>
+                    </select>
+
+                    <div class="sub-box" style="margin-top:10px;">
+                        <label style="font-weight:bold; font-size:11px;">DIVISIONE</label>
+                        <div style="display:flex; gap:6px; margin-top:6px;">
+                            <button type="button"
+                                @click="editingCospendExpense.splitMode = 'equal'; recomputeCospendSplit()"
+                                :style="'flex:1; padding:6px; cursor:pointer; border:1px solid #000; ' + (editingCospendExpense.splitMode === 'equal' ? 'background:#000; color:#fff;' : 'background:none;')">Parti
+                                uguali</button>
+                            <button type="button" @click="editingCospendExpense.splitMode = 'custom'"
+                                :style="'flex:1; padding:6px; cursor:pointer; border:1px solid #000; ' + (editingCospendExpense.splitMode === 'custom' ? 'background:#000; color:#fff;' : 'background:none;')">Importi
+                                custom</button>
+                        </div>
+                    </div>
+
+                    <div class="sub-box" style="margin-top:10px;">
+                        <label style="font-weight:bold; font-size:11px;">PARTECIPANTI</label>
+                        <template x-for="u in cospendParticipants" :key="u.id">
+                            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                                <input type="checkbox" style="width:auto"
+                                    :checked="!!editingCospendExpense.selected[u.id]"
+                                    @change="toggleCospendParticipant(u.id)">
+                                <span style="flex:1; font-size:13px;" x-text="u.username"></span>
+                                <template x-if="editingCospendExpense.selected[u.id]">
+                                    <div style="display:flex; align-items:center; gap:3px;">
+                                        <span style="font-size:12px; color:#666;">€</span>
+                                        <input type="number" min="0" step="0.01" style="width:70px;"
+                                            :disabled="editingCospendExpense.splitMode === 'equal'"
+                                            x-model.number="editingCospendExpense.shares[u.id]">
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <div style="font-size:11px; margin-top:8px;"
+                            :style="Math.abs(cospendSharesSum() - (parseFloat(editingCospendExpense.amount) || 0)) > 0.01 ? 'color:#a33;' : 'color:#666;'">
+                            Somma quote: €<span x-text="cospendSharesSum().toFixed(2)"></span> / €<span
+                                x-text="(parseFloat(editingCospendExpense.amount) || 0).toFixed(2)"></span>
+                        </div>
+                    </div>
+
+                    <label>Note</label>
+                    <textarea x-model="editingCospendExpense.notes" rows="3"></textarea>
+
+                    <button class="btn-blk" @click="saveCospendExpense()">SALVA</button>
+                    <button @click="editingCospendExpense = null"
                         style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                 </div>
             </template>

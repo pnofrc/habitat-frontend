@@ -94,6 +94,12 @@ document.addEventListener('alpine:init', () => {
         currentUser: null,
         usersList: [],
         editingUser: null,
+        rooms: [],
+        editingRoom: null,
+        cospendExpenses: [],
+        cospendParticipants: [],
+        cospendBalances: null,
+        editingCospendExpense: null,
 
         // Calendar state
         editingCalendarEvent: null,
@@ -151,7 +157,7 @@ document.addEventListener('alpine:init', () => {
 
         get visibleTabs() {
             if (!this.currentUser) return [];
-            const allTabs = ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar'];
+            const allTabs = ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend'];
             if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram', 'activity'];
             if (this.currentUser.role === 'reader') return allTabs;
             // reader_limited
@@ -395,10 +401,11 @@ document.addEventListener('alpine:init', () => {
         async fetchData() {
             if (!this.token) return;
             try {
-                if (this.view === 'users') { await this.fetchUsers(); return; }
+                if (this.view === 'users') { await this.fetchUsers(); await this.fetchRooms(); return; }
                 if (this.view === 'telegram') { await this.fetchTelegramData(); return; }
                 if (this.view === 'activity') { await this.fetchUsers(); await this.fetchActivity(); return; }
                 if (this.view === 'calendar') { this.$nextTick(() => this.initCalendar()); return; }
+                if (this.view === 'cospend') { await this.fetchCospendData(); return; }
                 if (this.view === 'finance') {
                     await this.fetchFinanceData();
                     await this.loadFlowCassaCategories();
@@ -1303,8 +1310,13 @@ document.addEventListener('alpine:init', () => {
                     const newG = await resG.json();
                     guestId = newG.id;
                 }
-                const { _compBookings, _invoice, guestName, hasMembership, guest: _g, residency: _r, ...payload } = this.editingBooking;
+                const { _compBookings, _invoice, guestName, hasMembership, guest: _g, residency: _r, forceExtraGuests: _feg, ...payload } = this.editingBooking;
                 payload.membershipId = payload.membershipId ? parseInt(payload.membershipId) : null;
+                if (Array.isArray(payload.companions)) {
+                    payload.companions = payload.companions
+                        .filter(c => c && (typeof c === 'string' ? c.trim() : (c.name || '').trim()))
+                        .map(c => typeof c === 'string' ? c : { name: c.name.trim(), membershipId: c.membershipId ? parseInt(c.membershipId) : null });
+                }
                 const res = await fetch(isUpdate ? `${this.BASE_URL}/bookings/${this.editingBooking.id}` : `${this.BASE_URL}/bookings/`, {
                     method: isUpdate ? 'PATCH' : 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
@@ -1381,6 +1393,23 @@ document.addEventListener('alpine:init', () => {
             };
         },
 
+        companionName(c) {
+            return typeof c === 'string' ? c : (c?.name || '');
+        },
+
+        roomIsDouble(roomName) {
+            return this.rooms.find(r => r.name === roomName)?.pricingModel === 'double';
+        },
+
+        bookingMissingMembership(b) {
+            if (b._compBookings?.length) {
+                return !b.hasMembership || b._compBookings.some(cb => !cb.hasMembership);
+            }
+            const companionsMissing = Array.isArray(b.companions) &&
+                b.companions.some(c => c && typeof c === 'object' && !c.membershipId);
+            return !b.hasMembership || companionsMissing;
+        },
+
         primaryBookings(statuses) {
             const pool = this.items.filter(b => statuses.includes(b.guestStatus));
             const secondaryIds = new Set();
@@ -1415,6 +1444,7 @@ document.addEventListener('alpine:init', () => {
                 fetch(`${this.BASE_URL}/membership/`, { headers: { 'Authorization': `Bearer ${this.token}` } })
                     .then(r => r.json()).then(d => { this.memberships = d.filter(m => m.confirmed); })
             );
+            if (!this.rooms.length) fetches.push(this.fetchRooms());
             await Promise.all(fetches);
         },
 
@@ -1430,14 +1460,20 @@ document.addEventListener('alpine:init', () => {
                 companions: [],
                 rideToPersons: [],
                 rideFromPersons: [],
-                membershipId: ""
+                membershipId: "",
+                forceExtraGuests: false
             };
         },
 
         async openEditBooking(b) {
             await this._loadBookingDeps();
             const guestId = b.guest?.id || b.guest;
-            const companions = Array.isArray(b.companions) ? b.companions.filter(c => typeof c === 'string') : [];
+            const hasCompBookings = (b._compBookings || []).length > 0;
+            const companions = hasCompBookings
+                ? b.companions
+                : (Array.isArray(b.companions) ? b.companions.filter(Boolean).map(c =>
+                    typeof c === 'string' ? { name: c, membershipId: null } : { name: c.name || '', membershipId: c.membershipId ?? null }
+                ) : []);
             const compBookings = (b._compBookings || []).map(cb => ({
                 id: cb.id,
                 guestName: cb.guest?.name || '',
@@ -1456,6 +1492,7 @@ document.addEventListener('alpine:init', () => {
                 rideFromPersons: Array.isArray(b.rideFromPersons) ? [...b.rideFromPersons] : (b.needsRideFrom ? ['Ospite principale'] : []),
                 membershipId: b.membershipId || "",
                 _compBookings: compBookings,
+                forceExtraGuests: companions.length > 1,
                 _invoice: null
             };
             if (b.id && b.checkIn && b.checkOut) {
@@ -1467,9 +1504,10 @@ document.addEventListener('alpine:init', () => {
                         const inv = await invRes.json();
                         this.editingBooking._invoice = {
                             id: inv.id || null,
-                            totalAmount: inv.totalAmount,
+                            totalAmount: inv.manualRequired ? null : inv.totalAmount,
                             foodAmount: inv.foodAmount,
-                            preview: !!inv.preview
+                            preview: !!inv.preview,
+                            manualRequired: !!inv.manualRequired
                         };
                     }
                 } catch (_) {}
@@ -1478,6 +1516,7 @@ document.addEventListener('alpine:init', () => {
 
         async startResidencyApproval(r) {
             try {
+                if (!this.rooms.length) await this.fetchRooms();
                 const [resB, resT] = await Promise.all([
                     fetch(`${this.BASE_URL}/bookings/`, {
                         headers: { 'Authorization': `Bearer ${this.token}` }
@@ -1488,12 +1527,10 @@ document.addEventListener('alpine:init', () => {
                 ]);
                 const allBookings = await resB.json();
                 const { subject: emailSubject, body: emailBody } = await resT.json();
-                const allRooms = ['monolocale', 'ex poni', 'ex ronco', 'cameratina', 'secondo piano', 'camerata'];
-                const sharedRooms = ['camerata', 'cameratina'];
                 const from = new Date(r.fromDate);
                 const to = new Date(r.toDate);
-                const roomOptions = allRooms.map(name => {
-                    if (sharedRooms.includes(name)) return { name, available: true, label: name + ' (condivisa)' };
+                const roomOptions = this.rooms.filter(room => room.active).map(({ name, pricingModel }) => {
+                    if (pricingModel === 'linear') return { name, available: true, label: name + ' (condivisa)' };
                     const occupied = allBookings.some(b =>
                         b.room === name &&
                         new Date(b.checkIn) < to &&
@@ -1685,6 +1722,41 @@ document.addEventListener('alpine:init', () => {
             const idx = arr.indexOf(name);
             if (idx === -1) arr.push(name);
             else arr.splice(idx, 1);
+            this.recomputeInvoice();
+        },
+
+        calcInvoiceClient(checkIn, checkOut, personCount, room, rideCost) {
+            const start = new Date(checkIn);
+            const end = new Date(checkOut);
+            const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000));
+            const foodDaily = 7;
+            const round2 = n => Math.round(n * 100) / 100;
+            let pricingModel = room?.pricingModel || 'double';
+            let roomRate = room?.roomRate ?? 18;
+            const foodAmount = round2(personCount * days * foodDaily);
+            if (pricingModel === 'linear') {
+                const totalAmount = round2(personCount * days * roomRate + foodAmount + rideCost);
+                return { manualRequired: false, foodAmount, totalAmount, days };
+            }
+            if (personCount > 2) return { manualRequired: true, foodAmount, days };
+            const multiplier = personCount >= 2 ? 1.5 : 1;
+            const totalAmount = round2(days * roomRate * multiplier + foodAmount + rideCost);
+            return { manualRequired: false, foodAmount, totalAmount, days };
+        },
+
+        recomputeInvoice() {
+            const eb = this.editingBooking;
+            if (!eb || !eb._invoice || !eb.checkIn || !eb.checkOut) return;
+            const personCount = 1 + (eb.companions?.length || 0);
+            const room = this.rooms.find(r => r.name === eb.room);
+            const rideCost = ((eb.rideToPersons?.length || 0) + (eb.rideFromPersons?.length || 0)) * 2;
+            const calc = this.calcInvoiceClient(eb.checkIn, eb.checkOut, personCount, room, rideCost);
+            eb._invoice = {
+                ...eb._invoice,
+                manualRequired: calc.manualRequired,
+                foodAmount: calc.foodAmount,
+                totalAmount: calc.manualRequired ? null : calc.totalAmount
+            };
         },
 
         async restoreResidency(r) {
@@ -3066,7 +3138,8 @@ document.addEventListener('alpine:init', () => {
                 role: 'reader',
                 allowedTabs: [],
                 allowedWriteTabs: [],
-                active: true
+                active: true,
+                inCospend: true
             };
         },
 
@@ -3132,6 +3205,201 @@ document.addEventListener('alpine:init', () => {
                     throw new Error(err.message || "Errore eliminazione utente");
                 }
                 await this.fetchUsers();
+            } catch (e) { alert(e.message); }
+        },
+
+        // ── Room Management ──
+
+        async fetchRooms() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/rooms/`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) throw new Error("Errore caricamento stanze");
+                this.rooms = await res.json();
+            } catch (e) { alert(e.message); }
+        },
+
+        openCreateRoom() {
+            this.editingRoom = { name: '', capacity: 2, pricingModel: 'double', roomRate: 18, active: true };
+        },
+
+        openEditRoom(room) {
+            this.editingRoom = { ...room };
+        },
+
+        async saveRoom() {
+            try {
+                const isUpdate = !!this.editingRoom.id;
+                const payload = { ...this.editingRoom };
+                const url = isUpdate ? `${this.BASE_URL}/rooms/${this.editingRoom.id}` : `${this.BASE_URL}/rooms/`;
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore salvataggio stanza");
+                }
+                this.editingRoom = null;
+                await this.fetchRooms();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteRoom(id) {
+            if (!await this.showConfirm("Eliminare questa stanza?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/rooms/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore eliminazione stanza");
+                }
+                await this.fetchRooms();
+            } catch (e) { alert(e.message); }
+        },
+
+        // ── Cospend ──
+
+        async fetchCospendData() {
+            try {
+                const [expRes, partRes, balRes] = await Promise.all([
+                    fetch(`${this.BASE_URL}/cospend/`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/cospend/participants`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                    fetch(`${this.BASE_URL}/cospend/balances`, { headers: { 'Authorization': `Bearer ${this.token}` } }),
+                ]);
+                this.cospendExpenses = await expRes.json();
+                this.cospendParticipants = await partRes.json();
+                this.cospendBalances = await balRes.json();
+            } catch (e) { alert(e.message); }
+        },
+
+        openCreateCospendExpense() {
+            this.editingCospendExpense = {
+                title: '',
+                amount: 0,
+                date: new Date().toISOString().split('T')[0],
+                paidByUserId: '',
+                splitMode: 'equal',
+                selected: {},
+                shares: {},
+                notes: ''
+            };
+        },
+
+        openEditCospendExpense(exp) {
+            const selected = {};
+            const shares = {};
+            exp.participants.forEach(p => { selected[p.userId] = true; shares[p.userId] = p.amount; });
+            this.editingCospendExpense = {
+                id: exp.id,
+                title: exp.title,
+                amount: exp.amount,
+                date: exp.date,
+                paidByUserId: exp.paidByUserId,
+                splitMode: 'custom',
+                selected,
+                shares,
+                notes: exp.notes || ''
+            };
+        },
+
+        toggleCospendParticipant(userId) {
+            const e = this.editingCospendExpense;
+            e.selected[userId] = !e.selected[userId];
+            if (!e.selected[userId]) delete e.shares[userId];
+            this.recomputeCospendSplit();
+        },
+
+        recomputeCospendSplit() {
+            const e = this.editingCospendExpense;
+            if (!e || e.splitMode !== 'equal') return;
+            const ids = Object.keys(e.selected).filter(id => e.selected[id]);
+            if (!ids.length) return;
+            const share = Math.round((parseFloat(e.amount || 0) / ids.length) * 100) / 100;
+            ids.forEach(id => { e.shares[id] = share; });
+        },
+
+        cospendSharesSum() {
+            const e = this.editingCospendExpense;
+            if (!e) return 0;
+            return Object.keys(e.selected).filter(id => e.selected[id])
+                .reduce((s, id) => s + (parseFloat(e.shares[id]) || 0), 0);
+        },
+
+        async saveCospendExpense() {
+            const e = this.editingCospendExpense;
+            if (!e.title.trim() || !e.amount || !e.paidByUserId) {
+                alert('Titolo, importo e "Pagato da" sono obbligatori');
+                return;
+            }
+            const participants = Object.keys(e.selected).filter(id => e.selected[id])
+                .map(id => ({ userId: parseInt(id, 10), amount: parseFloat(e.shares[id]) || 0 }));
+            if (!participants.length) {
+                alert('Seleziona almeno un partecipante');
+                return;
+            }
+            const sum = Math.round(participants.reduce((s, p) => s + p.amount, 0) * 100) / 100;
+            if (Math.abs(sum - parseFloat(e.amount)) > 0.01) {
+                alert(`La somma delle quote (€${sum}) non combacia con l'importo totale (€${e.amount})`);
+                return;
+            }
+            try {
+                const isUpdate = !!e.id;
+                const payload = {
+                    title: e.title.trim(),
+                    amount: parseFloat(e.amount),
+                    date: e.date,
+                    paidByUserId: parseInt(e.paidByUserId, 10),
+                    participants,
+                    notes: e.notes || null
+                };
+                const url = isUpdate ? `${this.BASE_URL}/cospend/${e.id}` : `${this.BASE_URL}/cospend/`;
+                const res = await fetch(url, {
+                    method: isUpdate ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore salvataggio spesa");
+                }
+                this.editingCospendExpense = null;
+                await this.fetchCospendData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteCospendExpense(id) {
+            if (!await this.showConfirm("Eliminare questa spesa?")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/cospend/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore eliminazione spesa");
+                }
+                await this.fetchCospendData();
+            } catch (e) { alert(e.message); }
+        },
+
+        async settleCospend(s) {
+            if (!await this.showConfirm(`Segnare come saldato: ${s.from} ha pagato €${s.amount.toFixed(2)} a ${s.to}?`)) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/cospend/settle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ fromUserId: s.fromUserId, toUserId: s.toUserId, amount: s.amount })
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore saldo");
+                }
+                await this.fetchCospendData();
             } catch (e) { alert(e.message); }
         },
 
