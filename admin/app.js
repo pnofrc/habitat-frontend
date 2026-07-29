@@ -1431,7 +1431,7 @@ document.addEventListener('alpine:init', () => {
                     return Object.assign({}, b, { _compBookings: comps });
                 }
                 return Object.assign({}, b, { _compBookings: [] });
-            });
+            }).sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
         },
 
         async _loadBookingDeps() {
