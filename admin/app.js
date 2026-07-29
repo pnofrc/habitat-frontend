@@ -15,6 +15,7 @@ document.addEventListener('alpine:init', () => {
         editingBooking: null,
         editingResidency: null,
         confirmModal: null,
+        membershipConfirmModal: null,
         editingGuest: null,
         newGuestToggle: false,
         newGuestName: '',
@@ -329,6 +330,12 @@ document.addEventListener('alpine:init', () => {
         showConfirm(message) {
             return new Promise(resolve => {
                 this.confirmModal = { message, resolve };
+            });
+        },
+
+        showMembershipConfirm() {
+            return new Promise(resolve => {
+                this.membershipConfirmModal = { sendEmail: true, resolve };
             });
         },
 
@@ -1651,12 +1658,13 @@ document.addEventListener('alpine:init', () => {
         },
 
         async confirmMembership(m) {
-            if (!await this.showConfirm("Confermare tesseramento?")) return;
+            const result = await this.showMembershipConfirm();
+            if (!result) return;
             try {
                 const res = await fetch(`${this.BASE_URL}/membership/${m.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({ confirmed: true })
+                    body: JSON.stringify({ confirmed: true, skipEmail: !result.sendEmail })
                 });
                 if (!res.ok) throw new Error("Errore conferma tesseramento");
                 const habitatMethods = ['HabitatPaypal', 'HabitatIban', 'CashHabitat', 'HabitatCard'];
