@@ -172,6 +172,11 @@
             background-color: rgba(255, 0, 0, 0.1) !important;
         }
 
+        .booking-past {
+            background-color: rgba(0, 0, 0, 0.06) !important;
+            color: #888;
+        }
+
         .status-tag {
             font-size: 9px;
             padding: 2px 4px;
@@ -1507,7 +1512,7 @@
                             </thead>
                             <tbody>
                                 <template x-for="b in primaryBookings(['standby', 'in_progress'])" :key="b.id">
-                                    <tr :class="(b.room === 'da assegnare' || bookingMissingMembership(b)) && 'alert-red'">
+                                    <tr :class="{'alert-red': b.room === 'da assegnare' || bookingMissingMembership(b), 'booking-past': new Date(b.checkIn) < new Date().setHours(0,0,0,0)}">
                                         <td @click="canWrite && openEditBooking(b)"
                                             :style="(canWrite ? 'cursor:pointer; text-decoration:underline; ' : '') + 'max-width:200px; overflow:hidden; text-overflow:ellipsis;'">
                                             <!-- Gruppo: mostra tutti i nomi con relativa stanza -->
