@@ -4133,6 +4133,22 @@
                 </div>
             </template>
 
+            <template x-if="membershipConfirmModal">
+                <div class="modal-overlay">
+                    <div class="modal-box">
+                        <p>Confermare tesseramento?</p>
+                        <label style="display:flex; align-items:center; gap:8px; margin-bottom:16px; cursor:pointer; font-size:14px;">
+                            <input type="checkbox" x-model="membershipConfirmModal.sendEmail" style="width:16px; height:16px;">
+                            Invia email di approvazione
+                        </label>
+                        <button class="btn-blk" style="width:auto"
+                            @click="membershipConfirmModal.resolve({ sendEmail: membershipConfirmModal.sendEmail }); membershipConfirmModal = null">CONFERMA</button>
+                        <button @click="membershipConfirmModal.resolve(null); membershipConfirmModal = null"
+                            style="border:1px solid #000; padding:8px 20px; cursor:pointer;">Annulla</button>
+                    </div>
+                </div>
+            </template>
+
             <!-- MODAL: Checkout -->
             <template x-if="checkoutModal">
                 <div class="modal-overlay">
