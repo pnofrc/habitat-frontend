@@ -1525,6 +1525,9 @@
                                                     <span x-show="bookingMissingMembership(b)"
                                                         title="Tessera mancante per almeno una persona"
                                                         style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
+                                                    <span x-show="!bookingMissingMembership(b)"
+                                                        title="Tessera associata per tutti"
+                                                        style="color:#2f855a; margin-left:4px; cursor:help;">🎫</span>
                                                 </span>
                                             </template>
                                             <!-- Ospite singolo -->
@@ -1537,6 +1540,9 @@
                                                     <span x-show="bookingMissingMembership(b)"
                                                         title="Tessera associativa mancante"
                                                         style="color:red; margin-left:4px; cursor:help;">&#9888;</span>
+                                                    <span x-show="!bookingMissingMembership(b)"
+                                                        title="Tessera associata"
+                                                        style="color:#2f855a; margin-left:4px; cursor:help;">🎫</span>
                                                 </span>
                                             </template>
                                             <span x-show="b.rideToPersons?.length > 0 || b.needsRideTo"
@@ -3530,51 +3536,143 @@
                     <label>Feedback</label>
                     <textarea x-model="editingBooking.feedback" rows="4" placeholder=""></textarea>
 
-                    <!-- Camera doppia con gruppo: sezione per persona -->
-                    <template x-if="editingBooking._compBookings?.length > 0">
+                    <!-- Camera doppia con gruppo: sezione per persona (ogni compagno ha una prenotazione propria) -->
+                    <template x-if="editingBooking._hasCompBookingsMode">
                         <div>
                             <div class="sub-box" style="margin-top:10px;">
                                 <label style="font-weight:bold; font-size:11px;">
                                     TESSERA ASSOCIAZIONE — <span x-text="editingBooking.guestName"></span>
-                                    <span x-show="!editingBooking.membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
                                 </label>
-                                <select @change="editingBooking.membershipId = $event.target.value ? parseInt($event.target.value) : null" style="margin-top:5px;">
-                                    <option value="" :selected="!editingBooking.membershipId">Nessuno</option>
-                                    <template x-for="m in memberships" :key="m.id">
-                                        <option :value="m.id" :selected="editingBooking.membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
-                                    </template>
-                                </select>
+                                <div x-data="{ q: '', open: !editingBooking.membershipId }" style="margin-top:4px;">
+                                    <div style="display:flex; align-items:center; gap:6px; border:1px solid #ccc; padding:6px 8px;"
+                                        :style="editingBooking.membershipId ? 'background:#f0fdf4; border-color:#9ae6b4;' : 'background:#fff5f5; border-color:#feb2b2;'">
+                                        <span style="font-size:12px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                            <template x-if="editingBooking.membershipId && membershipById(editingBooking.membershipId)">
+                                                <span>
+                                                    🎫 <b x-text="membershipById(editingBooking.membershipId).name + ' ' + membershipById(editingBooking.membershipId).surname"></b>
+                                                    <span style="color:#666;" x-text="'— ' + membershipById(editingBooking.membershipId).email"></span>
+                                                    <span x-show="!membershipById(editingBooking.membershipId).confirmed" style="margin-left:4px; padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold;">IN ATTESA</span>
+                                                </span>
+                                            </template>
+                                            <span x-show="!editingBooking.membershipId" style="color:#a33;">&#9888; Nessuna tessera associata</span>
+                                        </span>
+                                        <button type="button" @click="open = !open" x-text="open ? 'chiudi' : (editingBooking.membershipId ? 'cambia' : 'associa')"
+                                            style="font-size:10px; border:1px solid #000; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;"></button>
+                                        <button type="button" x-show="editingBooking.membershipId" @click="editingBooking.membershipId = null"
+                                            style="font-size:10px; border:1px solid #ccc; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;">✕</button>
+                                    </div>
+                                    <div x-show="open" style="margin-top:4px;">
+                                        <input type="text" x-model="q" placeholder="Cerca tesserato per nome, cognome o email..."
+                                            style="width:100%; padding:5px 7px; font-size:11px; margin-top:0;">
+                                        <div style="max-height:150px; overflow-y:auto; border:1px solid #ccc; margin-top:3px;">
+                                            <template x-for="m in memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase()))" :key="m.id">
+                                                <div @click="editingBooking.membershipId = m.id; open = false"
+                                                    :style="editingBooking.membershipId == m.id ? 'background:#eee;' : ''"
+                                                    style="padding:4px 7px; font-size:11px; cursor:pointer; display:flex; justify-content:space-between; gap:6px;">
+                                                    <span x-text="m.name + ' ' + m.surname + ' — ' + m.email"></span>
+                                                    <span x-show="!m.confirmed" style="padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold; flex-shrink:0;">IN ATTESA</span>
+                                                </div>
+                                            </template>
+                                            <div x-show="memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase())).length === 0"
+                                                style="padding:8px; color:#999; text-align:center; font-size:11px;">Nessun tesserato trovato</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <template x-for="(cb, idx) in editingBooking._compBookings" :key="cb.id">
+                            <template x-for="(cb, idx) in editingBooking._compBookings" :key="cb.id ?? ('new-' + idx)">
                                 <div class="sub-box" style="margin-top:8px;">
-                                    <label style="font-weight:bold; font-size:11px;">
-                                        TESSERA ASSOCIAZIONE — <span x-text="cb.guestName"></span>
-                                        <span x-show="!cb.membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
-                                    </label>
-                                    <select
-                                        @change="editingBooking._compBookings[idx].membershipId = $event.target.value ? parseInt($event.target.value) : null"
-                                        style="margin-top:5px;">
-                                        <option value="" :selected="!editingBooking._compBookings[idx].membershipId">Nessuno</option>
-                                        <template x-for="m in memberships" :key="m.id">
-                                            <option :value="m.id" :selected="editingBooking._compBookings[idx].membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
-                                        </template>
-                                    </select>
+                                    <div style="display:flex; gap:6px; align-items:center;">
+                                        <input type="text" x-model="editingBooking._compBookings[idx].guestName"
+                                            :placeholder="'Persona ' + (idx + 2)"
+                                            style="flex:1; margin-top:0; font-size:13px; padding:6px 8px;">
+                                        <button type="button"
+                                            @click="if (cb.id) editingBooking._deletedCompBookingIds.push(cb.id); editingBooking._compBookings.splice(idx, 1)"
+                                            style="border:1px solid #ccc; background:none; padding:4px 8px; cursor:pointer; flex-shrink:0;">✕</button>
+                                    </div>
+                                    <label style="font-size:10px; color:#666; margin-top:6px; display:block;">TESSERA ASSOCIAZIONE</label>
+                                    <div x-data="{ q: '', open: !editingBooking._compBookings[idx].membershipId }" style="margin-top:4px;">
+                                        <div style="display:flex; align-items:center; gap:6px; border:1px solid #ccc; padding:6px 8px;"
+                                            :style="editingBooking._compBookings[idx].membershipId ? 'background:#f0fdf4; border-color:#9ae6b4;' : 'background:#fff5f5; border-color:#feb2b2;'">
+                                            <span style="font-size:12px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                                <template x-if="editingBooking._compBookings[idx].membershipId && membershipById(editingBooking._compBookings[idx].membershipId)">
+                                                    <span>
+                                                        🎫 <b x-text="membershipById(editingBooking._compBookings[idx].membershipId).name + ' ' + membershipById(editingBooking._compBookings[idx].membershipId).surname"></b>
+                                                        <span style="color:#666;" x-text="'— ' + membershipById(editingBooking._compBookings[idx].membershipId).email"></span>
+                                                        <span x-show="!membershipById(editingBooking._compBookings[idx].membershipId).confirmed" style="margin-left:4px; padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold;">IN ATTESA</span>
+                                                    </span>
+                                                </template>
+                                                <span x-show="!editingBooking._compBookings[idx].membershipId" style="color:#a33;">&#9888; Nessuna tessera associata</span>
+                                            </span>
+                                            <button type="button" @click="open = !open" x-text="open ? 'chiudi' : (editingBooking._compBookings[idx].membershipId ? 'cambia' : 'associa')"
+                                                style="font-size:10px; border:1px solid #000; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;"></button>
+                                            <button type="button" x-show="editingBooking._compBookings[idx].membershipId" @click="editingBooking._compBookings[idx].membershipId = null"
+                                                style="font-size:10px; border:1px solid #ccc; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;">✕</button>
+                                        </div>
+                                        <div x-show="open" style="margin-top:4px;">
+                                            <input type="text" x-model="q" placeholder="Cerca tesserato per nome, cognome o email..."
+                                                style="width:100%; padding:5px 7px; font-size:11px; margin-top:0;">
+                                            <div style="max-height:150px; overflow-y:auto; border:1px solid #ccc; margin-top:3px;">
+                                                <template x-for="m in memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase()))" :key="m.id">
+                                                    <div @click="editingBooking._compBookings[idx].membershipId = m.id; open = false"
+                                                        :style="editingBooking._compBookings[idx].membershipId == m.id ? 'background:#eee;' : ''"
+                                                        style="padding:4px 7px; font-size:11px; cursor:pointer; display:flex; justify-content:space-between; gap:6px;">
+                                                        <span x-text="m.name + ' ' + m.surname + ' — ' + m.email"></span>
+                                                        <span x-show="!m.confirmed" style="padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold; flex-shrink:0;">IN ATTESA</span>
+                                                    </div>
+                                                </template>
+                                                <div x-show="memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase())).length === 0"
+                                                    style="padding:8px; color:#999; text-align:center; font-size:11px;">Nessun tesserato trovato</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
+                            <button type="button"
+                                @click="editingBooking._compBookings.push({ id: null, guestId: null, guestName: '', membershipId: null })"
+                                style="margin-top:8px; font-size:11px; border:1px solid #000; background:none; padding:4px 10px; cursor:pointer; width:100%;">+ persona</button>
                         </div>
                     </template>
 
                     <!-- Stanza condivisa o ospite singolo: socio + gruppo libero -->
-                    <template x-if="!editingBooking._compBookings?.length">
+                    <template x-if="!editingBooking._hasCompBookingsMode">
                         <div>
                             <div class="sub-box" style="margin-top:10px;">
                                 <label style="font-weight:bold; font-size:11px;">SOCIO TESSERATO</label>
-                                <select @change="editingBooking.membershipId = $event.target.value ? parseInt($event.target.value) : null" style="margin-top:5px;">
-                                    <option value="" :selected="!editingBooking.membershipId">Nessuno</option>
-                                    <template x-for="m in memberships" :key="m.id">
-                                        <option :value="m.id" :selected="editingBooking.membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
-                                    </template>
-                                </select>
+                                <div x-data="{ q: '', open: !editingBooking.membershipId }" style="margin-top:4px;">
+                                    <div style="display:flex; align-items:center; gap:6px; border:1px solid #ccc; padding:6px 8px;"
+                                        :style="editingBooking.membershipId ? 'background:#f0fdf4; border-color:#9ae6b4;' : 'background:#fafafa;'">
+                                        <span style="font-size:12px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                            <template x-if="editingBooking.membershipId && membershipById(editingBooking.membershipId)">
+                                                <span>
+                                                    🎫 <b x-text="membershipById(editingBooking.membershipId).name + ' ' + membershipById(editingBooking.membershipId).surname"></b>
+                                                    <span style="color:#666;" x-text="'— ' + membershipById(editingBooking.membershipId).email"></span>
+                                                    <span x-show="!membershipById(editingBooking.membershipId).confirmed" style="margin-left:4px; padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold;">IN ATTESA</span>
+                                                </span>
+                                            </template>
+                                            <span x-show="!editingBooking.membershipId" style="color:#999;">Nessuna tessera associata</span>
+                                        </span>
+                                        <button type="button" @click="open = !open" x-text="open ? 'chiudi' : (editingBooking.membershipId ? 'cambia' : 'associa')"
+                                            style="font-size:10px; border:1px solid #000; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;"></button>
+                                        <button type="button" x-show="editingBooking.membershipId" @click="editingBooking.membershipId = null"
+                                            style="font-size:10px; border:1px solid #ccc; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;">✕</button>
+                                    </div>
+                                    <div x-show="open" style="margin-top:4px;">
+                                        <input type="text" x-model="q" placeholder="Cerca tesserato per nome, cognome o email..."
+                                            style="width:100%; padding:5px 7px; font-size:11px; margin-top:0;">
+                                        <div style="max-height:150px; overflow-y:auto; border:1px solid #ccc; margin-top:3px;">
+                                            <template x-for="m in memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase()))" :key="m.id">
+                                                <div @click="editingBooking.membershipId = m.id; open = false"
+                                                    :style="editingBooking.membershipId == m.id ? 'background:#eee;' : ''"
+                                                    style="padding:4px 7px; font-size:11px; cursor:pointer; display:flex; justify-content:space-between; gap:6px;">
+                                                    <span x-text="m.name + ' ' + m.surname + ' — ' + m.email"></span>
+                                                    <span x-show="!m.confirmed" style="padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold; flex-shrink:0;">IN ATTESA</span>
+                                                </div>
+                                            </template>
+                                            <div x-show="memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase())).length === 0"
+                                                style="padding:8px; color:#999; text-align:center; font-size:11px;">Nessun tesserato trovato</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="sub-box" style="margin-top:10px;">
                                 <label style="font-weight:bold; font-size:11px;">GRUPPO (persone che vengono insieme)</label>
@@ -3589,18 +3687,42 @@
                                             <button type="button" @click="editingBooking.companions.splice(idx, 1); recomputeInvoice()"
                                                 style="border:1px solid #ccc; background:none; padding:4px 8px; cursor:pointer; flex-shrink:0;">✕</button>
                                         </div>
-                                        <label style="font-size:10px; color:#666; margin-top:6px; display:block;">
-                                            TESSERA ASSOCIAZIONE
-                                            <span x-show="!editingBooking.companions[idx].membershipId" title="Tessera mancante" style="color:red; margin-left:4px;">&#9888;</span>
-                                        </label>
-                                        <select
-                                            @change="editingBooking.companions[idx].membershipId = $event.target.value ? parseInt($event.target.value) : null"
-                                            style="margin-top:4px;">
-                                            <option value="" :selected="!editingBooking.companions[idx].membershipId">Nessuno</option>
-                                            <template x-for="m in memberships" :key="m.id">
-                                                <option :value="m.id" :selected="editingBooking.companions[idx].membershipId == m.id" x-text="m.name + ' ' + m.surname + ' — ' + m.email"></option>
-                                            </template>
-                                        </select>
+                                        <label style="font-size:10px; color:#666; margin-top:6px; display:block;">TESSERA ASSOCIAZIONE</label>
+                                        <div x-data="{ q: '', open: !editingBooking.companions[idx].membershipId }" style="margin-top:4px;">
+                                            <div style="display:flex; align-items:center; gap:6px; border:1px solid #ccc; padding:6px 8px;"
+                                                :style="editingBooking.companions[idx].membershipId ? 'background:#f0fdf4; border-color:#9ae6b4;' : 'background:#fff5f5; border-color:#feb2b2;'">
+                                                <span style="font-size:12px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                                    <template x-if="editingBooking.companions[idx].membershipId && membershipById(editingBooking.companions[idx].membershipId)">
+                                                        <span>
+                                                            🎫 <b x-text="membershipById(editingBooking.companions[idx].membershipId).name + ' ' + membershipById(editingBooking.companions[idx].membershipId).surname"></b>
+                                                            <span style="color:#666;" x-text="'— ' + membershipById(editingBooking.companions[idx].membershipId).email"></span>
+                                                            <span x-show="!membershipById(editingBooking.companions[idx].membershipId).confirmed" style="margin-left:4px; padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold;">IN ATTESA</span>
+                                                        </span>
+                                                    </template>
+                                                    <span x-show="!editingBooking.companions[idx].membershipId" style="color:#a33;">&#9888; Nessuna tessera associata</span>
+                                                </span>
+                                                <button type="button" @click="open = !open" x-text="open ? 'chiudi' : (editingBooking.companions[idx].membershipId ? 'cambia' : 'associa')"
+                                                    style="font-size:10px; border:1px solid #000; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;"></button>
+                                                <button type="button" x-show="editingBooking.companions[idx].membershipId" @click="editingBooking.companions[idx].membershipId = null"
+                                                    style="font-size:10px; border:1px solid #ccc; background:none; padding:3px 7px; cursor:pointer; flex-shrink:0;">✕</button>
+                                            </div>
+                                            <div x-show="open" style="margin-top:4px;">
+                                                <input type="text" x-model="q" placeholder="Cerca tesserato per nome, cognome o email..."
+                                                    style="width:100%; padding:5px 7px; font-size:11px; margin-top:0;">
+                                                <div style="max-height:150px; overflow-y:auto; border:1px solid #ccc; margin-top:3px;">
+                                                    <template x-for="m in memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase()))" :key="m.id">
+                                                        <div @click="editingBooking.companions[idx].membershipId = m.id; open = false"
+                                                            :style="editingBooking.companions[idx].membershipId == m.id ? 'background:#eee;' : ''"
+                                                            style="padding:4px 7px; font-size:11px; cursor:pointer; display:flex; justify-content:space-between; gap:6px;">
+                                                            <span x-text="m.name + ' ' + m.surname + ' — ' + m.email"></span>
+                                                            <span x-show="!m.confirmed" style="padding:0 4px; background:#fff7ed; color:#c2410c; border:1px solid #fb923c; border-radius:3px; font-size:9px; font-weight:bold; flex-shrink:0;">IN ATTESA</span>
+                                                        </div>
+                                                    </template>
+                                                    <div x-show="memberships.filter(m => q === '' || (m.name + ' ' + m.surname + ' ' + m.email).toLowerCase().includes(q.toLowerCase())).length === 0"
+                                                        style="padding:8px; color:#999; text-align:center; font-size:11px;">Nessun tesserato trovato</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </template>
                                 <template x-if="roomIsDouble(editingBooking.room) && editingBooking.companions.length >= 1">
@@ -3651,6 +3773,20 @@
                         </div>
                         <div style="font-size:11px; color:#666; margin-top:8px;"
                             x-text="'Totale: €' + ((editingBooking.rideToPersons.length + editingBooking.rideFromPersons.length) * 2)"></div>
+                        <template x-if="(editingBooking.rideToPersons.length + editingBooking.rideFromPersons.length) > 0">
+                            <div style="margin-top:8px;">
+                                <label style="font-size:11px; color:#666;">Credito a (chi ha guidato/pagato la benzina)</label>
+                                <select :value="editingBooking.rideDriver || ''" @change="editingBooking.rideDriver = $event.target.value || null">
+                                    <option value="">Nessuno</option>
+                                    <template x-for="h in habitanti" :key="h">
+                                        <option :value="h" x-text="h.charAt(0).toUpperCase() + h.slice(1)"></option>
+                                    </template>
+                                </select>
+                                <div x-show="editingBooking.rideDriver" style="font-size:10px; color:#666; margin-top:3px;">
+                                    Al checkout verrà registrata un'uscita in Flow Cassa a credito di <span x-text="editingBooking.rideDriver" style="font-weight:bold;"></span>.
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
                     <template x-if="editingBooking._invoice">
@@ -3676,6 +3812,41 @@
                                         :value="editingBooking._invoice.foodAmount"
                                         @input="editingBooking._invoice.foodAmount = parseFloat($event.target.value) || 0">
                                 </div>
+                            </div>
+
+                            <div x-show="!editingBooking._invoice.manualRequired" style="margin-top:12px; border-top:1px solid #eee; padding-top:8px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <label style="font-weight:bold; font-size:11px;">SUDDIVISIONE PER PERSONA</label>
+                                    <button type="button" @click="recomputeInvoiceShares()"
+                                        style="font-size:10px; border:1px solid #ccc; background:none; padding:2px 6px; cursor:pointer;">Dividi equamente</button>
+                                </div>
+                                <template x-for="s in (editingBooking._invoice.shares || [])" :key="s.name">
+                                    <div style="display:flex; gap:6px; align-items:center; margin-top:6px;">
+                                        <span style="flex:1; font-size:11px;" x-text="s.name"></span>
+                                        <div style="display:flex; align-items:center; gap:3px;">
+                                            <span style="font-size:12px; color:#666;">€</span>
+                                            <input type="number" min="0" step="0.01" style="width:70px;"
+                                                :value="s.amount" @input="s.amount = parseFloat($event.target.value) || 0">
+                                        </div>
+                                        <label style="display:flex; align-items:center; gap:3px; font-size:10px; white-space:nowrap; cursor:pointer;">
+                                            <input type="checkbox" :checked="s.isPaid" style="width:auto; margin:0;"
+                                                @change="toggleShareCorePaid(s.name)">
+                                            pagato
+                                        </label>
+                                        <select x-show="s.isPaid" :value="s.paymentMethod || ''"
+                                            @change="s.paymentMethod = $event.target.value || null"
+                                            style="width:70px; font-size:10px; padding:2px;">
+                                            <option value="">metodo</option>
+                                            <option value="cash">Cash</option>
+                                            <option value="iban">Iban</option>
+                                            <option value="card">Card</option>
+                                            <option value="paypal">Paypal</option>
+                                        </select>
+                                    </div>
+                                </template>
+                                <div style="font-size:10px; margin-top:6px;"
+                                    :style="Math.abs(invoiceSharesSum() - (editingBooking._invoice.totalAmount || 0)) > 0.01 ? 'color:#a33;' : 'color:#666;'"
+                                    x-text="'Somma quote: €' + invoiceSharesSum().toFixed(2) + ' / €' + (editingBooking._invoice.totalAmount || 0).toFixed(2)"></div>
                             </div>
                         </div>
                     </template>
@@ -4182,20 +4353,52 @@
                             </template>
                         </div>
 
-                        <label style="margin-top:15px;">Metodo di pagamento</label>
-                        <div style="display:flex; gap:5px; margin-top:5px;">
-                            <button @click="checkoutModal.paymentMethod = 'iban'"
-                                :style="checkoutModal.paymentMethod === 'iban' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">IBAN</button>
-                            <button @click="checkoutModal.paymentMethod = 'card'"
-                                :style="checkoutModal.paymentMethod === 'card' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">CARD</button>
-                            <button @click="checkoutModal.paymentMethod = 'paypal'"
-                                :style="checkoutModal.paymentMethod === 'paypal' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">PAYPAL</button>
-                            <button @click="checkoutModal.paymentMethod = 'cash'"
-                                :style="checkoutModal.paymentMethod === 'cash' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">CASH</button>
-                        </div>
+                        <template x-if="checkoutModal.shares?.length > 0">
+                            <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
+                                <label>Quote per persona</label>
+                                <template x-for="s in checkoutModal.shares" :key="s.name">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-top:6px;">
+                                        <span x-text="s.name"></span>
+                                        <span>
+                                            <b x-text="'€' + (parseFloat(s.amount) || 0).toFixed(2)"></b>
+                                            <span :style="s.isPaid ? 'color:green; margin-left:6px;' : 'color:#a33; margin-left:6px;'"
+                                                x-text="s.isPaid ? ('pagato (' + (s.paymentMethod || '') + ')') : 'non pagato'"></span>
+                                        </span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
 
-                        <button class="btn-blk" style="margin-top:15px;" @click="confirmCheckout()">CONFERMA
-                            PAGAMENTO</button>
+                        <template x-if="checkoutModal.allSharesPaid">
+                            <div style="margin-top:15px; font-size:12px; color:green;">
+                                Tutte le quote sono state pagate individualmente: il checkout registrerà in Flow Cassa un pagamento separato per ciascun ospite, con il relativo metodo.
+                            </div>
+                        </template>
+
+                        <template x-if="checkoutModal.shares?.length > 0 && !checkoutModal.allSharesPaid">
+                            <div style="margin-top:15px; font-size:12px; color:#a33;">
+                                Non tutti gli ospiti hanno ancora pagato la propria quota. Puoi comunque forzare il checkout manualmente con un unico metodo di pagamento.
+                            </div>
+                        </template>
+
+                        <template x-if="!checkoutModal.allSharesPaid">
+                            <div>
+                                <label style="margin-top:15px;">Metodo di pagamento</label>
+                                <div style="display:flex; gap:5px; margin-top:5px;">
+                                    <button @click="checkoutModal.paymentMethod = 'iban'"
+                                        :style="checkoutModal.paymentMethod === 'iban' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">IBAN</button>
+                                    <button @click="checkoutModal.paymentMethod = 'card'"
+                                        :style="checkoutModal.paymentMethod === 'card' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">CARD</button>
+                                    <button @click="checkoutModal.paymentMethod = 'paypal'"
+                                        :style="checkoutModal.paymentMethod === 'paypal' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">PAYPAL</button>
+                                    <button @click="checkoutModal.paymentMethod = 'cash'"
+                                        :style="checkoutModal.paymentMethod === 'cash' ? 'background:#000; color:#fff; padding:6px 12px; border:1px solid #000;' : 'padding:6px 12px; border:1px solid #000;'">CASH</button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <button class="btn-blk" style="margin-top:15px;" @click="confirmCheckout()"
+                            x-text="checkoutModal.allSharesPaid ? 'CONFERMA CHECKOUT' : 'CONFERMA PAGAMENTO'"></button>
                         <button @click="checkoutModal = null"
                             style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                     </div>
