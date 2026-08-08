@@ -778,6 +778,9 @@
                     <button x-show="visibleTabs.includes('cospend')" :class="view === 'cospend' && 'active'"
                         @click="setView('cospend')">Cospend</button>
                     <span x-show="visibleTabs.includes('cospend')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('turni')" :class="view === 'turni' && 'active'"
+                        @click="setView('turni')">Turni</button>
+                    <span x-show="visibleTabs.includes('turni')" style="color:#ccc; pointer-events:none;">|</span>
                     <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'"
                         @click="setView('users')">Gestione CDM</button>
                     <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'"
@@ -836,6 +839,9 @@
                 </template>
                 <template x-if="visibleTabs.includes('cospend')">
                     <button :class="view==='cospend'&&'active'" @click="setView('cospend'); mobileNavOpen=false">Cospend</button>
+                </template>
+                <template x-if="visibleTabs.includes('turni')">
+                    <button :class="view==='turni'&&'active'" @click="setView('turni'); mobileNavOpen=false">Turni</button>
                 </template>
                 <template x-if="visibleTabs.includes('users')">
                     <button :class="view==='users'&&'active'" @click="setView('users'); mobileNavOpen=false">Gestione CDM</button>
@@ -3007,6 +3013,150 @@
                     </div>
                 </div>
 
+                <!-- TURNI -->
+                <div x-show="view === 'turni'">
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                            <h3 style="margin:0">Habitanti</h3>
+                            <button x-show="canWriteTab('turni')" @click="openCreateResident()" class="create">+ NUOVO HABITANTE</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Attivo</th>
+                                    <th>Assenze</th>
+                                    <th x-show="canWriteTab('turni')"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="r in turniResidents" :key="r.id">
+                                    <tr>
+                                        <td x-text="r.name"></td>
+                                        <td x-text="r.active ? 'Si' : 'No'"></td>
+                                        <td>
+                                            <template x-for="a in r.absences" :key="a.id">
+                                                <div style="font-size:12px; display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+                                                    <span x-text="formatDate(a.fromDate) + ' - ' + formatDate(a.toDate)"></span>
+                                                    <button x-show="canWriteTab('turni')" @click="deleteResidentAbsence(a.id)"
+                                                        class="btn-del" style="padding:0 6px; font-size:10px;">X</button>
+                                                </div>
+                                            </template>
+                                            <button x-show="canWriteTab('turni')" @click="openAddAbsence(r)"
+                                                style="font-size:11px; border:none; background:none; text-decoration:underline; cursor:pointer; padding:0;">+
+                                                assenza</button>
+                                        </td>
+                                        <td x-show="canWriteTab('turni')">
+                                            <button @click="openEditResident(r)">MODIFICA</button>
+                                            <button @click="deleteResident(r)" class="btn-del">X</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr x-show="!turniResidents.length">
+                                    <td colspan="4" style="color:#999;">Nessun habitante registrato</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card" style="margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <button @click="turniPrevWeek()" style="padding:4px 10px;">‹</button>
+                                <h3 style="margin:0" x-text="turniWeekLabel"></h3>
+                                <button @click="turniNextWeek()" style="padding:4px 10px;">›</button>
+                                <input type="date" @change="turniJumpToWeek($event.target.value)"
+                                    style="font-size:12px;" title="Vai a settimana">
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button x-show="turniHasPlan" @click="openTurniPrintPage()">APRI PAGINA STAMPABILE</button>
+                                <button x-show="canWriteTab('turni')" @click="generateTurniPlan()" class="create"
+                                    x-text="turniHasPlan ? 'RIGENERA SETTIMANA' : 'GENERA SETTIMANA'"></button>
+                            </div>
+                        </div>
+
+                        <div x-show="turniLoading" style="color:#999;">Caricamento...</div>
+
+                        <template x-if="!turniLoading && turniPlan?.loadSummary?.length">
+                            <div style="overflow-x:auto; margin-bottom:20px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Persona</th>
+                                            <th>Presenza settimana</th>
+                                            <th>Turni questa settimana</th>
+                                            <th>Turni totali (storico)</th>
+                                            <th>Rapporto carico/peso</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="s in turniPlan.loadSummary" :key="s.type + s.id">
+                                            <tr>
+                                                <td x-text="s.name"></td>
+                                                <td>
+                                                    <span x-text="s.presencePct + '%'"></span>
+                                                    <span style="color:#999; font-size:11px;"
+                                                        x-text="'(' + s.eligibleDaysThisWeek + '/7 gg)'"></span>
+                                                </td>
+                                                <td x-text="s.shiftsThisWeek"></td>
+                                                <td x-text="s.shiftsTotal"></td>
+                                                <td x-text="s.ratio ?? '-'"
+                                                    title="Piu' basso = piu' 'in credito', verra' chiamato prima"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
+                        <template x-if="!turniLoading && turniPlan && !turniHasPlan">
+                            <div style="color:#999; padding:10px 0;">Nessun turno generato per questa settimana.</div>
+                        </template>
+
+                        <template x-if="!turniLoading && turniPlan && turniHasPlan">
+                            <div style="overflow-x:auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Giorno</th>
+                                            <th>Presenti</th>
+                                            <th>Pranzo · Cucina</th>
+                                            <th>Pranzo · Piatti/Tavola</th>
+                                            <th>Pranzo · Pulizia</th>
+                                            <th>Cena · Cucina</th>
+                                            <th>Cena · Piatti/Tavola</th>
+                                            <th>Cena · Pulizia</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="day in turniPlan.days" :key="day.date">
+                                            <tr>
+                                                <td x-text="formatTurniDay(day.date)" style="text-transform:capitalize;"></td>
+                                                <td x-text="day.headcount"></td>
+                                                <template x-for="meal in ['pranzo','cena']" :key="meal">
+                                                    <template x-for="role in ['cucina','piatti','pulizia']" :key="meal+role">
+                                                        <td>
+                                                            <template x-for="p in day.meals[meal][role]" :key="p.assignmentId">
+                                                                <div style="display:flex; align-items:center; gap:4px; font-size:13px; white-space:nowrap;">
+                                                                    <span x-text="p.name"></span>
+                                                                    <button x-show="canWriteTab('turni')"
+                                                                        @click="openSwapAssignment(day, meal, role, p)"
+                                                                        style="font-size:10px; padding:0 4px; border:none; background:none; cursor:pointer;">✎</button>
+                                                                </div>
+                                                            </template>
+                                                            <span x-show="!day.meals[meal][role].length" style="color:#ccc;">-</span>
+                                                        </td>
+                                                    </template>
+                                                </template>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
                 <!-- ACTIVITY -->
                 <div x-show="view === 'activity'">
                     <div class="card">
@@ -3877,7 +4027,7 @@
                             <label>Tab consentite</label>
                             <div style="margin-top:5px;">
                                 <template
-                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend']"
+                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni']"
                                     :key="tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
@@ -3893,7 +4043,7 @@
                             <label>Permessi Scrittura</label>
                             <div style="margin-top:5px;">
                                 <template
-                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend']"
+                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni']"
                                     :key="'write-' + tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
@@ -4274,6 +4424,63 @@
                     <button class="btn-blk" @click="saveHabitante()">SALVA</button>
                     <button @click="editingHabitante = null"
                         style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
+
+            <!-- SIDEBAR: Edit Resident (Habitante turni) -->
+            <template x-if="editingResident">
+                <div class="sidebar">
+                    <h3 x-text="editingResident.id ? 'Modifica Habitante' : 'Nuovo Habitante'"></h3>
+                    <label>Nome</label>
+                    <input type="text" x-model="editingResident.name" @keyup.enter="saveResident()">
+                    <label style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" x-model="editingResident.active" style="width:auto"> Attivo
+                    </label>
+                    <label style="margin-top:10px;">Note</label>
+                    <textarea x-model="editingResident.notes" rows="2"></textarea>
+                    <button class="btn-blk" @click="saveResident()">SALVA</button>
+                    <button @click="editingResident = null"
+                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
+                </div>
+            </template>
+
+            <!-- MODAL: Add Absence -->
+            <template x-if="addingAbsenceFor">
+                <div class="modal-overlay" @click.self="addingAbsenceFor = null">
+                    <div class="modal-box" style="text-align:left; min-width:320px;">
+                        <h3 style="margin:0 0 15px;">Nuova assenza</h3>
+                        <label>Dal</label>
+                        <input type="date" x-model="addingAbsenceFor.fromDate">
+                        <label style="margin-top:10px; display:block;">Al</label>
+                        <input type="date" x-model="addingAbsenceFor.toDate">
+                        <label style="margin-top:10px; display:block;">Motivo (opzionale)</label>
+                        <input type="text" x-model="addingAbsenceFor.reason">
+                        <div style="display:flex; gap:10px; margin-top:20px;">
+                            <button @click="addingAbsenceFor = null" style="flex:1;">ANNULLA</button>
+                            <button class="btn-blk" @click="saveAbsence()" style="flex:1;">SALVA</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- MODAL: Swap turno -->
+            <template x-if="turniSwapModal">
+                <div class="modal-overlay" @click.self="turniSwapModal = null">
+                    <div class="modal-box" style="text-align:left; min-width:320px;">
+                        <h3 style="margin:0 0 5px;">Cambia turno</h3>
+                        <p style="font-size:12px; color:#666; margin:0 0 15px; text-transform:capitalize;"
+                            x-text="formatTurniDay(turniSwapModal.day.date) + ' — ' + turniSwapModal.meal + ' — ' + turniSwapModal.role"></p>
+                        <select x-model="turniSwapModal.choice" style="width:100%;">
+                            <template x-for="p in turniSwapModal.day.roster" :key="p.type + p.id">
+                                <option :value="p.type + ':' + p.id"
+                                    x-text="p.name + (p.eligible ? '' : ' (non eleggibile — arrivo/partenza)')"></option>
+                            </template>
+                        </select>
+                        <div style="display:flex; gap:10px; margin-top:20px;">
+                            <button @click="turniSwapModal = null" style="flex:1;">ANNULLA</button>
+                            <button class="btn-blk" @click="saveSwapAssignment()" style="flex:1;">SALVA</button>
+                        </div>
+                    </div>
                 </div>
             </template>
 

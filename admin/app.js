@@ -143,6 +143,15 @@ document.addEventListener('alpine:init', () => {
         showHabitantiManager: false,
         editingHabitante: null,
 
+        // Turni (habitanti + piano turni cucina/pulizia) state
+        turniResidents: [],
+        turniWeekStart: null,
+        turniPlan: null,
+        turniLoading: false,
+        editingResident: null,
+        addingAbsenceFor: null,
+        turniSwapModal: null,
+
         canWriteTab(tab) {
             if (!this.currentUser) return false;
             if (this.currentUser.role === 'admin') return true;
@@ -158,7 +167,7 @@ document.addEventListener('alpine:init', () => {
 
         get visibleTabs() {
             if (!this.currentUser) return [];
-            const allTabs = ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend'];
+            const allTabs = ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni'];
             if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram', 'activity'];
             if (this.currentUser.role === 'reader') return allTabs;
             // reader_limited
@@ -413,6 +422,7 @@ document.addEventListener('alpine:init', () => {
                 if (this.view === 'activity') { await this.fetchUsers(); await this.fetchActivity(); return; }
                 if (this.view === 'calendar') { this.$nextTick(() => this.initCalendar()); return; }
                 if (this.view === 'cospend') { await this.fetchCospendData(); return; }
+                if (this.view === 'turni') { await this.fetchTurniData(); return; }
                 if (this.view === 'finance') {
                     await this.fetchFinanceData();
                     await this.loadFlowCassaCategories();
@@ -1139,6 +1149,203 @@ document.addEventListener('alpine:init', () => {
         deleteHabitante(name) {
             this.habitanti = this.habitanti.filter(h => h !== name);
             this.saveHabitantiToStorage();
+        },
+
+        // --- TURNI ---
+
+        // Sempre calcoli in data locale: mai un round-trip su toISOString() (UTC),
+        // altrimenti in fusi orari UTC+ la data puo' slittare di un giorno.
+        localDateStr(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        },
+
+        mondayOf(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            const day = d.getDay(); // 0=Sun..6=Sat
+            const diff = day === 0 ? -6 : 1 - day;
+            d.setDate(d.getDate() + diff);
+            return this.localDateStr(d);
+        },
+
+        addWeeks(dateStr, n) {
+            const d = new Date(dateStr + 'T00:00:00');
+            d.setDate(d.getDate() + n * 7);
+            return this.localDateStr(d);
+        },
+
+        get turniWeekLabel() {
+            if (!this.turniWeekStart) return '';
+            const start = new Date(this.turniWeekStart + 'T00:00:00');
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            const fmt = (d) => d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+            return `${fmt(start)} - ${fmt(end)} ${end.getFullYear()}`;
+        },
+
+        get turniHasPlan() {
+            return !!this.turniPlan?.days?.some(d => Object.values(d.meals).some(m => Object.values(m).some(r => r.length)));
+        },
+
+        formatTurniDay(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: '2-digit' });
+        },
+
+        async fetchTurniData() {
+            if (!this.turniWeekStart) {
+                this.turniWeekStart = this.mondayOf(this.localDateStr(new Date()));
+            }
+            await this.loadTurniResidents();
+            await this.loadTurniPlan();
+        },
+
+        async turniJumpToWeek(dateStr) {
+            if (!dateStr) return;
+            this.turniWeekStart = this.mondayOf(dateStr);
+            await this.loadTurniPlan();
+        },
+
+        openTurniPrintPage() {
+            window.open(`${this.BASE_URL}/turni-print?weekStart=${this.turniWeekStart}`, '_blank');
+        },
+
+        async loadTurniResidents() {
+            try {
+                const res = await fetch(`${this.BASE_URL}/residents/`, { headers: { 'Authorization': `Bearer ${this.token}` } });
+                if (res.status === 401) return this.logout();
+                this.turniResidents = await res.json();
+            } catch (e) { alert(e.message); }
+        },
+
+        async loadTurniPlan() {
+            this.turniLoading = true;
+            try {
+                const res = await fetch(`${this.BASE_URL}/turni/plan?weekStart=${this.turniWeekStart}`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.status === 401) return this.logout();
+                this.turniPlan = await res.json();
+            } catch (e) { alert(e.message); }
+            this.turniLoading = false;
+        },
+
+        async turniPrevWeek() {
+            this.turniWeekStart = this.addWeeks(this.turniWeekStart, -1);
+            await this.loadTurniPlan();
+        },
+
+        async turniNextWeek() {
+            this.turniWeekStart = this.addWeeks(this.turniWeekStart, 1);
+            await this.loadTurniPlan();
+        },
+
+        async generateTurniPlan() {
+            const msg = this.turniHasPlan
+                ? 'Rigenerare i turni di questa settimana? Le assegnazioni attuali (incluse le modifiche manuali) verranno sovrascritte.'
+                : 'Generare i turni per questa settimana?';
+            if (!(await this.showConfirm(msg))) return;
+            this.turniLoading = true;
+            try {
+                const res = await fetch(`${this.BASE_URL}/turni/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ weekStart: this.turniWeekStart })
+                });
+                if (res.status === 401) return this.logout();
+                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Errore generazione turni'); }
+                this.turniPlan = await res.json();
+            } catch (e) { alert(e.message); }
+            this.turniLoading = false;
+        },
+
+        openSwapAssignment(day, meal, role, current) {
+            this.turniSwapModal = {
+                day, meal, role,
+                assignmentId: current.assignmentId,
+                choice: `${current.type}:${current.id}`
+            };
+        },
+
+        async saveSwapAssignment() {
+            const [personType, personIdStr] = this.turniSwapModal.choice.split(':');
+            const personId = parseInt(personIdStr, 10);
+            const person = this.turniSwapModal.day.roster.find(p => p.type === personType && p.id === personId);
+            try {
+                const res = await fetch(`${this.BASE_URL}/turni/assignment/${this.turniSwapModal.assignmentId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ personType, personId, personName: person?.name || '' })
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Errore salvataggio turno'); }
+                this.turniSwapModal = null;
+                await this.loadTurniPlan();
+            } catch (e) { alert(e.message); }
+        },
+
+        openCreateResident() {
+            this.editingResident = { id: null, name: '', active: true, notes: '' };
+        },
+
+        openEditResident(r) {
+            this.editingResident = { id: r.id, name: r.name, active: r.active, notes: r.notes || '' };
+        },
+
+        async saveResident() {
+            const { id, name, active, notes } = this.editingResident;
+            if (!name.trim()) return;
+            try {
+                const res = await fetch(id ? `${this.BASE_URL}/residents/${id}` : `${this.BASE_URL}/residents/`, {
+                    method: id ? 'PATCH' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ name: name.trim(), active, notes })
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Errore salvataggio habitante'); }
+                this.editingResident = null;
+                await this.loadTurniResidents();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteResident(r) {
+            if (!(await this.showConfirm(`Eliminare l'habitante "${r.name}"?`))) return;
+            try {
+                await fetch(`${this.BASE_URL}/residents/${r.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                await this.loadTurniResidents();
+            } catch (e) { alert(e.message); }
+        },
+
+        openAddAbsence(resident) {
+            this.addingAbsenceFor = { residentId: resident.id, fromDate: '', toDate: '', reason: '' };
+        },
+
+        async saveAbsence() {
+            const { residentId, fromDate, toDate, reason } = this.addingAbsenceFor;
+            if (!fromDate || !toDate) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/residents/${residentId}/absences`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+                    body: JSON.stringify({ fromDate, toDate, reason })
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Errore salvataggio assenza'); }
+                this.addingAbsenceFor = null;
+                await this.loadTurniResidents();
+            } catch (e) { alert(e.message); }
+        },
+
+        async deleteResidentAbsence(absenceId) {
+            try {
+                await fetch(`${this.BASE_URL}/residents/absences/${absenceId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                await this.loadTurniResidents();
+            } catch (e) { alert(e.message); }
         },
 
         selectGuest(guest) {
