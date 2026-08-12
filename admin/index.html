@@ -882,6 +882,7 @@
                                     <th>Citta</th>
                                     <th>Interessi</th>
                                     <th>Pagamento</th>
+                                    <th>Pagato da</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -902,6 +903,7 @@
                                                 x-text="[m.interestHabitat && 'Habitat', m.interestDistrettoA && 'Distretto A', m.interestQuazar && 'Quazar'].filter(Boolean).join(', ')"></small>
                                         </td>
                                         <td x-text="m.paymentMethod"></td>
+                                        <td x-text="m.paidBy || '-'"></td>
                                         <td>
                                             <span x-show="canWrite">
                                                 <button x-show="membershipTab === 'requests'"
@@ -1632,6 +1634,8 @@
                                                 style="font-size:10px; color:#2b6cb0;">LEGGI</button>
                                         </td>
                                         <td x-show="canWrite">
+                                            <button @click="reactivateBooking(b.id)"
+                                                style="background:#2c7a7b; color:#fff; padding:3px 8px; font-size:11px; cursor:pointer;">RIATTIVA</button>
                                             <button @click="deleteItem(b.id)" class="btn-del">X</button>
                                         </td>
                                     </tr>
@@ -3068,12 +3072,25 @@
                                 <input type="date" @change="turniJumpToWeek($event.target.value)"
                                     style="font-size:12px;" title="Vai a settimana">
                             </div>
-                            <div style="display:flex; gap:10px;">
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                                 <button x-show="turniHasPlan" @click="openTurniPrintPage()">APRI PAGINA STAMPABILE</button>
                                 <button x-show="canWriteTab('turni')" @click="generateTurniPlan()" class="create"
-                                    x-text="turniHasPlan ? 'RIGENERA SETTIMANA' : 'GENERA SETTIMANA'"></button>
+                                    style="flex-shrink:0; white-space:nowrap;"
+                                    x-text="(turniGenFrom || turniGenTo) ? 'RIGENERA INTERVALLO' : (turniHasPlan ? 'RIGENERA SETTIMANA' : 'GENERA SETTIMANA')"></button>
                             </div>
                         </div>
+
+                        <template x-if="canWriteTab('turni')">
+                            <div style="display:flex; gap:6px; align-items:center; font-size:12px; margin-bottom:15px;">
+                                <span style="color:#666;">Rigenera solo da</span>
+                                <input type="date" x-model="turniGenFrom" :min="turniWeekStart" :max="turniGenTo || turniWeekEnd" style="font-size:12px;">
+                                <span style="color:#666;">a</span>
+                                <input type="date" x-model="turniGenTo" :min="turniGenFrom || turniWeekStart" :max="turniWeekEnd" style="font-size:12px;">
+                                <span style="color:#666;">(vuoto = tutta la settimana)</span>
+                                <button x-show="turniGenFrom || turniGenTo" @click="turniGenFrom=''; turniGenTo=''"
+                                    style="font-size:11px; border:none; background:none; text-decoration:underline; cursor:pointer;">azzera</button>
+                            </div>
+                        </template>
 
                         <div x-show="turniLoading" style="color:#999;">Caricamento...</div>
 
@@ -3086,13 +3103,14 @@
                                             <th>Presenza settimana</th>
                                             <th>Turni questa settimana</th>
                                             <th>Turni totali (storico)</th>
+                                            <th>Cucina / Piatti / Pulizia</th>
                                             <th>Rapporto carico/peso</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template x-for="s in turniPlan.loadSummary" :key="s.type + s.id">
                                             <tr>
-                                                <td x-text="s.name"></td>
+                                                <td x-text="s.displayName || s.name"></td>
                                                 <td>
                                                     <span x-text="s.presencePct + '%'"></span>
                                                     <span style="color:#999; font-size:11px;"
@@ -3100,6 +3118,11 @@
                                                 </td>
                                                 <td x-text="s.shiftsThisWeek"></td>
                                                 <td x-text="s.shiftsTotal"></td>
+                                                <td>
+                                                    <span x-text="(s.roleCounts?.cucina ?? 0) + ' / ' + (s.roleCounts?.piatti ?? 0) + ' / ' + (s.roleCounts?.pulizia ?? 0)"></span>
+                                                    <span x-show="s.roleImbalance" style="color:#c00; font-size:11px; margin-left:4px;"
+                                                        :title="s.roleImbalance ? ('Fa soprattutto ' + s.roleImbalance.mostRole + ' (' + s.roleImbalance.mostCount + ') e quasi mai ' + s.roleImbalance.leastRole + ' (' + s.roleImbalance.leastCount + ')') : ''">⚠ sbilanciato</span>
+                                                </td>
                                                 <td x-text="s.ratio ?? '-'"
                                                     title="Piu' basso = piu' 'in credito', verra' chiamato prima"></td>
                                             </tr>
@@ -3118,27 +3141,28 @@
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Giorno</th>
-                                            <th>Presenti</th>
-                                            <th>Pranzo · Cucina</th>
-                                            <th>Pranzo · Piatti/Tavola</th>
-                                            <th>Pranzo · Pulizia</th>
-                                            <th>Cena · Cucina</th>
-                                            <th>Cena · Piatti/Tavola</th>
-                                            <th>Cena · Pulizia</th>
+                                            <th>Turno</th>
+                                            <template x-for="day in turniVisibleDays" :key="day.date">
+                                                <th x-text="formatTurniDay(day.date)" style="text-transform:capitalize;"></th>
+                                            </template>
+                                        </tr>
+                                        <tr>
+                                            <th style="font-weight:normal; color:#666;">Presenti</th>
+                                            <template x-for="day in turniVisibleDays" :key="day.date + '-presenti'">
+                                                <th x-text="day.headcount" style="font-weight:normal; color:#666;"></th>
+                                            </template>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <template x-for="day in turniPlan.days" :key="day.date">
-                                            <tr>
-                                                <td x-text="formatTurniDay(day.date)" style="text-transform:capitalize;"></td>
-                                                <td x-text="day.headcount"></td>
-                                                <template x-for="meal in ['pranzo','cena']" :key="meal">
-                                                    <template x-for="role in ['cucina','piatti','pulizia']" :key="meal+role">
+                                        <template x-for="meal in ['pranzo','cena']" :key="meal">
+                                            <template x-for="role in ['cucina','piatti','pulizia']" :key="meal+role">
+                                                <tr>
+                                                    <td x-text="turniRoleLabel(meal, role)" style="white-space:nowrap;"></td>
+                                                    <template x-for="day in turniVisibleDays" :key="day.date + meal + role">
                                                         <td>
                                                             <template x-for="p in day.meals[meal][role]" :key="p.assignmentId">
                                                                 <div style="display:flex; align-items:center; gap:4px; font-size:13px; white-space:nowrap;">
-                                                                    <span x-text="p.name"></span>
+                                                                    <span x-text="p.displayName || p.name"></span>
                                                                     <button x-show="canWriteTab('turni')"
                                                                         @click="openSwapAssignment(day, meal, role, p)"
                                                                         style="font-size:10px; padding:0 4px; border:none; background:none; cursor:pointer;">✎</button>
@@ -3147,8 +3171,8 @@
                                                             <span x-show="!day.meals[meal][role].length" style="color:#ccc;">-</span>
                                                         </td>
                                                     </template>
-                                                </template>
-                                            </tr>
+                                                </tr>
+                                            </template>
                                         </template>
                                     </tbody>
                                 </table>
@@ -4369,13 +4393,13 @@
                 </div>
             </template>
 
-            <!-- MODAL: Habitanti Manager -->
+            <!-- MODAL: Habitanti Manager (condiviso con il tab Turni: stessi habitanti, stessa API /residents) -->
             <template x-if="showHabitantiManager">
                 <div class="modal-overlay" @click.self="closeHabitantiManager()">
                     <div class="modal-box" style="text-align:left; min-width:400px; max-width:600px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                             <h3 style="margin:0;">Gestione Habitanti</h3>
-                            <button @click="openCreateHabitante()"
+                            <button x-show="canWriteTab('turni')" @click="openCreateResident()"
                                 style="padding: 6px 12px; cursor: pointer; background: #000; color:#fff; border:none;">
                                 + Nuovo
                             </button>
@@ -4384,20 +4408,22 @@
                             <thead>
                                 <tr style="background:#f5f5f5; border-bottom:2px solid #ddd;">
                                     <th style="padding:8px; text-align:left;">Nome</th>
+                                    <th style="padding:8px; text-align:left;">Attivo</th>
                                     <th style="padding:8px; text-align:right;">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="h in habitanti" :key="h">
+                                <template x-for="r in turniResidents" :key="r.id">
                                     <tr style="border-bottom:1px solid #eee;">
-                                        <td style="padding:8px;" x-text="h.charAt(0).toUpperCase() + h.slice(1)"></td>
+                                        <td style="padding:8px;" x-text="r.name"></td>
+                                        <td style="padding:8px;" x-text="r.active ? 'Si' : 'No'"></td>
                                         <td style="padding:8px; text-align:right;">
-                                            <div style="display:flex; gap:8px; justify-content:flex-end;">
-                                                <button @click="openEditHabitante(h)"
+                                            <div x-show="canWriteTab('turni')" style="display:flex; gap:8px; justify-content:flex-end;">
+                                                <button @click="openEditResident(r)"
                                                     style="padding:4px 8px; cursor:pointer; background:#666; color:#fff; border:none; font-size:11px;">
                                                     Modifica
                                                 </button>
-                                                <button @click="deleteHabitante(h)"
+                                                <button @click="deleteResident(r)"
                                                     style="padding:4px 8px; cursor:pointer; background:#d32f2f; color:#fff; border:none; font-size:11px;">
                                                     Elimina
                                                 </button>
@@ -4405,6 +4431,9 @@
                                         </td>
                                     </tr>
                                 </template>
+                                <tr x-show="!turniResidents.length">
+                                    <td colspan="3" style="padding:8px; color:#999;">Nessun habitante registrato</td>
+                                </tr>
                             </tbody>
                         </table>
                         <button @click="closeHabitantiManager()"
@@ -4412,18 +4441,6 @@
                             Chiudi
                         </button>
                     </div>
-                </div>
-            </template>
-
-            <!-- SIDEBAR: Edit Habitante -->
-            <template x-if="editingHabitante">
-                <div class="sidebar">
-                    <h3 x-text="editingHabitante.original ? 'Modifica Habitante' : 'Nuovo Habitante'"></h3>
-                    <label>Nome (minuscolo)</label>
-                    <input type="text" x-model="editingHabitante.name" @keyup.enter="saveHabitante()">
-                    <button class="btn-blk" @click="saveHabitante()">SALVA</button>
-                    <button @click="editingHabitante = null"
-                        style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Annulla</button>
                 </div>
             </template>
 
@@ -4849,6 +4866,16 @@
                                 </template>
                                 <template x-if="!canWrite">
                                     <span x-text="editingMembership.paymentMethod"></span>
+                                </template>
+
+                                <span style="color:#666;">Pagato da:</span>
+                                <template x-if="canWrite">
+                                    <input type="text" x-model="editingMembership.paidBy"
+                                           placeholder="Nome di chi ha pagato (se diverso dal socio)"
+                                           style="font-family:inherit; font-size:13px; padding:5px; border:1px solid #000;">
+                                </template>
+                                <template x-if="!canWrite">
+                                    <span x-text="editingMembership.paidBy || '-'"></span>
                                 </template>
 
                                 <span style="color:#666;">Stato:</span>

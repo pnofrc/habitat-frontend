@@ -139,9 +139,7 @@ document.addEventListener('alpine:init', () => {
         editingFlowCassaCategory: null,
         editingBookingFinance: null,
         showFlowCassaCategoryManager: false,
-        habitanti: [],
         showHabitantiManager: false,
-        editingHabitante: null,
 
         // Turni (habitanti + piano turni cucina/pulizia) state
         turniResidents: [],
@@ -151,6 +149,8 @@ document.addEventListener('alpine:init', () => {
         editingResident: null,
         addingAbsenceFor: null,
         turniSwapModal: null,
+        turniGenFrom: '',
+        turniGenTo: '',
 
         canWriteTab(tab) {
             if (!this.currentUser) return false;
@@ -308,12 +308,14 @@ document.addEventListener('alpine:init', () => {
         },
 
         async init() {
-            this.loadHabitanti();
             const hash = window.location.hash.slice(1);
             if (hash) this.view = hash;
             if (this.token) {
                 const ok = await this.fetchCurrentUser();
-                if (ok) await this.fetchData();
+                if (ok) {
+                    await this.loadTurniResidents();
+                    await this.fetchData();
+                }
             }
         },
 
@@ -1123,33 +1125,11 @@ document.addEventListener('alpine:init', () => {
             return expenseCount + financeCount;
         },
 
-        loadHabitanti() {
-            const stored = localStorage.getItem('habitanti');
-            this.habitanti = stored ? JSON.parse(stored) : ['beppe', 'chiara', 'enri', 'marco', 'pongie', 'poni'];
+        openHabitantiManager() {
+            if (!this.turniResidents.length) this.loadTurniResidents();
+            this.showHabitantiManager = true;
         },
-        saveHabitantiToStorage() {
-            localStorage.setItem('habitanti', JSON.stringify(this.habitanti));
-        },
-        openHabitantiManager() { this.showHabitantiManager = true; },
-        closeHabitantiManager() { this.showHabitantiManager = false; this.editingHabitante = null; },
-        openCreateHabitante() { this.editingHabitante = { original: null, name: '' }; },
-        openEditHabitante(name) { this.editingHabitante = { original: name, name }; },
-        saveHabitante() {
-            const trimmed = this.editingHabitante.name.trim().toLowerCase();
-            if (!trimmed) return;
-            if (this.editingHabitante.original === null) {
-                if (!this.habitanti.includes(trimmed)) this.habitanti.push(trimmed);
-            } else {
-                const idx = this.habitanti.indexOf(this.editingHabitante.original);
-                if (idx !== -1) this.habitanti[idx] = trimmed;
-            }
-            this.saveHabitantiToStorage();
-            this.editingHabitante = null;
-        },
-        deleteHabitante(name) {
-            this.habitanti = this.habitanti.filter(h => h !== name);
-            this.saveHabitantiToStorage();
-        },
+        closeHabitantiManager() { this.showHabitantiManager = false; },
 
         // --- TURNI ---
 
@@ -1185,13 +1165,43 @@ document.addEventListener('alpine:init', () => {
             return `${fmt(start)} - ${fmt(end)} ${end.getFullYear()}`;
         },
 
+        get turniWeekEnd() {
+            if (!this.turniWeekStart) return '';
+            const start = new Date(this.turniWeekStart + 'T00:00:00');
+            start.setDate(start.getDate() + 6);
+            return this.localDateStr(start);
+        },
+
         get turniHasPlan() {
             return !!this.turniPlan?.days?.some(d => Object.values(d.meals).some(m => Object.values(m).some(r => r.length)));
+        },
+
+        // Se e' impostato un intervallo "da/a", la tabella mostra solo quei
+        // giorni invece dell'intera settimana - altrimenti l'intervallo
+        // scelto per la rigenerazione non si vedrebbe mai in tabella.
+        get turniVisibleDays() {
+            const days = this.turniPlan?.days || [];
+            if (!this.turniGenFrom && !this.turniGenTo) return days;
+            return days.filter(d =>
+                (!this.turniGenFrom || d.date >= this.turniGenFrom) &&
+                (!this.turniGenTo || d.date <= this.turniGenTo)
+            );
+        },
+
+        // Elenco nomi habitanti attivi, condiviso tra Flow Cassa e Turni (fonte: turniResidents / API /residents)
+        get habitanti() {
+            return this.turniResidents.filter(r => r.active).map(r => r.name);
         },
 
         formatTurniDay(dateStr) {
             const d = new Date(dateStr + 'T00:00:00');
             return d.toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: '2-digit' });
+        },
+
+        turniRoleLabel(meal, role) {
+            const mealLabel = meal === 'pranzo' ? 'Pranzo' : 'Cena';
+            const roleLabel = { cucina: 'Cucina', piatti: 'Piatti/Tavola', pulizia: 'Pulizia' }[role] || role;
+            return `${mealLabel} · ${roleLabel}`;
         },
 
         async fetchTurniData() {
@@ -1209,7 +1219,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         openTurniPrintPage() {
-            window.open(`${this.BASE_URL}/turni-print?weekStart=${this.turniWeekStart}`, '_blank');
+            let url = `${this.BASE_URL}/turni-print?weekStart=${this.turniWeekStart}`;
+            if (this.turniGenFrom) url += `&fromDate=${this.turniGenFrom}`;
+            if (this.turniGenTo) url += `&toDate=${this.turniGenTo}`;
+            window.open(url, '_blank');
         },
 
         async loadTurniResidents() {
@@ -1243,16 +1256,22 @@ document.addEventListener('alpine:init', () => {
         },
 
         async generateTurniPlan() {
-            const msg = this.turniHasPlan
-                ? 'Rigenerare i turni di questa settimana? Le assegnazioni attuali (incluse le modifiche manuali) verranno sovrascritte.'
-                : 'Generare i turni per questa settimana?';
+            const hasRange = this.turniGenFrom || this.turniGenTo;
+            const msg = hasRange
+                ? `Rigenerare i turni dal ${this.turniGenFrom || 'inizio settimana'} al ${this.turniGenTo || 'fine settimana'}? Le assegnazioni attuali in quell'intervallo (incluse le modifiche manuali) verranno sovrascritte.`
+                : this.turniHasPlan
+                    ? 'Rigenerare i turni di questa settimana? Le assegnazioni attuali (incluse le modifiche manuali) verranno sovrascritte.'
+                    : 'Generare i turni per questa settimana?';
             if (!(await this.showConfirm(msg))) return;
             this.turniLoading = true;
             try {
+                const body = { weekStart: this.turniWeekStart };
+                if (this.turniGenFrom) body.fromDate = this.turniGenFrom;
+                if (this.turniGenTo) body.toDate = this.turniGenTo;
                 const res = await fetch(`${this.BASE_URL}/turni/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                    body: JSON.stringify({ weekStart: this.turniWeekStart })
+                    body: JSON.stringify(body)
                 });
                 if (res.status === 401) return this.logout();
                 if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Errore generazione turni'); }
@@ -1363,6 +1382,22 @@ document.addEventListener('alpine:init', () => {
                 if (!res.ok) {
                     const err = await res.json();
                     throw new Error(err.message || "Errore check-in");
+                }
+                await this.fetchData();
+                if (this.selectedGuest) this.selectGuest(this.selectedGuest);
+            } catch (e) { alert(e.message); }
+        },
+
+        async reactivateBooking(bookingId) {
+            if (!await this.showConfirm("Riportare questa prenotazione tra le Attive? Le eventuali voci gia\' registrate in Flow Cassa per il checkout non verranno modificate.")) return;
+            try {
+                const res = await fetch(`${this.BASE_URL}/bookings/${bookingId}/reactivate`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Errore riattivazione");
                 }
                 await this.fetchData();
                 if (this.selectedGuest) this.selectGuest(this.selectedGuest);
@@ -2349,6 +2384,7 @@ document.addEventListener('alpine:init', () => {
                         phoneNumber: m.phoneNumber,
                         email: newEmail,
                         paymentMethod: m.paymentMethod,
+                        paidBy: m.paidBy || null,
                         festivalAllergy: m.festivalAllergy,
                         festivalAllergyNotes: m.festivalAllergyNotes || null,
                         festivalCheckinDay: m.festivalCheckinDay || null,
