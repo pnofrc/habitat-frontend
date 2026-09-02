@@ -167,11 +167,15 @@ document.addEventListener('alpine:init', () => {
 
         get visibleTabs() {
             if (!this.currentUser) return [];
+            // Tab nascoste dal formulario (non navigabili per nessun ruolo)
+            const hiddenTabs = ['guests'];
             const allTabs = ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni'];
-            if (this.currentUser.role === 'admin') return [...allTabs, 'users', 'telegram', 'activity'];
-            if (this.currentUser.role === 'reader') return allTabs;
+            let tabs;
+            if (this.currentUser.role === 'admin') tabs = [...allTabs, 'users', 'telegram', 'activity'];
+            else if (this.currentUser.role === 'reader') tabs = [...allTabs];
             // reader_limited
-            return (this.currentUser.allowedTabs || []);
+            else tabs = (this.currentUser.allowedTabs || []);
+            return tabs.filter(t => !hiddenTabs.includes(t));
         },
 
         get filteredFinanceItems() {
