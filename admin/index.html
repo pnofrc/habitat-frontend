@@ -720,6 +720,25 @@
                 flex-wrap: wrap;
             }
         }
+
+        /* Dashboard KPI */
+        .dash-blk { margin-bottom: 22px; }
+        .dash-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+                    border-bottom: 1px solid #000; padding-bottom: 4px; margin-bottom: 10px; }
+        .dash-row { display: flex; gap: 14px; flex-wrap: wrap; }
+        .dash-tile { flex: 1; min-width: 140px; border: 1px solid #000; padding: 12px; }
+        .dash-k { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+        .dash-v { font-size: 24px; font-weight: 700; margin-top: 6px; }
+        .dash-s { font-size: 11px; margin-top: 3px; }
+        .dash-act { cursor: pointer; }
+        .dash-act .dash-s { text-decoration: underline; }
+        .dash-bar { height: 5px; background: #fff; border: 1px solid #000; margin-top: 8px; }
+        .dash-bar > span { display: block; height: 100%; background: #000; }
+        .dash-panel { flex: 1; min-width: 240px; border: 1px solid #000; padding: 12px; }
+        .dash-panel h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+        .dash-li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #000; }
+        .dash-li:last-child { border-bottom: 0; }
+        @media (max-width: 700px) { .dash-row { flex-direction: column; } }
     </style>
 </head>
 
@@ -745,6 +764,9 @@
 
                 <!-- Desktop tabs -->
                 <div class="nav-tabs" style="display:flex; gap:20px; align-items:center; flex:1; flex-wrap:wrap;">
+                    <button x-show="visibleTabs.includes('dashboard')" :class="view === 'dashboard' && 'active'"
+                        @click="setView('dashboard')">Dashboard</button>
+                    <span x-show="visibleTabs.includes('dashboard')" style="color:#ccc; pointer-events:none;">|</span>
                     <button x-show="visibleTabs.includes('expenses')" :class="view === 'expenses' && 'active'"
                         @click="setView('expenses')">Flow Cassa</button>
                     <button x-show="visibleTabs.includes('finance')" :class="view === 'finance' && 'active'"
@@ -810,6 +832,9 @@
                     <img src="https://habitattt.it/images/h.logo.png" alt="Habitat" style="height:24px;">
                     <button @click="mobileNavOpen = false" style="font-size:22px; min-height:unset; padding:4px 8px; font-weight:normal;">✕</button>
                 </div>
+                <template x-if="visibleTabs.includes('dashboard')">
+                    <button :class="view==='dashboard'&&'active'" @click="setView('dashboard'); mobileNavOpen=false">Dashboard</button>
+                </template>
                 <template x-if="visibleTabs.includes('expenses')">
                     <button :class="view==='expenses'&&'active'" @click="setView('expenses'); mobileNavOpen=false">Flow Cassa</button>
                 </template>
@@ -947,6 +972,112 @@
                     </div>
                 </div>
 
+
+                <!-- DASHBOARD -->
+                <div x-show="view === 'dashboard'" x-cloak>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;">
+                        <h2 style="margin:0;">Dashboard</h2>
+                        <button @click="fetchDashboard()" :disabled="dashboardLoading"
+                            x-text="dashboardLoading ? 'aggiorno…' : 'aggiorna'"></button>
+                    </div>
+
+                    <template x-if="!dashboard && !dashboardLoading">
+                        <p>Dati non disponibili. <button @click="fetchDashboard()">riprova</button></p>
+                    </template>
+
+                    <template x-if="dashboard">
+                        <div>
+                            <!-- BLOCCO: STATO -->
+                            <div class="dash-blk"
+                                x-show="dashboard.cassaBalance || dashboard.financeYtd || dashboard.guestsInHouse || dashboard.membersThisYear">
+                                <div class="dash-lbl">Stato</div>
+                                <div class="dash-row">
+                                    <div class="dash-tile" x-show="dashboard.cassaBalance">
+                                        <div class="dash-k">Saldo cassa</div>
+                                        <div class="dash-v" x-text="formatCurrency(dashboard.cassaBalance?.amount || 0)"></div>
+                                        <div class="dash-s">Flow Cassa</div>
+                                    </div>
+                                    <div class="dash-tile" x-show="dashboard.financeYtd">
+                                        <div class="dash-k" x-text="'Bilancio ' + (dashboard.financeYtd?.year || '')"></div>
+                                        <div class="dash-v" x-text="formatCurrency(dashboard.financeYtd?.balance || 0)"></div>
+                                        <div x-show="dashboard.financeYtd?.pct !== null && dashboard.financeYtd?.pct !== undefined">
+                                            <div class="dash-bar">
+                                                <span :style="`width:${Math.max(0, Math.min(100, (dashboard.financeYtd?.pct || 0) * 100))}%`"></span>
+                                            </div>
+                                        </div>
+                                        <div class="dash-s"
+                                            x-show="dashboard.financeYtd?.pct !== null && dashboard.financeYtd?.pct !== undefined"
+                                            x-text="Math.round((dashboard.financeYtd?.pct || 0) * 100) + '% del target ' + formatCurrency(dashboard.financeYtd?.target || 0)"></div>
+                                    </div>
+                                    <div class="dash-tile" x-show="dashboard.guestsInHouse">
+                                        <div class="dash-k">Ospiti in struttura</div>
+                                        <div class="dash-v" x-text="dashboard.guestsInHouse?.count ?? 0"></div>
+                                        <div class="dash-s">ora</div>
+                                    </div>
+                                    <div class="dash-tile" x-show="dashboard.membersThisYear">
+                                        <div class="dash-k" x-text="'Tesserati ' + (dashboard.membersThisYear?.year || '')"></div>
+                                        <div class="dash-v" x-text="dashboard.membersThisYear?.count ?? 0"></div>
+                                        <div class="dash-s">confermati</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOCCO: DA GESTIRE -->
+                            <div class="dash-blk"
+                                x-show="dashboard.residencyPending || dashboard.membershipUnconfirmed || dashboard.festivalUnconfirmed">
+                                <div class="dash-lbl">Da gestire</div>
+                                <div class="dash-row">
+                                    <div class="dash-tile dash-act" x-show="dashboard.residencyPending" @click="setView('residency')">
+                                        <div class="dash-k">Residenze in attesa</div>
+                                        <div class="dash-v" x-text="dashboard.residencyPending?.count ?? 0"></div>
+                                        <div class="dash-s">apri Residenze</div>
+                                    </div>
+                                    <div class="dash-tile dash-act" x-show="dashboard.membershipUnconfirmed" @click="setView('membership')">
+                                        <div class="dash-k">Tessere da confermare</div>
+                                        <div class="dash-v" x-text="dashboard.membershipUnconfirmed?.count ?? 0"></div>
+                                        <div class="dash-s">apri Tessere</div>
+                                    </div>
+                                    <div class="dash-tile dash-act" x-show="dashboard.festivalUnconfirmed" @click="setView('festival')">
+                                        <div class="dash-k">Biglietti festival da confermare</div>
+                                        <div class="dash-v" x-text="dashboard.festivalUnconfirmed?.count ?? 0"></div>
+                                        <div class="dash-s">apri Festival</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOCCO: AGENDA -->
+                            <div class="dash-blk" x-show="dashboard.arrivalsDepartures || dashboard.shiftsToday">
+                                <div class="dash-lbl">Agenda</div>
+                                <div class="dash-row">
+                                    <div class="dash-panel" x-show="dashboard.arrivalsDepartures">
+                                        <h4>Arrivi &amp; partenze · prossimi 7 giorni</h4>
+                                        <template x-if="!dashboard.arrivalsDepartures?.items?.length">
+                                            <div class="dash-li"><span>nessun movimento</span></div>
+                                        </template>
+                                        <template x-for="m in (dashboard.arrivalsDepartures?.items || [])" :key="m.bookingId + '-' + m.type">
+                                            <div class="dash-li">
+                                                <span x-text="(m.type === 'arrival' ? '↓ ' : '↑ ') + m.guestName + (m.room ? ' — ' + m.room : '')"></span>
+                                                <span x-text="formatDate(m.date)"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="dash-panel" x-show="dashboard.shiftsToday">
+                                        <h4>Turni di oggi</h4>
+                                        <template x-if="!dashboard.shiftsToday?.items?.length">
+                                            <div class="dash-li"><span>nessun turno</span></div>
+                                        </template>
+                                        <template x-for="s in (dashboard.shiftsToday?.items || [])" :key="s.meal + '-' + s.role + '-' + s.personName">
+                                            <div class="dash-li">
+                                                <span x-text="s.meal + ' · ' + s.role"></span>
+                                                <span x-text="s.personName"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
 
                 <!-- EXPENSES -->
                 <div x-show="view === 'expenses'">
