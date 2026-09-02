@@ -2,7 +2,9 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('app', () => ({
         BASE_URL,
         token: localStorage.getItem('token') || '',
-        view: 'expenses',
+        view: 'dashboard',
+        dashboard: null,
+        dashboardLoading: false,
         editingMembership: null,
         chart: null,
         items: [],
@@ -169,13 +171,13 @@ document.addEventListener('alpine:init', () => {
             if (!this.currentUser) return [];
             // Tab nascoste dal formulario (non navigabili per nessun ruolo)
             const hiddenTabs = ['guests'];
-            const allTabs = ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni'];
+            const allTabs = ['dashboard', 'expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni'];
             let tabs;
             if (this.currentUser.role === 'admin') tabs = [...allTabs, 'users', 'telegram', 'activity'];
             else if (this.currentUser.role === 'reader') tabs = [...allTabs];
-            // reader_limited
-            else tabs = (this.currentUser.allowedTabs || []);
-            return tabs.filter(t => !hiddenTabs.includes(t));
+            // reader_limited: dashboard sempre visibile + le tab concesse
+            else tabs = ['dashboard', ...(this.currentUser.allowedTabs || [])];
+            return [...new Set(tabs)].filter(t => !hiddenTabs.includes(t));
         },
 
         get filteredFinanceItems() {
@@ -420,9 +422,27 @@ document.addEventListener('alpine:init', () => {
             await this.fetchData();
         },
 
+        async fetchDashboard() {
+            this.dashboardLoading = true;
+            try {
+                const res = await fetch(`${this.BASE_URL}/dashboard`, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (res.status === 401) return this.logout();
+                if (!res.ok) throw new Error('Errore caricamento dashboard');
+                this.dashboard = await res.json();
+            } catch (e) {
+                console.error(e);
+                this.dashboard = null;
+            } finally {
+                this.dashboardLoading = false;
+            }
+        },
+
         async fetchData() {
             if (!this.token) return;
             try {
+                if (this.view === 'dashboard') { await this.fetchDashboard(); return; }
                 if (this.view === 'users') { await this.fetchUsers(); await this.fetchRooms(); return; }
                 if (this.view === 'telegram') { await this.fetchTelegramData(); return; }
                 if (this.view === 'activity') { await this.fetchUsers(); await this.fetchActivity(); return; }
