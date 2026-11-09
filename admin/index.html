@@ -1152,6 +1152,12 @@
                                         <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
                                     </template>
                                 </select>
+                                <select x-model.number="expensesYear" style="width: auto; margin:0">
+                                    <template x-for="y in expensesYearOptions" :key="y">
+                                        <option :value="y" x-text="y"></option>
+                                    </template>
+                                    <option value="all">Tutti gli anni</option>
+                                </select>
                                 <select x-model="expenseSort" style="width: auto; margin:0">
                                     <option value="date-desc">Data ↓</option>
                                     <option value="date-asc">Data ↑</option>

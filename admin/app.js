@@ -88,6 +88,7 @@ document.addEventListener('alpine:init', () => {
         habitanteFilter: 'all',
         typeFilter: 'all',
         expenseSort: 'date-desc',
+        expensesYear: new Date().getFullYear(),
         mobileNavOpen: false,
         stats: { totalIn: 0, totalOut: 0, balance: 0 },
         foodBudget: { totalDays: 0, foodDaily: 7, virtualBudget: 0 },
@@ -633,13 +634,20 @@ document.addEventListener('alpine:init', () => {
 
                 let matchExpenseType = this.typeFilter === 'all' || i.expenseType === this.typeFilter;
 
-                return matchType && matchHabitante && matchExpenseType;
+                let matchYear = this.expensesYear === 'all' || new Date(i.date).getFullYear() === this.expensesYear;
+
+                return matchType && matchHabitante && matchExpenseType && matchYear;
             }).sort((a, b) => {
                 if (this.expenseSort === 'alpha-asc') return (a.title || '').localeCompare(b.title || '');
                 if (this.expenseSort === 'alpha-desc') return (b.title || '').localeCompare(a.title || '');
                 if (this.expenseSort === 'date-asc') return new Date(a.date) - new Date(b.date);
                 return new Date(b.date) - new Date(a.date);
             });
+        },
+
+        get expensesYearOptions() {
+            if (this.view !== 'expenses') return [];
+            return this.yearOptionsFromDate(this.items, 'date');
         },
 
         get plannerTimeSlots() {
