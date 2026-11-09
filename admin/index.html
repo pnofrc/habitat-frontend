@@ -892,6 +892,12 @@
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <h3 style="margin:0"
                                 x-text="membershipTab === 'requests' ? 'Richieste Iscrizione' : 'Soci Tesserati'"></h3>
+                            <select x-model.number="membershipYear" style="width: auto; margin:0;">
+                                <template x-for="y in membershipYearOptions" :key="y">
+                                    <option :value="y" x-text="y"></option>
+                                </template>
+                                <option value="all">Tutti gli anni</option>
+                            </select>
                             <span x-show="memberships.filter(m => m.confirmed && m.isArtist).length > 0"
                                   title="Tessere artista confermate: quote a carico Habitat da versare"
                                   style="padding:4px 10px; background:#eef2ff; color:#3730a3; border:1px solid #818cf8; border-radius:3px; font-size:12px; font-weight:bold;"
@@ -915,8 +921,13 @@
                                 <template x-for="m in filteredMemberships" :key="m.id">
                                     <tr>
                                         <td @click="editingMembership = {...m}"
-                                            style="cursor:pointer; text-decoration:underline;"
-                                            x-text="formatName(m.surname) + ' ' + formatName(m.name)"></td>
+                                            style="cursor:pointer; text-decoration:underline;">
+                                            <span x-text="formatName(m.surname) + ' ' + formatName(m.name)"></span>
+                                            <span x-show="isReturningMember(m)" title="Già tesserato in un anno precedente"
+                                                  style="margin-left:4px; padding:1px 5px; background:#f0fdf4; color:#15803d; border:1px solid #86efac; border-radius:3px; font-size:10px; font-weight:bold;">
+                                                GIA&#39; TESSERATO
+                                            </span>
+                                        </td>
                                         <td x-text="m.email"></td>
                                         <td x-text="m.city"></td>
                                         <td>

@@ -83,6 +83,7 @@ document.addEventListener('alpine:init', () => {
         residencyCount: 0,
         bookingSubTab: 'active',
         membershipTab: 'requests',
+        membershipYear: new Date().getFullYear(),
         filter: 'all',
         habitanteFilter: 'all',
         typeFilter: 'all',
@@ -579,7 +580,23 @@ document.addEventListener('alpine:init', () => {
         get filteredMemberships() {
             if (this.view !== 'membership') return [];
             return this.items.filter(m =>
-                this.membershipTab === 'confirmed' ? m.confirmed : !m.confirmed
+                (this.membershipTab === 'confirmed' ? m.confirmed : !m.confirmed) &&
+                (this.membershipYear === 'all' || m.year === this.membershipYear)
+            );
+        },
+
+        get membershipYearOptions() {
+            return this.yearOptionsFromField(this.items, 'year');
+        },
+
+        isReturningMember(m) {
+            return this.items.some(x =>
+                x.id !== m.id &&
+                x.year < m.year &&
+                (
+                    (x.email && m.email && x.email.toLowerCase() === m.email.toLowerCase()) ||
+                    (x.vatNumber && m.vatNumber && x.vatNumber === m.vatNumber)
+                )
             );
         },
 
