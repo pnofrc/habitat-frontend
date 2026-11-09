@@ -242,8 +242,10 @@ document.addEventListener('alpine:init', () => {
         yearOptionsFromDate(records, dateField) {
             const years = new Set([new Date().getFullYear()]);
             (Array.isArray(records) ? records : []).forEach(r => {
-                const d = new Date(r[dateField]);
-                if (!isNaN(d.getTime())) years.add(d.getFullYear());
+                if (r[dateField] != null) {
+                    const d = new Date(r[dateField]);
+                    if (!isNaN(d.getTime())) years.add(d.getFullYear());
+                }
             });
             return [...years].sort((a, b) => b - a);
         },
