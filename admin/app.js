@@ -230,6 +230,24 @@ document.addEventListener('alpine:init', () => {
             return this.cassaCiboIn - this.cassaCiboOut;
         },
 
+        yearOptionsFromField(records, field) {
+            const years = new Set([new Date().getFullYear()]);
+            (Array.isArray(records) ? records : []).forEach(r => {
+                const y = parseInt(r[field], 10);
+                if (!isNaN(y)) years.add(y);
+            });
+            return [...years].sort((a, b) => b - a);
+        },
+
+        yearOptionsFromDate(records, dateField) {
+            const years = new Set([new Date().getFullYear()]);
+            (Array.isArray(records) ? records : []).forEach(r => {
+                const d = new Date(r[dateField]);
+                if (!isNaN(d.getTime())) years.add(d.getFullYear());
+            });
+            return [...years].sort((a, b) => b - a);
+        },
+
         get foodBudgetRemaining() {
             return this.foodBudget.virtualBudget - this.foodSpent;
         },
