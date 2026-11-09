@@ -5024,6 +5024,15 @@
                                 <span x-text="editingMembership.confirmed ? 'Confermato' : 'In attesa di conferma'"
                                     :style="editingMembership.confirmed ? 'color:green; font-weight:bold;' : 'color:orange;'"></span>
 
+                                <span style="color:#666;">Anno Tessera:</span>
+                                <template x-if="canWrite">
+                                    <input type="number" x-model.number="editingMembership.year"
+                                           style="font-family:inherit; font-size:13px; padding:5px; border:1px solid #000; width:90px;">
+                                </template>
+                                <template x-if="!canWrite">
+                                    <span x-text="editingMembership.year"></span>
+                                </template>
+
                                 <span style="color:#666;">Lingua:</span>
                                 <span x-text="editingMembership.language === 'it' ? 'Italiano' : 'English'"></span>
                             </div>

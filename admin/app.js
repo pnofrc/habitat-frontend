@@ -2446,6 +2446,7 @@ document.addEventListener('alpine:init', () => {
                         email: newEmail,
                         paymentMethod: m.paymentMethod,
                         paidBy: m.paidBy || null,
+                        year: m.year,
                         festivalAllergy: m.festivalAllergy,
                         festivalAllergyNotes: m.festivalAllergyNotes || null,
                         festivalCheckinDay: m.festivalCheckinDay || null,
