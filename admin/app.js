@@ -91,7 +91,6 @@ document.addEventListener('alpine:init', () => {
         expenseSort: 'date-desc',
         expensesYear: new Date().getFullYear(),
         mobileNavOpen: false,
-        stats: { totalIn: 0, totalOut: 0, balance: 0 },
         foodBudget: { totalDays: 0, foodDaily: 7, virtualBudget: 0 },
         receiptFile: null,
         loginData: { username: '', password: '' },
@@ -225,15 +224,24 @@ document.addEventListener('alpine:init', () => {
         },
 
         get cassaCiboIn() {
-            return this.items
+            return this.expensesItemsForYear
                 .filter(i => String(i.isExit) === 'false' && i.isOspitalita)
                 .reduce((s, i) => s + (parseFloat(i.foodAmount) || 0), 0);
         },
 
         get cassaCiboOut() {
-            return this.items
+            return this.expensesItemsForYear
                 .filter(i => String(i.isExit) === 'true' && i.isFood)
                 .reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+        },
+
+        get stats() {
+            let inc = 0, out = 0;
+            this.expensesItemsForYear.forEach(i => {
+                const val = parseFloat(i.amount) || 0;
+                String(i.isExit) === 'true' ? out += val : inc += val;
+            });
+            return { totalIn: inc.toFixed(2), totalOut: out.toFixed(2), balance: (inc - out).toFixed(2) };
         },
 
         get cassaCiboBalance() {
@@ -550,7 +558,6 @@ document.addEventListener('alpine:init', () => {
                 if (this.view === 'expenses') {
                     await this.loadFlowCassaCategories();
                     await this.fetchFoodBudget();
-                    this.updateStats();
                     this.$nextTick(() => this.renderChart());
                 }
 
@@ -653,6 +660,13 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
+        get expensesItemsForYear() {
+            if (this.view !== 'expenses') return this.items;
+            return this.items.filter(i =>
+                this.expensesYear === 'all' || new Date(i.date).getFullYear() === this.expensesYear
+            );
+        },
+
         get expensesYearOptions() {
             if (this.view !== 'expenses') return [];
             return this.yearOptionsFromDate(this.items, 'date');
@@ -719,15 +733,6 @@ document.addEventListener('alpine:init', () => {
                 if (act.status !== 'confirmed') return sum;
                 return sum + (parseFloat(act.price) || 0);
             }, 0);
-        },
-
-        updateStats() {
-            let inc = 0, out = 0;
-            this.items.forEach(i => {
-                const val = parseFloat(i.amount) || 0;
-                String(i.isExit) === 'true' ? out += val : inc += val;
-            });
-            this.stats = { totalIn: inc.toFixed(2), totalOut: out.toFixed(2), balance: (inc - out).toFixed(2) };
         },
 
         async fetchFoodBudget() {

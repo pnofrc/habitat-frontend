@@ -890,8 +890,10 @@
                     <div class="card">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 style="margin:0"
-                                x-text="membershipTab === 'requests' ? 'Richieste Iscrizione' : 'Soci Tesserati'"></h3>
+                            <h3 style="margin:0">
+                                <span x-text="membershipTab === 'requests' ? 'Richieste Iscrizione' : 'Soci Tesserati'"></span>
+                                <span style="font-weight:normal; font-size:14px; color:#666;" x-text="'(' + filteredMemberships.length + ')'"></span>
+                            </h3>
                             <select x-model.number="membershipYear" style="width: auto; margin:0;">
                                 <template x-for="y in membershipYearOptions" :key="y">
                                     <option :value="y" x-text="y"></option>
@@ -1092,6 +1094,16 @@
 
                 <!-- EXPENSES -->
                 <div x-show="view === 'expenses'">
+                    <div class="card" style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+                        <strong>Anno</strong>
+                        <select x-model.number="expensesYear" style="width: auto; margin:0;">
+                            <template x-for="y in expensesYearOptions" :key="y">
+                                <option :value="y" x-text="y"></option>
+                            </template>
+                            <option value="all">Tutti gli anni</option>
+                        </select>
+                    </div>
+
                     <div class="card" style="height: 180px;"><canvas id="expenseChart"></canvas></div>
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
                         <div class="card" style="flex:1"><small>IN</small><br><b x-text="stats.totalIn + '&#x20AC;'"
@@ -1151,12 +1163,6 @@
                                     <template x-for="cat in flowCassaCategories" :key="cat.id">
                                         <option :value="cat.name" x-text="cat.name.charAt(0).toUpperCase() + cat.name.slice(1)"></option>
                                     </template>
-                                </select>
-                                <select x-model.number="expensesYear" style="width: auto; margin:0">
-                                    <template x-for="y in expensesYearOptions" :key="y">
-                                        <option :value="y" x-text="y"></option>
-                                    </template>
-                                    <option value="all">Tutti gli anni</option>
                                 </select>
                                 <select x-model="expenseSort" style="width: auto; margin:0">
                                     <option value="date-desc">Data ↓</option>
@@ -1232,6 +1238,16 @@
 
                     <!-- Overview Tab -->
                     <div x-show="financeTab === 'overview'">
+                        <div class="card" style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+                            <strong>Anno</strong>
+                            <select x-model.number="filterFinanceYear" style="width: auto; margin:0;">
+                                <template x-for="y in financeYearOptions" :key="y">
+                                    <option :value="y" x-text="y"></option>
+                                </template>
+                                <option value="all">Tutti gli anni</option>
+                            </select>
+                        </div>
+
                         <!-- Summary Cards (consistent with Flow Cassa) -->
                         <div style="display: flex; gap: 10px; margin-bottom: 20px; text-align: center;">
                             <div class="card" style="flex:1;">
@@ -1263,13 +1279,6 @@
                                         <template x-for="cat in financeCategories" :key="cat.id">
                                             <option :value="cat.id" x-text="cat.name"></option>
                                         </template>
-                                    </select>
-
-                                    <select x-model.number="filterFinanceYear" style="width: auto; margin: 0;">
-                                        <template x-for="y in financeYearOptions" :key="y">
-                                            <option :value="y" x-text="y"></option>
-                                        </template>
-                                        <option value="all">Tutti gli anni</option>
                                     </select>
 
                                     <button @click="filterFinanceType = 'all'; filterFinanceCategory = null; filterFinanceYear = new Date().getFullYear();"
