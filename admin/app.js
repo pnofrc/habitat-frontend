@@ -139,6 +139,7 @@ document.addEventListener('alpine:init', () => {
         filterFinanceCategory: null,
         filterFinanceDateStart: null,
         filterFinanceDateEnd: null,
+        filterFinanceYear: new Date().getFullYear(),
         flowItems: [],
         flowCassaCategories: [],  // Loaded from API
         editingFlowCassaCategory: null,
@@ -191,8 +192,14 @@ document.addEventListener('alpine:init', () => {
                 if (this.filterFinanceCategory && f.categoryId !== this.filterFinanceCategory) return false;
                 if (this.filterFinanceDateStart && new Date(f.date) < new Date(this.filterFinanceDateStart)) return false;
                 if (this.filterFinanceDateEnd && new Date(f.date) > new Date(this.filterFinanceDateEnd)) return false;
+                if (this.filterFinanceYear !== 'all' && new Date(f.date).getFullYear() !== this.filterFinanceYear) return false;
                 return true;
             });
+        },
+
+        get financeYearOptions() {
+            if (this.view !== 'finance') return [];
+            return this.yearOptionsFromDate(this.financeItems, 'date');
         },
 
         get financeIncomeTotal() {

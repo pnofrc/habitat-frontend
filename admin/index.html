@@ -1265,7 +1265,14 @@
                                         </template>
                                     </select>
 
-                                    <button @click="filterFinanceType = 'all'; filterFinanceCategory = null;"
+                                    <select x-model.number="filterFinanceYear" style="width: auto; margin: 0;">
+                                        <template x-for="y in financeYearOptions" :key="y">
+                                            <option :value="y" x-text="y"></option>
+                                        </template>
+                                        <option value="all">Tutti gli anni</option>
+                                    </select>
+
+                                    <button @click="filterFinanceType = 'all'; filterFinanceCategory = null; filterFinanceYear = new Date().getFullYear();"
                                             style="padding: 4px 10px; cursor: pointer;">Resetta</button>
                                 </div>
 
