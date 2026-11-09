@@ -81,6 +81,7 @@ document.addEventListener('alpine:init', () => {
         residencyApproval: null,
         residencyRejection: null,
         residencyCount: 0,
+        residencyYear: new Date().getFullYear(),
         bookingSubTab: 'active',
         membershipTab: 'requests',
         membershipYear: new Date().getFullYear(),
@@ -648,6 +649,18 @@ document.addEventListener('alpine:init', () => {
         get expensesYearOptions() {
             if (this.view !== 'expenses') return [];
             return this.yearOptionsFromDate(this.items, 'date');
+        },
+
+        get filteredResidencies() {
+            if (this.view !== 'residency') return [];
+            return this.items.filter(r =>
+                this.residencyYear === 'all' || new Date(r.fromDate).getFullYear() === this.residencyYear
+            );
+        },
+
+        get residencyYearOptions() {
+            if (this.view !== 'residency') return [];
+            return this.yearOptionsFromDate(this.items, 'fromDate');
         },
 
         get plannerTimeSlots() {

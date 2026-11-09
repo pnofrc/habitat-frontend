@@ -1831,8 +1831,16 @@
                 <!-- RESIDENCY -->
                 <div x-show="view === 'residency'">
                     <div class="card">
-                        <button x-show="canWrite" @click="openCreateResidency()" class="create">+ NUOVA
-                            RICHIESTA</button>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <button x-show="canWrite" @click="openCreateResidency()" class="create">+ NUOVA
+                                RICHIESTA</button>
+                            <select x-model.number="residencyYear" style="width: auto; margin:0;">
+                                <template x-for="y in residencyYearOptions" :key="y">
+                                    <option :value="y" x-text="y"></option>
+                                </template>
+                                <option value="all">Tutti gli anni</option>
+                            </select>
+                        </div>
                         <table>
                             <thead>
                                 <tr>
@@ -1845,7 +1853,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="r in items" :key="r.id">
+                                <template x-for="r in filteredResidencies" :key="r.id">
                                     <tr>
                                         <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">
                                             <span x-text="r.name"></span>
