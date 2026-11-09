@@ -594,7 +594,7 @@ document.addEventListener('alpine:init', () => {
                 x.id !== m.id &&
                 x.year < m.year &&
                 (
-                    (x.email && m.email && x.email.toLowerCase() === m.email.toLowerCase()) ||
+                    (x.email && m.email && x.email.trim().toLowerCase() === m.email.trim().toLowerCase()) ||
                     (x.vatNumber && m.vatNumber && x.vatNumber === m.vatNumber)
                 )
             );
