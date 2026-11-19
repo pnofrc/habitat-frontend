@@ -566,7 +566,14 @@ function resize() {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
-addEventListener("resize", resize);
+let resizePending = false;
+addEventListener("resize", () => {
+  // On mobile, scrolling hides/shows the browser toolbar: 100svh then fires many resize
+  // events in a burst, each one re-triggering the camera/FOV jump below. One per frame is enough.
+  if (resizePending) return;
+  resizePending = true;
+  requestAnimationFrame(() => { resizePending = false; resize(); });
+});
 resize();
 
 let visible = true;
