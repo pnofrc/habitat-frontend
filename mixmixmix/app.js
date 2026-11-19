@@ -161,7 +161,8 @@ function paint() {
   const playing = !audio.paused;
   $("air").classList.toggle("off", mode !== "radio");
   $("air").classList.toggle("playing", !audio.paused);
-  $("where").textContent = mode === "list" ? `${queue.p.name} · ${queue.i + 1} of ${queue.p.sets.length}` : mode === "radio" ? listeners() : "";
+  $("where").textContent = mode === "list" ? `${queue.p.name} · ${queue.i + 1} of ${queue.p.sets.length}` : "";
+  listeners();
   if ($("artist").textContent !== s.artist || $("desc").textContent !== (s.description ?? "")) { $("artist").textContent = s.artist; fitAfter = true; }
   const p = listOf(s);                               // under the name: its playlist, a way into it, then a few words
   $("pl").hidden = !p;
@@ -296,9 +297,10 @@ function plays(e, n) {
   e.setAttribute("aria-label", n ? `${num(n)} ${n === 1 ? "play" : "plays"}` : "");
 }
 function listeners() {
-  if (!STATS) return "";
-  const now = STATS.now || (!audio.paused && mode === "radio" ? 1 : 0);
-  return now ? `${num(now)} listening now` : "";
+  const e = $("n-listeners");
+  const now = mode === "radio" && STATS ? STATS.now || (!audio.paused ? 1 : 0) : 0;
+  e.textContent = now ? num(now) : "";
+  if (now) e.setAttribute("aria-label", `${num(now)} listening now`); else e.removeAttribute("aria-label");
 }
 function showStats(st) {
   if (!st || typeof st.now !== "number") return;
