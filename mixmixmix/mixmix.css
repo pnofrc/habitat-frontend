@@ -16,6 +16,7 @@
 .where { font-size: 14px; }
 .live { margin: 0; order: -1; padding: 0; background: none; color: var(--ink); font: 400 14px/1 "Courier New", Courier, monospace; letter-spacing: .02em; text-transform: lowercase; }
 .live::before { box-shadow: 0 0 6px #ff2b2b; }
+.live sup { margin-left: 3px; font-size: 10px; color: var(--soft); }
 .air:not(.off) #where { margin-left: 4px; }
 .artist { margin-top: 14px; font-size: clamp(56px, 8.4vw, 148px); line-height: .9; letter-spacing: -0.05em; }
 .pl { font-size: 14px; }
