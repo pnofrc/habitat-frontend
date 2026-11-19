@@ -103,6 +103,11 @@ footer a { color: var(--soft); }
 
 /* ---- The wordmark full width again (as on the main page), the logo alone top right above it ---- */
 .wordmark { left: var(--m); right: var(--m); top: calc(var(--m) + 64px); font-size: 13.6vw; line-height: .8; }
+.wm-break { display: none; }
 @media (max-width: 760px) {
   .wordmark { left: 0; right: 0; text-align: center; top: calc(var(--m) + 52px); font-size: 13.6vw; }
+  /* "mix" twice, stacked a step apart: the lone logo lost its anchor, this gives the wordmark one of its own */
+  .wm-break { display: inline; }
+  .wm-step { display: inline-block; transform: translateX(1.08em); }
+  .brand2 { opacity: .4; }
 }
