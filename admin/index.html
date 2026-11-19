@@ -3330,27 +3330,6 @@
                                         <td>
                                             <b x-text="s.artist"></b>
                                             <div style="font-size:12px; color:#666;" x-text="[mxList(s.playlist)?.name, s.date].filter(Boolean).join(' · ')"></div>
-                                            <!-- modifica -->
-                                            <template x-if="mxEdit && mxEdit.id === s.id">
-                                                <div class="sub-box" style="margin-top:8px; white-space:normal;">
-                                                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
-                                                        <label>Sostituisci l'audio (vuoto = resta)<input type="file" accept=".mp3,.m4a,.aac,.ogg,.opus,.wav,.flac,.aif,.aiff,audio/*" @change="mxEdit.audio = $event.target.files[0]"></label>
-                                                        <label>Sostituisci la copertina<input type="file" accept="image/*" @change="mxEdit.cover = $event.target.files[0]"></label>
-                                                        <label>Artista<input type="text" x-model="mxEdit.artist" maxlength="200"></label>
-                                                        <label>Data<input type="date" x-model="mxEdit.date"></label>
-                                                        <label>Titolo<input type="text" x-model="mxEdit.title" maxlength="300"></label>
-                                                        <label>Playlist<select x-model="mxEdit.playlist"><option value="">— nessuna —</option><template x-for="p in mx.playlists" :key="p.id"><option :value="p.id" x-text="p.name"></option></template></select></label>
-                                                    </div>
-                                                    <label>Descrizione<textarea x-model="mxEdit.description" rows="2" maxlength="4000"></textarea></label>
-                                                    <label style="font-weight:normal;"><input type="checkbox" x-model="mxEdit.radio" style="width:auto"> nel loop della radio</label>
-                                                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px;">
-                                                        <button class="btn-blk" style="width:auto; padding:6px 16px;" :disabled="mxEdit.busy" @click="mxSave()">SALVA</button>
-                                                        <button :disabled="mxEdit.busy" @click="mxEdit = null">Annulla</button>
-                                                        <span style="font-size:12px;" x-text="mxEdit.msg"></span>
-                                                        <button class="btn-del" style="margin-left:auto;" :disabled="mxEdit.busy" @click="mxDelete(s)">ELIMINA IL MIX</button>
-                                                    </div>
-                                                </div>
-                                            </template>
                                         </td>
                                         <td style="white-space:nowrap;" x-text="mxSpan(s.duration)"></td>
                                         <td><input type="checkbox" style="width:auto" :checked="s.radio !== false" :disabled="!canWriteTab('mixmix')" @change="mxToggleRadio(s, $event.target.checked)"></td>
@@ -3396,6 +3375,41 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- SIDEBAR: Edit Mix -->
+                    <template x-if="mxEdit">
+                        <div class="sidebar">
+                            <h3 x-text="'MODIFICA: ' + mxEdit.artist"></h3>
+                            <label>Sostituisci l'audio (vuoto = resta)</label>
+                            <input type="file" accept=".mp3,.m4a,.aac,.ogg,.opus,.wav,.flac,.aif,.aiff,audio/*"
+                                @change="mxEdit.audio = $event.target.files[0]">
+                            <label>Sostituisci la copertina</label>
+                            <input type="file" accept="image/*" @change="mxEdit.cover = $event.target.files[0]">
+                            <label>Artista</label><input type="text" x-model="mxEdit.artist" maxlength="200">
+                            <label>Data</label><input type="date" x-model="mxEdit.date">
+                            <label>Titolo</label><input type="text" x-model="mxEdit.title" maxlength="300">
+                            <label>Playlist</label>
+                            <select x-model="mxEdit.playlist">
+                                <option value="">— nessuna —</option>
+                                <template x-for="p in mx.playlists" :key="p.id">
+                                    <option :value="p.id" x-text="p.name"></option>
+                                </template>
+                            </select>
+                            <label>Descrizione</label><textarea x-model="mxEdit.description" rows="4" maxlength="4000"></textarea>
+                            <label style="margin-top:10px;">
+                                <input type="checkbox" x-model="mxEdit.radio" style="width:auto"> Nel loop della radio
+                            </label>
+                            <div x-show="mxEdit.busy" style="height:4px; background:#eee; margin:12px 0 0;">
+                                <div style="height:100%; background:#000;" :style="'width:' + (mxEdit.progress * 100) + '%'"></div>
+                            </div>
+                            <p x-show="mxEdit.msg" style="font-size:12px; margin:8px 0 0;" x-text="mxEdit.msg"></p>
+                            <button class="btn-blk" :disabled="mxEdit.busy" @click="mxSave()">SALVA</button>
+                            <button class="btn-del" style="width:100%; margin-top:10px; text-align:center;"
+                                :disabled="mxEdit.busy" @click="mxDelete(mxEdit)">ELIMINA IL MIX</button>
+                            <button :disabled="mxEdit.busy" @click="mxEdit = null"
+                                style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">Chiudi</button>
+                        </div>
+                    </template>
                 </div>
 
                 <!-- TURNI -->
