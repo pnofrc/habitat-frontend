@@ -174,7 +174,7 @@ document.addEventListener('alpine:init', () => {
             if (!this.currentUser) return [];
             // Tab nascoste dal formulario (non navigabili per nessun ruolo)
             const hiddenTabs = ['guests'];
-            const allTabs = ['dashboard', 'expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni'];
+            const allTabs = ['dashboard', 'expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni', 'mixmix'];
             let tabs;
             if (this.currentUser.role === 'admin') tabs = [...allTabs, 'users', 'telegram', 'activity'];
             else if (this.currentUser.role === 'reader') tabs = [...allTabs];
@@ -487,6 +487,7 @@ document.addEventListener('alpine:init', () => {
                 if (this.view === 'calendar') { this.$nextTick(() => this.initCalendar()); return; }
                 if (this.view === 'cospend') { await this.fetchCospendData(); return; }
                 if (this.view === 'turni') { await this.fetchTurniData(); return; }
+                if (this.view === 'mixmix') return;   // la scheda carica da sé (admin/mixmix.js)
                 if (this.view === 'finance') {
                     await this.fetchFinanceData();
                     await this.loadFlowCassaCategories();

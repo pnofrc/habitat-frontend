@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mixmix · Habitat</title>
+<meta name="description" content="Habitat's radio: sets and recordings made at Cà de Monti, Tredozio, on air 24 hours a day.">
+<meta name="theme-color" content="#120c09">
+<link rel="icon" href="logo.png">
+<script>document.documentElement.dataset.tema = "nero"; document.documentElement.dataset.pal = "brace"; window.MIXMIX_MINIMAL = true;</script>
+<script src="../config.js"></script>
+<script>window.MIXMIX_API = BASE_URL;   // habitattt.it/bck, or localhost:3001 in development</script>
+<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="mixmix.css?v=1">
+<link rel="preload" href="fonts/birbi-Regular.ttf" as="font" type="font/ttf" crossorigin>
+</head>
+<body>
+<section class="stage" aria-label="Radio">
+  <h1 class="wordmark">mixmix</h1>
+  <canvas id="map" aria-hidden="true"></canvas>
+  <header class="top">
+    <a class="brand" href="https://habitattt.it"><img src="logo.png" alt="Habitat" width="54" height="54"></a>
+  </header>
+  <div class="air" id="air">
+    <p class="where"><button class="back" id="back" type="button" hidden ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg><span>back to live stream</span></button><span id="where"></span><span class="live">on air</span></p>
+    <p class="artist" id="artist">mixmix</p>
+    <p class="pl" id="pl" hidden><a id="pl-link" href="#playlist"></a></p>
+    <p class="desc" id="desc" hidden></p>
+    <div class="bar">
+      <button class="play" id="play" type="button" aria-label="Listen to the radio"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="ico" d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
+      <div class="track">
+        <div class="rail" id="rail"><input class="seek" id="seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Position in the set"></div>
+        <div class="times"><span id="t0">0:00</span><span id="t1"></span></div>
+      </div>
+    </div>
+    <p class="next"><span id="next"></span><button class="share" id="share" data-share="now" type="button" aria-label="Copy the link to this set" title="Copy the link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 12v8h14v-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg></button></p>
+    <div class="sharebox" id="sharebox" hidden><button type="button" id="share-link">link</button><button type="button" id="share-story">story</button><span id="share-msg" role="status"></span></div>
+  </div>
+  <aside class="prog" aria-label="The radio, next">
+    <a class="brand2" href="https://habitattt.it"><img src="logo.png" alt="Habitat" width="48" height="48"></a>
+  </aside>
+</section>
+
+<section class="legend" id="archivio" aria-label="Archive">
+  <div class="tabs" role="tablist">
+    <a class="tab" role="tab" href="#mixes" id="tab-mixes" aria-selected="true">mixes<sup id="n-mixes"></sup></a>
+    <a class="tab" role="tab" href="#playlist" id="tab-playlist" aria-selected="false">playlist<sup id="n-playlist"></sup></a>
+  </div>
+  <div class="area" id="area-mixes" role="tabpanel" aria-labelledby="tab-mixes">
+    <ol class="sets" id="sets"><li class="empty">Loading…</li></ol>
+  </div>
+  <div class="area" id="area-playlist" role="tabpanel" aria-labelledby="tab-playlist" hidden>
+    <div class="tiles" id="tiles"></div>
+  </div>
+  <div class="area" id="area-detail" role="tabpanel" aria-labelledby="tab-playlist" hidden></div>
+</section>
+<!-- The mini player: fixed at the bottom once the big one has scrolled away (the archive). -->
+<div class="mini" id="mini" inert>
+  <span class="mini-p" id="mini-p"></span>
+  <button class="mini-play" id="mini-play" type="button" aria-label="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="mini-ico" d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
+  <img class="mini-cover" id="mini-cover" alt="" width="44" height="44" hidden>
+  <span class="mini-t"><b id="mini-artist"></b><span id="mini-sub"></span></span>
+  <span class="mini-time" id="mini-time"></span>
+  <button class="mini-up" id="mini-up" type="button" aria-label="Back to the player" title="Back to the player"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M5 11l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg></button>
+</div>
+<footer><span>Habitat · c/o Cà de Monti · Tredozio (FC)</span><a href="https://habitattt.it/license/">Habitat License v0.0</a></footer>
+
+<script type="module" src="app.js?v=1"></script>
+</body></html>
