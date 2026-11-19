@@ -803,6 +803,9 @@
                     <button x-show="visibleTabs.includes('turni')" :class="view === 'turni' && 'active'"
                         @click="setView('turni')">Turni</button>
                     <span x-show="visibleTabs.includes('turni')" style="color:#ccc; pointer-events:none;">|</span>
+                    <button x-show="visibleTabs.includes('mixmix')" :class="view === 'mixmix' && 'active'"
+                        @click="setView('mixmix')">Mixmix</button>
+                    <span x-show="visibleTabs.includes('mixmix')" style="color:#ccc; pointer-events:none;">|</span>
                     <button x-show="visibleTabs.includes('users')" :class="view === 'users' && 'active'"
                         @click="setView('users')">Gestione CDM</button>
                     <button x-show="visibleTabs.includes('telegram')" :class="view === 'telegram' && 'active'"
@@ -867,6 +870,9 @@
                 </template>
                 <template x-if="visibleTabs.includes('turni')">
                     <button :class="view==='turni'&&'active'" @click="setView('turni'); mobileNavOpen=false">Turni</button>
+                </template>
+                <template x-if="visibleTabs.includes('mixmix')">
+                    <button :class="view==='mixmix'&&'active'" @click="setView('mixmix'); mobileNavOpen=false">Mixmix</button>
                 </template>
                 <template x-if="visibleTabs.includes('users')">
                     <button :class="view==='users'&&'active'" @click="setView('users'); mobileNavOpen=false">Gestione CDM</button>
@@ -3189,6 +3195,209 @@
                     </div>
                 </div>
 
+                <!-- MIXMIX: la radio di Habitat (logica in admin/mixmix.js, player in /mixmixmix/) -->
+                <div x-show="view === 'mixmix'" x-data="mixmixAdmin" x-init="mxInit()" x-effect="view === 'mixmix' && !mxLoaded && mxLoad()">
+                    <template x-if="mxError"><div class="card alert-red" x-text="mxError"></div></template>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                        <span style="font-size:12px;">Player pubblico: <a href="../mixmixmix/" target="_blank">habitattt.it/mixmixmix</a></span>
+                        <span style="font-size:12px; color:#666;" x-text="mxGb(mx.disk?.free)"></span>
+                    </div>
+                    <p x-show="mxMsg" x-text="mxMsg" style="font-size:13px; color:green; margin:0 0 10px;"></p>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px; align-items:start;">
+                        <!-- In onda -->
+                        <div class="card">
+                            <h3 style="margin:0 0 6px">In onda</h3>
+                            <p style="font-size:12px; color:#666; margin:0 0 10px;">Il loop di tutti i mix con “radio”, nell'ordine dell'elenco, più i set programmati. Ora italiana.</p>
+                            <table>
+                                <tbody>
+                                    <template x-for="(p, i) in mxUpcoming" :key="i + p.set.id + p.start">
+                                        <tr :style="i === 0 ? 'font-weight:bold' : ''">
+                                            <td style="width:70px;" x-text="i === 0 ? 'ORA' : mxClock(p.start)"></td>
+                                            <td><span x-text="p.set.artist"></span> <span x-show="p.slot" style="font-size:11px; border:1px solid #000; padding:0 4px;">PROGRAMMATO</span></td>
+                                            <td style="width:80px; color:#666;" x-text="i === 0 ? 'fino alle ' + mxClock(p.end) : ''"></td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="!mxUpcoming.length"><td style="color:#999;">Silenzio: nessun mix nel loop e niente in programma.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Palinsesto -->
+                        <div class="card">
+                            <h3 style="margin:0 0 6px">Palinsesto</h3>
+                            <p style="font-size:12px; color:#666; margin:0 0 10px;">Un set programmato va in onda a quell'ora per tutti, poi la radio torna al suo loop.</p>
+                            <div x-show="canWriteTab('mixmix')" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                                <label style="flex:2 1 160px;">Set<select x-model="mxSched.set"><template x-for="s in mx.sets" :key="s.id"><option :value="s.id" x-text="s.artist + ' · ' + mxSpan(s.duration)"></option></template></select></label>
+                                <label style="flex:1 1 120px;">Giorno<input type="date" x-model="mxSched.day"></label>
+                                <label style="flex:1 1 90px;">Ora<input type="time" x-model="mxSched.time" step="60"></label>
+                                <button class="create" @click="mxSchedule()">PROGRAMMA</button>
+                            </div>
+                            <table style="margin-top:10px;">
+                                <tbody>
+                                    <template x-for="e in mxFuture" :key="e.id">
+                                        <tr>
+                                            <td x-text="mxWhen(e.start) + ' – ' + mxClock(e.end)"></td>
+                                            <td><b x-text="e.set.artist"></b> <span x-show="e.start <= mxNow" style="font-size:11px; background:#000; color:#fff; padding:0 4px;">IN ONDA</span></td>
+                                            <td x-show="canWriteTab('mixmix')"><button class="btn-del" @click="mxUnschedule(e.id)">X</button></td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="!mxFuture.length"><td style="color:#999;">Niente in programma: la radio suona il suo loop.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- I mix -->
+                    <div class="card" style="margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                            <h3 style="margin:0">Mix <span style="font-weight:normal; color:#666;" x-text="'(' + mx.sets.length + ')'"></span></h3>
+                            <div x-show="canWriteTab('mixmix')" style="display:flex; gap:10px;">
+                                <button class="create" @click="mxOpenNew()">+ NUOVO MIX</button>
+                                <button class="create" @click="mxOpenBulk()">+ PIÙ MIX INSIEME</button>
+                            </div>
+                        </div>
+                        <p style="font-size:12px; color:#666; margin:0 0 10px;">L'ordine qui è l'ordine del loop della radio e delle playlist: spostali con le frecce.</p>
+
+                        <!-- Nuovo mix -->
+                        <template x-if="mxNew">
+                            <div class="sub-box" style="margin-bottom:15px;">
+                                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+                                    <label>File audio (mp3, m4a, ogg; wav/flac/aiff diventano mp3)<input type="file" accept=".mp3,.m4a,.aac,.ogg,.opus,.wav,.flac,.aif,.aiff,audio/*" @change="mxNew.audio = $event.target.files[0]"></label>
+                                    <label>Copertina (facoltativa, meglio quadrata)<input type="file" accept="image/*" @change="mxNew.cover = $event.target.files[0]"></label>
+                                    <label>Artista<input type="text" x-model="mxNew.artist" maxlength="200"></label>
+                                    <label>Data<input type="date" x-model="mxNew.date"></label>
+                                    <label>Titolo (facoltativo)<input type="text" x-model="mxNew.title" maxlength="300"></label>
+                                    <label>Playlist<select x-model="mxNew.playlist"><option value="">— nessuna —</option><template x-for="p in mx.playlists" :key="p.id"><option :value="p.id" x-text="p.name"></option></template></select></label>
+                                </div>
+                                <label>Descrizione (facoltativa)<textarea x-model="mxNew.description" rows="2" maxlength="4000"></textarea></label>
+                                <label style="font-weight:normal;"><input type="checkbox" x-model="mxNew.radio" style="width:auto"> nel loop della radio</label>
+                                <div x-show="mxNew.busy" style="height:4px; background:#eee; margin:8px 0;"><div style="height:100%; background:#000;" :style="'width:' + (mxNew.progress * 100) + '%'"></div></div>
+                                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                                    <button class="btn-blk" style="width:auto; padding:8px 18px;" :disabled="mxNew.busy" @click="mxCreate()">AGGIUNGI IL MIX</button>
+                                    <button :disabled="mxNew.busy" @click="mxNew = null">Annulla</button>
+                                    <span style="font-size:12px;" x-text="mxNew.msg"></span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Più mix insieme -->
+                        <template x-if="mxBulk">
+                            <div class="sub-box" style="margin-bottom:15px;">
+                                <label>Tutti i file di una serata, audio e copertine insieme (una copertina va con l'audio dello stesso nome: poni.mp3 + poni.jpg)
+                                    <input type="file" multiple accept=".mp3,.m4a,.aac,.ogg,.opus,.wav,.flac,.aif,.aiff,audio/*,image/*" @change="mxAddFiles([...$event.target.files]); $event.target.value = ''" :disabled="mxBulk.busy"></label>
+                                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px;">
+                                    <label>Data<input type="date" x-model="mxBulk.date"></label>
+                                    <label>Playlist<select x-model="mxBulk.playlist"><option value="">— nessuna —</option><template x-for="p in mx.playlists" :key="p.id"><option :value="p.id" x-text="p.name"></option></template></select></label>
+                                    <label>O una playlist nuova<input type="text" x-model="mxBulk.newName" placeholder="QUI 25" maxlength="80"></label>
+                                    <label>Evento (playlist nuova)<input type="text" x-model="mxBulk.newEvent" maxlength="300"></label>
+                                </div>
+                                <label style="font-weight:normal;"><input type="checkbox" x-model="mxBulk.radio" style="width:auto"> nel loop della radio</label>
+                                <table x-show="mxBulk.rows.length" style="margin-top:10px;">
+                                    <thead><tr><th></th><th>Artista</th><th>Copertina</th><th>Descrizione</th><th>Stato</th><th></th></tr></thead>
+                                    <tbody>
+                                        <template x-for="(r, i) in mxBulk.rows" :key="r.key">
+                                            <tr :style="r.done ? 'opacity:.5' : ''">
+                                                <td style="white-space:nowrap;"><button :disabled="mxBulk.busy || !i" @click="mxBulkMove(i, -1)">↑</button><button :disabled="mxBulk.busy || i === mxBulk.rows.length - 1" @click="mxBulkMove(i, 1)">↓</button></td>
+                                                <td><input type="text" x-model="r.artist" :disabled="r.done || mxBulk.busy"><div style="font-size:11px; color:#666;" x-text="r.audio.name + ' · ' + Math.round(r.audio.size / 1048576) + ' MB'"></div></td>
+                                                <td><select x-model="r.coverName" :disabled="r.done || mxBulk.busy"><option value="">— nessuna —</option><template x-for="im in mxBulk.images" :key="im.name"><option :value="im.name" x-text="im.name"></option></template></select></td>
+                                                <td><input type="text" x-model="r.description" :disabled="r.done || mxBulk.busy"></td>
+                                                <td style="font-size:12px; min-width:140px;" :style="r.error ? 'color:#cc0000' : r.done ? 'color:green' : ''">
+                                                    <span x-text="r.state"></span>
+                                                    <div x-show="r.progress > 0 && !r.done" style="height:3px; background:#eee; margin-top:3px;"><div style="height:100%; background:#000;" :style="'width:' + (r.progress * 100) + '%'"></div></div>
+                                                </td>
+                                                <td><button class="btn-del" :disabled="mxBulk.busy" @click="mxBulk.rows.splice(i, 1)">X</button></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px;">
+                                    <button class="btn-blk" style="width:auto; padding:8px 18px;" :disabled="mxBulk.busy || !mxBulk.rows.some((r) => !r.done)" @click="mxBulkGo()"
+                                        x-text="mxBulk.busy ? 'CARICO…' : mxBulk.rows.some((r) => r.error) ? 'RIPROVA (' + mxBulk.rows.filter((r) => !r.done).length + ')' : 'CARICA E PUBBLICA ' + mxBulk.rows.filter((r) => !r.done).length"></button>
+                                    <button :disabled="mxBulk.busy" @click="mxBulk = null">Chiudi</button>
+                                    <span style="font-size:12px;" x-text="mxBulk.msg"></span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <table>
+                            <thead><tr><th x-show="canWriteTab('mixmix')"></th><th></th><th>Mix</th><th>Durata</th><th>Radio</th><th x-show="canWriteTab('mixmix')"></th></tr></thead>
+                            <tbody>
+                                <template x-for="(s, i) in mx.sets" :key="s.id">
+                                    <tr>
+                                        <td x-show="canWriteTab('mixmix')" style="white-space:nowrap; width:60px;"><button :disabled="!i" @click="mxMove(i, -1)" title="Su">↑</button><button :disabled="i === mx.sets.length - 1" @click="mxMove(i, 1)" title="Giù">↓</button></td>
+                                        <td style="width:52px;"><img x-show="s.cover" :src="mxCover(s)" alt="" width="44" height="44" style="display:block; object-fit:cover;"></td>
+                                        <td>
+                                            <b x-text="s.artist"></b>
+                                            <div style="font-size:12px; color:#666;" x-text="[mxList(s.playlist)?.name, s.date].filter(Boolean).join(' · ')"></div>
+                                            <!-- modifica -->
+                                            <template x-if="mxEdit && mxEdit.id === s.id">
+                                                <div class="sub-box" style="margin-top:8px;">
+                                                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+                                                        <label>Sostituisci l'audio (vuoto = resta)<input type="file" accept=".mp3,.m4a,.aac,.ogg,.opus,.wav,.flac,.aif,.aiff,audio/*" @change="mxEdit.audio = $event.target.files[0]"></label>
+                                                        <label>Sostituisci la copertina<input type="file" accept="image/*" @change="mxEdit.cover = $event.target.files[0]"></label>
+                                                        <label>Artista<input type="text" x-model="mxEdit.artist" maxlength="200"></label>
+                                                        <label>Data<input type="date" x-model="mxEdit.date"></label>
+                                                        <label>Titolo<input type="text" x-model="mxEdit.title" maxlength="300"></label>
+                                                        <label>Playlist<select x-model="mxEdit.playlist"><option value="">— nessuna —</option><template x-for="p in mx.playlists" :key="p.id"><option :value="p.id" x-text="p.name"></option></template></select></label>
+                                                    </div>
+                                                    <label>Descrizione<textarea x-model="mxEdit.description" rows="2" maxlength="4000"></textarea></label>
+                                                    <label style="font-weight:normal;"><input type="checkbox" x-model="mxEdit.radio" style="width:auto"> nel loop della radio</label>
+                                                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                                                        <button class="btn-blk" style="width:auto; padding:6px 16px;" :disabled="mxEdit.busy" @click="mxSave()">SALVA</button>
+                                                        <button :disabled="mxEdit.busy" @click="mxEdit = null">Annulla</button>
+                                                        <span style="font-size:12px;" x-text="mxEdit.msg"></span>
+                                                        <button class="btn-del" style="margin-left:auto;" :disabled="mxEdit.busy" @click="mxDelete(s)">ELIMINA IL MIX</button>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </td>
+                                        <td style="white-space:nowrap;" x-text="mxSpan(s.duration)"></td>
+                                        <td><input type="checkbox" style="width:auto" :checked="s.radio !== false" :disabled="!canWriteTab('mixmix')" @change="mxToggleRadio(s, $event.target.checked)"></td>
+                                        <td x-show="canWriteTab('mixmix')"><button @click="mxOpenEdit(s)" x-text="mxEdit?.id === s.id ? 'CHIUDI' : 'MODIFICA'"></button></td>
+                                    </tr>
+                                </template>
+                                <tr x-show="mxLoaded && !mx.sets.length"><td colspan="6" style="color:#999;">Ancora nessun mix.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Playlist -->
+                    <div class="card" style="margin-top:20px;">
+                        <h3 style="margin:0 0 6px">Playlist</h3>
+                        <p style="font-size:12px; color:#666; margin:0 0 10px;">Una playlist raccoglie i mix di un evento. Creala qui, poi sceglila nella modifica di un mix.</p>
+                        <div x-show="canWriteTab('mixmix')" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin-bottom:10px;">
+                            <label style="flex:1 1 140px;">Nome<input type="text" x-model="mxPl.name" placeholder="QUI 25" maxlength="80"></label>
+                            <label style="flex:2 1 200px;">Evento (facoltativo)<input type="text" x-model="mxPl.title" maxlength="300"></label>
+                            <label style="flex:1 1 130px;">Data<input type="date" x-model="mxPl.date"></label>
+                            <button class="create" @click="mxCreatePl()">+ NUOVA PLAYLIST</button>
+                        </div>
+                        <table>
+                            <tbody>
+                                <template x-for="p in mx.playlists" :key="p.id">
+                                    <tr>
+                                        <td>
+                                            <b x-text="p.name"></b>
+                                            <div style="font-size:12px; color:#666;" x-text="[p.title, p.date, mxCount(p)].filter(Boolean).join(' · ')"></div>
+                                            <template x-if="mxPlEdit && mxPlEdit.id === p.id">
+                                                <div class="sub-box" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                                                    <label style="flex:1 1 140px;">Nome<input type="text" x-model="mxPlEdit.name" maxlength="80"></label>
+                                                    <label style="flex:2 1 200px;">Evento<input type="text" x-model="mxPlEdit.title" maxlength="300"></label>
+                                                    <label style="flex:1 1 130px;">Data<input type="date" x-model="mxPlEdit.date"></label>
+                                                    <button class="create" @click="mxSavePl()">SALVA</button>
+                                                    <button class="btn-del" @click="mxDeletePl(p)">ELIMINA</button>
+                                                </div>
+                                            </template>
+                                        </td>
+                                        <td x-show="canWriteTab('mixmix')" style="width:90px;"><button @click="mxOpenPl(p)" x-text="mxPlEdit?.id === p.id ? 'CHIUDI' : 'MODIFICA'"></button></td>
+                                    </tr>
+                                </template>
+                                <tr x-show="mxLoaded && !mx.playlists.length"><td style="color:#999;">Ancora nessuna playlist.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- TURNI -->
                 <div x-show="view === 'turni'">
                     <div class="card">
@@ -4223,7 +4432,7 @@
                             <label>Tab consentite</label>
                             <div style="margin-top:5px;">
                                 <template
-                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni']"
+                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni', 'mixmix']"
                                     :key="tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
@@ -4239,7 +4448,7 @@
                             <label>Permessi Scrittura</label>
                             <div style="margin-top:5px;">
                                 <template
-                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni']"
+                                    x-for="tab in ['expenses', 'finance', 'guests', 'bookings', 'residency', 'membership', 'festival', 'calendar', 'cospend', 'turni', 'mixmix']"
                                     :key="'write-' + tab">
                                     <label style="display:inline-block; margin-right:10px; font-weight:normal;">
                                         <input type="checkbox" style="width:auto"
@@ -5462,6 +5671,7 @@
     </template>
     <script src="../config.js"></script>
     <script src="app.js"></script>
+    <script src="mixmix.js"></script>
 </body>
 
 </html>

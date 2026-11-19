@@ -1,0 +1,197 @@
+@font-face { font-family: birbi; src: url(fonts/birbi-Regular.ttf) format("truetype"); font-display: swap; }
+:root { --ground: #ffffff; --ink: #000000; --green: #008000; --soft: #4d4d4d; --rule: #d9d9d9; --m: clamp(16px, 2.4vw, 32px); --ease: cubic-bezier(.22, 1, .36, 1);; --on-green: #ffffff; --map-major: #000000; --map-minor: #5a5a5a; --map-ring: #008000; color-scheme: light; }
+/* Nero: the same map at night. Habitat's green lifted so small Courier text stays readable on black;
+   the logo (black ink on transparent) is inverted into white ink; the covers keep their own colours. */
+:root[data-tema="nero"] { --ground: #000000; --ink: #ffffff; --green: #27b327; --soft: #a3a3a3; --rule: #3a3a3a; --on-green: #000000; --map-major: #ffffff; --map-minor: #9a9a9a; --map-ring: #27b327; color-scheme: dark; }
+:root[data-tema="nero"] .brand img { filter: invert(1); }
+* { box-sizing: border-box; }
+html { background: var(--ground); scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; color: var(--ink); background: var(--ground); font: 400 18px/1.4 Arial, Helvetica, sans-serif; }
+::selection { background: var(--green); color: var(--on-green); }
+:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+a { color: var(--green); text-underline-offset: 3px; }
+.mono, nav, .where, .times, .next, .set .e, .set .d, .meta, .crumb, .all, .tile .m, .set .k, footer { font-family: "Courier New", Courier, monospace; }
+
+/* ---- The map and the legend box on it ---- */
+.stage { position: relative; height: 100svh; min-height: 600px; overflow: hidden; }
+/* The wordmark sits on the paper, under the map: the contour lines run over it. */
+.wordmark { position: absolute; z-index: 0; left: var(--m); top: calc(var(--m) + 48px); margin: 0; font: 400 13.6vw/.8 birbi, Arial, sans-serif; color: var(--green); white-space: nowrap; pointer-events: none; user-select: none; }
+#map { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.top, .air { z-index: 2; }
+.top { position: absolute; top: var(--m); left: var(--m); right: var(--m); display: flex; justify-content: space-between; align-items: flex-start; }
+.brand { display: block; }
+.brand img { width: 54px; height: 54px; }
+nav { position: relative; z-index: 0; font-size: 14px; line-height: 1.6; text-align: right; padding: 6px 10px; }
+nav a { display: block; text-decoration: none; }
+nav a:hover { text-decoration: underline; }
+
+.air { position: absolute; left: var(--m); bottom: var(--m); width: min(600px, calc(100% - 2 * var(--m))); padding: 20px 24px 22px; border: 3px solid var(--ink); }
+/* The white of the label boxes is painted by a pseudo-element: as a plain background, Chrome painted
+   it a second time over the map (seen at phone width). */
+.air::before, nav::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--ground); }
+.where { margin: 0; min-height: 22px; font-size: 14px; line-height: 1.4; color: var(--green); display: flex; align-items: center; gap: 10px; }
+.where i { flex: none; width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
+.air.off .where { color: var(--soft); }
+.where i { display: none; }                           /* the live label carries the dot now */
+/* The ON AIR label: top right of the box, only while the box shows the radio; its dot always blinks. */
+.live { flex: none; margin: -2px -6px 0 auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; padding: 4px 9px 4px 8px; background: var(--green); color: var(--on-green); font: 700 13px/1 Arial, Helvetica, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff2b2b; box-shadow: 0 0 0 1.5px var(--on-green), 0 0 6px #ff2b2b; }
+.live::before { animation: blink 1.1s steps(1, end) infinite; }   /* the radio is always on, heard or not */
+.air.off .live { display: none; }
+@keyframes blink { 50% { opacity: .15; } }
+@media (prefers-reduced-motion: reduce) { .live::before { animation: none; } }
+/* Off air, the dot gives way to the way back: an arrow to the radio. */
+.back { flex: none; display: inline-flex; align-items: center; gap: 8px; margin: -4px 0 -4px -2px; padding: 2px 0; border: 0; background: none; font: inherit; color: var(--green); cursor: pointer; transition: transform .14s var(--ease); }
+.back[hidden] { display: none; }
+.back svg { width: 18px; height: 18px; }
+.back span { text-decoration: underline; text-underline-offset: 3px; }
+#where { margin-left: auto; text-align: right; white-space: nowrap; }
+.air:not(.off) #where { margin-left: 0; text-align: left; white-space: normal; color: var(--soft); }   /* on the radio: listeners, left of ON AIR */
+.back:hover { transform: translateX(-3px); } .back:active { transform: scale(.9); }
+.artist { margin: 8px 0 0; font: 700 clamp(40px, 5.2vw, 80px)/.92 Arial, Helvetica, sans-serif; letter-spacing: -0.04em; overflow-wrap: anywhere; }
+.pl { margin: 10px 0 0; font: 15px/1.4 "Courier New", Courier, monospace; }
+.pl[hidden], .desc[hidden] { display: none; }
+.pl a:hover { text-decoration-thickness: 2px; }
+.desc { margin: 8px 0 0; font-size: 16px; line-height: 1.45; color: var(--soft); max-width: 52ch; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }   /* the box must not grow over the wordmark */
+.bar { display: flex; align-items: center; gap: 16px; margin-top: 22px; }
+.play { flex: none; width: 64px; height: 64px; border: 0; border-radius: 50%; background: var(--green); color: var(--on-green); cursor: pointer; display: grid; place-items: center; transition: transform .14s var(--ease), background-color .15s ease; }
+.play:hover { transform: scale(1.06); } .play:active { transform: scale(.95); }
+.play svg { width: 22px; height: 22px; }
+.play.wait { background: var(--soft); }
+.track { flex: 1; min-width: 0; }
+
+/* The timeline: a line you can grab anywhere; the black part is what has played. */
+.rail { position: relative; height: 28px; --p: 0%; }
+.rail::before, .rail::after { content: ""; position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px; pointer-events: none; }
+.rail::before { right: 0; background: var(--rule); }
+.rail::after { width: var(--p); background: var(--ink); }
+.seek { -webkit-appearance: none; appearance: none; position: relative; z-index: 1; display: block; width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer; }
+.seek::-webkit-slider-runnable-track { height: 28px; background: transparent; }
+.seek::-moz-range-track { height: 28px; background: transparent; }
+.seek::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: 5px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); transition: transform .14s var(--ease); }
+.seek::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); }
+.seek:hover::-webkit-slider-thumb, .seek:active::-webkit-slider-thumb { transform: scale(1.25); }
+.times { display: flex; justify-content: space-between; margin-top: 2px; font-size: 13px; line-height: 1; color: var(--soft); font-variant-numeric: tabular-nums; }
+.next { margin: 14px 0 0; font-size: 14px; line-height: 1.4; color: var(--soft); display: flex; justify-content: space-between; gap: 12px; align-items: center; min-height: 32px; }
+.nx { padding: 0; border: 0; background: none; font: inherit; color: var(--green); text-align: left; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.nx:hover { text-decoration-thickness: 2px; }
+.share { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; background: none; color: var(--green); cursor: pointer; transition: transform .14s var(--ease); }
+.share svg { width: 22px; height: 22px; }
+.share:hover { transform: translateY(-2px); } .share:active { transform: scale(.92); }
+.share[aria-expanded="true"] { color: var(--ink); }
+.sets li.row { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px; }
+.sets li.row .share { margin-right: -8px; }
+.sets li.row .sharebox { grid-column: 1 / -1; margin: -4px 0 18px; justify-content: flex-end; }
+.pl-acts { display: flex; align-items: center; gap: 16px; margin: 20px 0 28px; }
+.pl-acts .all { margin: 0; }
+.pl-acts + .sharebox { margin: -16px 0 28px; }
+.sharebox { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; font: 14px/1.4 "Courier New", Courier, monospace; }
+.sharebox[hidden] { display: none; }
+.sharebox button { font: inherit; color: var(--ink); background: none; border: 3px solid var(--ink); padding: 6px 12px; cursor: pointer; transition: transform .14s var(--ease); }
+.sharebox button:hover { transform: translateY(-1px); } .sharebox button:active { transform: scale(.97); }
+.sharebox button:disabled { opacity: .5; cursor: wait; }
+#share-msg { color: var(--soft); }
+
+/* ---- The archive, set as a map legend ---- */
+.legend { padding: clamp(64px, 8vw, 120px) var(--m) clamp(80px, 8vw, 120px); border-top: 3px solid var(--ink); }
+.tabs { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px clamp(24px, 4vw, 64px); margin: 0 0 clamp(32px, 4vw, 56px); }
+.tab { font: 400 clamp(56px, 8vw, 128px)/.85 birbi, Arial, sans-serif; color: var(--rule); text-decoration: none; transition: color .2s ease; }
+.tab:hover { color: var(--soft); }
+.tab[aria-selected="true"] { color: var(--green); }
+#tab-playlist { margin-left: auto; }                     /* to the right edge, also when it wraps on phones */
+.tab sup { margin-left: 4px; font: 15px "Courier New", Courier, monospace; color: var(--soft); vertical-align: top; }
+.area[hidden] { display: none; }
+.sets { list-style: none; margin: 0; padding: 0; }
+.sets li + li { border-top: 1px solid var(--ink); }
+.empty { padding: 18px 0; font: 400 15px/1.4 "Courier New", Courier, monospace; color: var(--soft); }
+.set { width: 100%; display: grid; grid-template-columns: 96px 1fr auto; gap: 24px; align-items: center; padding: 18px 0; background: none; border: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+/* Minimal page: 1-bit covers (black ink on transparent) turned into white ink; the playing one in colour. */
+img.bw { filter: invert(1); image-rendering: pixelated; }
+.set img { width: 96px; height: 96px; display: block; object-fit: cover; transition: transform .25s var(--ease); }
+.set:hover img, .set:focus-visible img { transform: rotate(-3deg) scale(1.04); }
+.set .a { display: block; font: 700 clamp(26px, 3vw, 44px)/1 Arial, Helvetica, sans-serif; letter-spacing: -0.03em; }
+.set .e { display: block; margin-top: 6px; font-size: 14px; line-height: 1.4; color: var(--soft); }
+.set .d { font-size: 15px; font-variant-numeric: tabular-nums; }
+/* On hover, a play button over the cover (the cover still tilts under it). */
+.set .cv { position: relative; display: block; }
+.set .po { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: var(--green); color: var(--on-green); display: grid; place-items: center; opacity: 0; transform: scale(.8); transition: opacity .18s ease, transform .25s var(--ease); pointer-events: none; }
+.set .po svg { width: 18px; height: 18px; margin-left: 2px; }
+.set:hover .po, .set:focus-visible .po { opacity: 1; transform: scale(1); }
+@media (max-width: 760px) { .set .po { width: 34px; height: 34px; margin: -17px 0 0 -17px; } .set .po svg { width: 13px; height: 13px; } }
+.set.on .a { color: var(--green); }
+.set.on img { outline: 3px solid var(--green); outline-offset: 3px; }
+.set .e .go { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+.set .e .go:hover { text-decoration-thickness: 2px; }
+/* Plays: the play glyph and a number, quiet, before the length. */
+.pc { display: inline-flex; align-items: center; gap: 4px; margin: 0 18px 0 0; color: var(--soft); font-variant-numeric: tabular-nums; }
+.pc[hidden] { display: none; }
+.pc svg { width: 11px; height: 11px; }
+.meta .pc { margin: 0 0 0 14px; }
+.tile .m .pc { display: flex; width: max-content; margin: 6px 0 0; }
+.set .k { margin-right: 12px; font-size: 15px; font-weight: 400; letter-spacing: 0; color: var(--soft); }
+
+/* ---- Playlists: a sheet of their covers, a name, and the sets in order ---- */
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px var(--m); }
+.tile { display: block; color: inherit; text-decoration: none; }
+.tile .mos { display: grid; grid-template-columns: repeat(4, 1fr); border: 3px solid var(--ink); background: var(--ground); transition: transform .25s var(--ease); }
+.tile:hover .mos, .tile:focus-visible .mos { transform: rotate(-1.5deg); }
+.tile .mos img { width: 100%; height: auto; aspect-ratio: 1; display: block; object-fit: cover; }
+.tile .n { display: block; margin-top: 14px; font: 700 clamp(40px, 4.4vw, 72px)/.9 Arial, Helvetica, sans-serif; letter-spacing: -0.04em; }
+.tile .m { display: block; margin-top: 8px; font-size: 14px; line-height: 1.4; color: var(--soft); }
+.crumb { margin: 32px 0 18px; font-size: 14px; }
+.pl-name { margin: 0; font: 700 clamp(64px, 11vw, 180px)/.85 Arial, Helvetica, sans-serif; letter-spacing: -0.05em; overflow-wrap: anywhere; }
+.meta { margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: var(--soft); }
+.meta b { font-weight: 400; color: var(--ink); }
+.sheet { display: grid; grid-template-columns: repeat(var(--c, 11), 1fr); margin: 28px 0 0; border: 3px solid var(--ink); }
+.sheet img { width: 100%; height: auto; aspect-ratio: 1; display: block; object-fit: cover; }
+.all { display: inline-flex; align-items: center; gap: 10px; margin: 20px 0 28px; padding: 10px 14px; border: 0; background: var(--green); color: var(--on-green); font-size: 15px; cursor: pointer; transition: transform .14s var(--ease); }
+.all:hover { transform: translateY(-1px); } .all:active { transform: scale(.97); }
+.all svg { width: 14px; height: 14px; }
+
+/* Minimal page: "link copied", a moment above the bottom of the screen. */
+.toast { position: fixed; z-index: 30; left: 50%; bottom: 96px; max-width: calc(100vw - 32px); padding: 10px 16px; background: var(--green); color: var(--on-green); font: 14px/1.3 "Courier New", Courier, monospace; overflow-wrap: anywhere; transform: translate(-50%, 12px); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .25s var(--ease); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- The mini player: slides up from the bottom while the archive is on screen ---- */
+.mini { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 14px; padding: 10px var(--m); background: var(--ground); border-top: 3px solid var(--ink); transform: translateY(110%); transition: transform .35s var(--ease); }
+.mini.show { transform: none; }
+.mini-p { position: absolute; left: 0; top: -3px; height: 3px; width: var(--p, 0%); background: var(--green); }
+.mini-play { flex: none; width: 46px; height: 46px; border: 0; border-radius: 50%; background: var(--green); color: var(--on-green); display: grid; place-items: center; cursor: pointer; transition: transform .14s var(--ease); }
+.mini-play:hover { transform: scale(1.06); } .mini-play:active { transform: scale(.94); }
+.mini-play svg { width: 17px; height: 17px; }
+.mini-cover { flex: none; width: 44px; height: 44px; object-fit: cover; display: block; }
+.mini-cover[hidden] { display: none; }
+.mini-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mini-t b { font: 700 18px/1.15 Arial, Helvetica, sans-serif; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-t span, .mini-time { font: 13px/1.3 "Courier New", Courier, monospace; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-t span.is-live { color: var(--green); }
+.mini-time { flex: none; font-variant-numeric: tabular-nums; }
+.mini-up { flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; background: none; color: var(--green); cursor: pointer; transition: transform .14s var(--ease); }
+.mini-up svg { width: 22px; height: 22px; }
+.mini-up:hover { transform: translateY(-2px); }
+body.mini-on footer { padding-bottom: 84px; }          /* the bar never hides the last line of the page */
+@media (prefers-reduced-motion: reduce) { .mini { transition: none; } }
+
+footer { background: var(--green); color: var(--on-green); padding: 12px var(--m); font-size: 14px; line-height: 1.4; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer a { color: var(--on-green); }
+
+/* Desktop: the box a size smaller (as the page at 90%), so it keeps clear of the wordmark. */
+@media (min-width: 761px) { .air { zoom: .9; } }
+
+@media (max-width: 760px) {
+  .brand img { width: 40px; height: 40px; }
+  .top { justify-content: center; }                   /* no menu on phones: the H alone, centred over the wordmark */
+  .brand img { transform: translateX(20.6%); }          /* the H sits in the left part of logo.png: centre its ink */
+  .wordmark { left: 0; right: 0; text-align: center; }
+  .wordmark { font-size: 13.6vw; top: calc(var(--m) + 52px); }
+  nav { display: none; }
+  .air { padding: 16px 16px 14px; }
+  .set { grid-template-columns: 64px 1fr; gap: 14px; }
+  .set img { width: 64px; height: 64px; }
+  .set .d { grid-column: 2; }
+  .sheet { --c: 6 !important; }
+  .mini { gap: 12px; padding: 8px 16px; }
+  .mini-time { display: none; }
+  .tabs { row-gap: 22px; }                            /* mixes and playlist wrap: birbi's ink needs air between them */
+}
