@@ -3195,11 +3195,11 @@
                     </div>
                 </div>
 
-                <!-- MIXMIX: la radio di Habitat (logica in admin/mixmix.js, player in /mixmix/) -->
+                <!-- MIXMIX: la radio di Habitat (logica in admin/mixmix.js, player in /mixmixmix/) -->
                 <div x-show="view === 'mixmix'" x-data="mixmixAdmin" x-init="mxInit()" x-effect="view === 'mixmix' && !mxLoaded && mxLoad()">
                     <template x-if="mxError"><div class="card alert-red" x-text="mxError"></div></template>
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
-                        <span style="font-size:12px;">Player pubblico: <a href="../mixmix/" target="_blank">habitattt.it/mixmix</a></span>
+                        <span style="font-size:12px;">Player pubblico: <a href="../mixmixmix/" target="_blank">habitattt.it/mixmixmix</a></span>
                         <span style="font-size:12px; color:#666;" x-text="mxGb(mx.disk?.free)"></span>
                     </div>
                     <p x-show="mxMsg" x-text="mxMsg" style="font-size:13px; color:green; margin:0 0 10px;"></p>

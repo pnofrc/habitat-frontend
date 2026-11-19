@@ -1,5 +1,5 @@
 // Formulario → scheda Mixmix: i set della radio (caricare, modificare, ordinare), le playlist, il palinsesto.
-// Parla con formulario-backend: /mixmix-admin/* (con il token del formulario) e /mixmix/state (pubblico).
+// Pagina pubblica: habitattt.it/mixmixmix/. Parla con formulario-backend: /mixmix-admin/* (con il token del formulario) e /mixmix/state (pubblico).
 // È un componente Alpine annidato nell'app: legge token e permessi dall'app (canWriteTab, logout).
 document.addEventListener('alpine:init', () => {
     const TZ = 'Europe/Rome';
@@ -54,7 +54,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 this.mx = await this.mxApi('GET', 'state');
                 this.mxLoaded = true;
-                if (!this.mxRadio) this.mxRadio = await import('../mixmix/radio.js');
+                if (!this.mxRadio) this.mxRadio = await import('../mixmixmix/radio.js');
                 if (!this.mxSched.set && this.mx.sets[0]) this.mxSched.set = this.mx.sets[0].id;
             } catch (e) { this.mxError = e.message; }
         },
