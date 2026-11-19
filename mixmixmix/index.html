@@ -6,7 +6,11 @@
 <link rel="icon" href="logo.png">
 <script>document.documentElement.dataset.tema = "nero"; document.documentElement.dataset.pal = "brace"; window.MIXMIX_MINIMAL = true;</script>
 <script src="../config.js"></script>
-<script>window.MIXMIX_API = BASE_URL;   // habitattt.it/bck, or localhost:3001 in development</script>
+<script>
+// The backend: BASE_URL from ../config.js when the page sits next to the formulario (/formulario/mixmixmix/, or localhost);
+// served on its own (habitattt.it/mixmixmix/) there's no ../config.js, so the production backend.
+window.MIXMIX_API = typeof BASE_URL !== "undefined" ? BASE_URL : "https://habitattt.it/bck";
+</script>
 <link rel="stylesheet" href="style.css?v=1">
 <link rel="stylesheet" href="mixmix.css?v=1">
 <link rel="preload" href="fonts/birbi-Regular.ttf" as="font" type="font/ttf" crossorigin>
