@@ -3332,7 +3332,7 @@
                                             <div style="font-size:12px; color:#666;" x-text="[mxList(s.playlist)?.name, s.date].filter(Boolean).join(' · ')"></div>
                                             <!-- modifica -->
                                             <template x-if="mxEdit && mxEdit.id === s.id">
-                                                <div class="sub-box" style="margin-top:8px;">
+                                                <div class="sub-box" style="margin-top:8px; white-space:normal;">
                                                     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
                                                         <label>Sostituisci l'audio (vuoto = resta)<input type="file" accept=".mp3,.m4a,.aac,.ogg,.opus,.wav,.flac,.aif,.aiff,audio/*" @change="mxEdit.audio = $event.target.files[0]"></label>
                                                         <label>Sostituisci la copertina<input type="file" accept="image/*" @change="mxEdit.cover = $event.target.files[0]"></label>
@@ -3380,7 +3380,7 @@
                                             <b x-text="p.name"></b>
                                             <div style="font-size:12px; color:#666;" x-text="[p.title, p.date, mxCount(p)].filter(Boolean).join(' · ')"></div>
                                             <template x-if="mxPlEdit && mxPlEdit.id === p.id">
-                                                <div class="sub-box" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                                                <div class="sub-box" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; white-space:normal;">
                                                     <label style="flex:1 1 140px;">Nome<input type="text" x-model="mxPlEdit.name" maxlength="80"></label>
                                                     <label style="flex:2 1 200px;">Evento<input type="text" x-model="mxPlEdit.title" maxlength="300"></label>
                                                     <label style="flex:1 1 130px;">Data<input type="date" x-model="mxPlEdit.date"></label>

@@ -19,7 +19,7 @@
 .air:not(.off) #where { margin-left: 4px; }
 .artist { margin-top: 14px; font-size: clamp(56px, 8.4vw, 148px); line-height: .9; letter-spacing: -0.05em; }
 .pl { font-size: 14px; }
-.desc { max-width: 60ch; font-size: 15px; -webkit-line-clamp: 2; line-clamp: 2; }
+.desc { max-width: 60ch; font-size: 15px; -webkit-line-clamp: 4; line-clamp: 4; }
 .bar { margin-top: 26px; gap: 20px; }
 .play { width: 56px; height: 56px; background: none; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
 .play:hover { background: var(--green); color: var(--on-green); box-shadow: none; }

@@ -53,7 +53,7 @@ nav a:hover { text-decoration: underline; }
 .pl { margin: 10px 0 0; font: 15px/1.4 "Courier New", Courier, monospace; }
 .pl[hidden], .desc[hidden] { display: none; }
 .pl a:hover { text-decoration-thickness: 2px; }
-.desc { margin: 8px 0 0; font-size: 16px; line-height: 1.45; color: var(--soft); max-width: 52ch; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }   /* the box must not grow over the wordmark */
+.desc { margin: 8px 0 0; font-size: 16px; line-height: 1.45; color: var(--soft); max-width: 52ch; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5; overflow: hidden; }   /* the box must not grow over the wordmark */
 .bar { display: flex; align-items: center; gap: 16px; margin-top: 22px; }
 .play { flex: none; width: 64px; height: 64px; border: 0; border-radius: 50%; background: var(--green); color: var(--on-green); cursor: pointer; display: grid; place-items: center; transition: transform .14s var(--ease), background-color .15s ease; }
 .play:hover { transform: scale(1.06); } .play:active { transform: scale(.95); }
