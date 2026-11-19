@@ -17,7 +17,7 @@ document.addEventListener('alpine:init', () => {
         mx: { sets: [], playlists: [], schedule: [], disk: null },
         mxLoaded: false,
         mxError: '',
-        mxRadio: null,                          // ../mixmix/radio.js: il programma della radio, uguale al player
+        mxRadio: null,                          // ../mixmixmix/radio.js: il programma della radio, uguale al player
         mxNow: Date.now(),
         mxNew: null,                            // il modulo "nuovo mix"
         mxEdit: null,                           // { id, ...campi, audio, cover }
